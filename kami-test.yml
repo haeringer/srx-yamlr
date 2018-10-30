@@ -1,0 +1,20 @@
+---
+zones:
+  ZoneOne:
+    addresses:
+      HostOne: 10.1.1.1/32
+      HostTwo: 10.1.1.2/32
+  ZoneTwo:
+    addresses:
+      NetworkOne: 10.2.2.0/24
+applications:
+  snmp:
+    protocol: udp
+    port: 161
+policies:
+  allow-hostone-to-networkone:
+    from: ZoneOne
+    to: ZoneTwo
+    src: HostOne
+    dest: NetworkOne
+    apps: snmp
