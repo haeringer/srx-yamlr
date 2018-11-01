@@ -31,4 +31,4 @@ policies:
     to: ZoneThree
     src: Network2One
     dest: [Host3One,Host3Two,Host3Three]
-    apps: [snmp,dns]
+    apps: [snmp,api]
