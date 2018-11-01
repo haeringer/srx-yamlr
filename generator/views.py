@@ -5,7 +5,7 @@ from django.shortcuts import render
 from .models import SrxZone, SrxAddress, SrxAddrSet, SrxApplication, \
     SrxAppSet, SrxPolicy, SrxProtocol
 
-from generator.helpers import importyaml
+from .helpers import importyaml
 
 # call function from helpers.py to import YAML data
 importyaml(yamlfile)
