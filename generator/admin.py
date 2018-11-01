@@ -2,7 +2,7 @@ from django.contrib import admin
 
 # Register your models here.
 
-from .models import SrxZone, SrxAddress, SrxAddrSet, SrxApplication, SrxAppSet, SrxPolicy, SrxProtocol
+from .models import *
 
 admin.site.register(SrxPolicy)
 admin.site.register(SrxZone)

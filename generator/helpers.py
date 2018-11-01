@@ -1,4 +1,4 @@
-from .models import SrxZone, SrxAddress, SrxAddrSet, SrxApplication, SrxAppSet, SrxPolicy, SrxProtocol
+from .models import *
 
 import yaml
 
