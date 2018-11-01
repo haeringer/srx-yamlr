@@ -19,7 +19,7 @@ def importyaml(yamlfile):
     for zone, values in configdata['zones'].items():
         address = values['addresses'] # {'HostOne': '10.1.1.1/32'}
         for name, ip in address.items():
-            # retrieve zone name from zone model to make foreign key connection
+            # retrieve zone object from zone model to make foreign key connection
             srxzone_ = SrxZone.objects.get(zone_name=zone)
             SrxAddress.objects.update_or_create(
                 zone=srxzone_, address_name=name, address_ip=ip
@@ -41,23 +41,20 @@ def importyaml(yamlfile):
 
         obj, created = SrxPolicy.objects.update_or_create(policy_name=p)
 
-        # manytomany fields cannot be populated with update_or_create(),
-        # therefore use .add()
+        # manytomany fields cannot be populated with
+        # update_or_create(), therefore use .add()
         val = v.get('from')
         frm = SrxZone.objects.get(zone_name=val)
-        if not getattr(obj, 'from_zone').exists():
-            obj.from_zone.add(frm)
+        obj.from_zone.add(frm)
 
         val = v.get('to')
         to = SrxZone.objects.get(zone_name=val)
-        if not getattr(obj, 'to_zone').exists():
-            obj.to_zone.add(to)
+        obj.to_zone.add(to)
 
         val = v.get('src')
         src = SrxAddress.objects.get(address_name=val)
-        if not getattr(obj, 'source_address').exists():
-            obj.source_address.add(src)
+        obj.source_address.add(src)
 
-        # dst = SrxAddress.objects.get(address_name=v.get('dest'))
-        # if not getattr(obj, 'destination_address').exists():
-        #     obj.destination_address.add(dst)
+        val = v.get('dest')
+        dst = SrxAddress.objects.get(address_name=val)
+        obj.destination_address.add(dst)
