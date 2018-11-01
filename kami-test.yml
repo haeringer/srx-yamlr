@@ -6,11 +6,19 @@ zones:
       HostTwo: 10.1.1.2/32
   ZoneTwo:
     addresses:
-      NetworkOne: 10.2.2.0/24
+      Network2One: 10.2.2.0/24
+  ZoneThree:
+    addresses:
+      Host3One: 10.3.3.2/32
+      Host3Two: 10.3.3.3/32
+      Host3Three: 10.3.3.4/32
 applications:
   snmp:
     protocol: udp
     port: 161
+  api:
+    protocol: tcp
+    port: 5000
 policies:
   allow-hostone-to-networkone:
     from: ZoneOne
@@ -18,3 +26,10 @@ policies:
     src: HostOne
     dest: NetworkOne
     apps: snmp
+  allow-network2one-to-hosts3:
+    from: ZoneTwo
+    to: ZoneThree
+    src: Network2One
+    dest: Host3One
+    # dest: [Host3One,Host3Two,Host3Three]
+    apps: [snmp,dns]
