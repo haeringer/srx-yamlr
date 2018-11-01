@@ -51,18 +51,29 @@ def importyaml(yamlfile):
         to = SrxZone.objects.get(zone_name=v['to'])
         obj.to_zone.add(to)
 
-        if isinstance(v['src'], list):
-            for i in v['src']:
+        src = v['src']
+        if isinstance(src, list):
+            for i in src:
                 src = SrxAddress.objects.get(address_name=i)
                 obj.source_address.add(src)
         else:
-            src = SrxAddress.objects.get(address_name=v['src'])
+            src = SrxAddress.objects.get(address_name=src)
             obj.source_address.add(src)
 
-        if isinstance(v['dest'], list):
-            for i in v['dest']:
+        dest = v['dest']
+        if isinstance(dest, list):
+            for i in dest:
                 dst = SrxAddress.objects.get(address_name=i)
                 obj.destination_address.add(dst)
         else:
-            dst = SrxAddress.objects.get(address_name=v['dest'])
+            dst = SrxAddress.objects.get(address_name=dest)
             obj.destination_address.add(dst)
+
+        apps = v['apps']
+        if isinstance(apps, list):
+            for i in apps:
+                app = SrxApplication.objects.get(application_name=i)
+                obj.applications.add(app)
+        else:
+            app = SrxApplication.objects.get(application_name=apps)
+            obj.applications.add(app)
