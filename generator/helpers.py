@@ -1,5 +1,4 @@
-from .models import SrxZone, SrxAddress, SrxAddrSet, SrxApplication, \
-    SrxAppSet, SrxPolicy, SrxProtocol
+from .models import SrxZone, SrxAddress, SrxAddrSet, SrxApplication, SrxAppSet, SrxPolicy, SrxProtocol
 
 import yaml
 
@@ -10,6 +9,7 @@ def importyaml(yamlfile):
         configdata = yaml.load(stream)
 
     # import zones
+    SrxZone.objects.all().delete()
     for zone in configdata['zones']:
         SrxZone.objects.update_or_create(
             zone_name=zone
@@ -26,6 +26,7 @@ def importyaml(yamlfile):
             )
 
     # import applications
+    SrxApplication.objects.all().delete()
     for app, values in configdata['applications'].items():
         port = values.get('port')
         protocol = values.get('protocol')
@@ -35,25 +36,28 @@ def importyaml(yamlfile):
         )
 
     # import policies
-    # for policy, values in configdata['policies'].items():
-        # frm = SrxZone.objects.get(zone_name=values.get('from'))
-        # to = SrxZone.objects.get(zone_name=values.get('to'))
-        # src = SrxAddress.objects.get(address_name=values.get('src'))
-        # dest = SrxAddress.objects.get(address_name=values.get('dest'))
-        # apps = SrxApplication.objects.get(application_name=values.get('apps'))
-        # SrxPolicy.objects.update_or_create(
-        #     policy_name=policy, from_zone=frm, to_zone=to, source_address=src,
-        #     destination_address=dest, applications=apps
-        # )
-        # obj, created = SrxPolicy.objects.update_or_create(policy_name=policy)
-        # if obj.to_zone:
-        # # if hasattr(obj, 'to_zone'):
-        #     bla = 'egal'
-        # else:
-        #     obj.to_zone.add(to)
+    SrxPolicy.objects.all().delete()
+    for p, v in configdata['policies'].items():
 
+        obj, created = SrxPolicy.objects.update_or_create(policy_name=p)
 
-        # try:
-        #     bla = obj.objects.get(to_zone)
-        #     obj.to_zone.add(to)
-        # except obj.to_zone.exis
+        # manytomany fields cannot be populated with update_or_create(),
+        # therefore use .add()
+        val = v.get('from')
+        frm = SrxZone.objects.get(zone_name=val)
+        if not getattr(obj, 'from_zone').exists():
+            obj.from_zone.add(frm)
+
+        val = v.get('to')
+        to = SrxZone.objects.get(zone_name=val)
+        if not getattr(obj, 'to_zone').exists():
+            obj.to_zone.add(to)
+
+        val = v.get('src')
+        src = SrxAddress.objects.get(address_name=val)
+        if not getattr(obj, 'source_address').exists():
+            obj.source_address.add(src)
+
+        # dst = SrxAddress.objects.get(address_name=v.get('dest'))
+        # if not getattr(obj, 'destination_address').exists():
+        #     obj.destination_address.add(dst)
