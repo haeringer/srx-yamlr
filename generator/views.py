@@ -1,10 +1,11 @@
-yamlfile = 'kami-test.yml'
-
 from django.shortcuts import render
 
 from .models import *
 
 from .helpers import importyaml
+
+
+yamlfile = 'kami-test.yml'
 
 # call function from helpers.py to import YAML data
 importyaml(yamlfile)
