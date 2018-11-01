@@ -11,9 +11,7 @@ def importyaml(yamlfile):
     # import zones
     SrxZone.objects.all().delete()
     for zone in configdata['zones']:
-        SrxZone.objects.update_or_create(
-            zone_name=zone
-        )
+        SrxZone.objects.update_or_create(zone_name=zone)
 
     # import addresses
     for zone, values in configdata['zones'].items():
@@ -22,7 +20,9 @@ def importyaml(yamlfile):
             # retrieve zone object from zone model to make foreign key connection
             srxzone_ = SrxZone.objects.get(zone_name=zone)
             SrxAddress.objects.update_or_create(
-                zone=srxzone_, address_name=name, address_ip=ip
+                zone=srxzone_,
+                address_name=name,
+                address_ip=ip
             )
 
     # import applications
@@ -32,7 +32,9 @@ def importyaml(yamlfile):
         protocol = values.get('protocol')
         protocol_ = SrxProtocol.objects.get(protocol_type=protocol)
         SrxApplication.objects.update_or_create(
-            application_name=app, protocol=protocol_, application_port=port
+            application_name=app,
+            protocol=protocol_,
+            application_port=port
         )
 
     # import policies
@@ -43,18 +45,24 @@ def importyaml(yamlfile):
 
         # manytomany fields cannot be populated with
         # update_or_create(), therefore use .add()
-        val = v.get('from')
-        frm = SrxZone.objects.get(zone_name=val)
+        frm = SrxZone.objects.get(zone_name=v['from'])
         obj.from_zone.add(frm)
 
-        val = v.get('to')
-        to = SrxZone.objects.get(zone_name=val)
+        to = SrxZone.objects.get(zone_name=v['to'])
         obj.to_zone.add(to)
 
-        val = v.get('src')
-        src = SrxAddress.objects.get(address_name=val)
-        obj.source_address.add(src)
+        if isinstance(v['src'], list):
+            for i in v['src']:
+                src = SrxAddress.objects.get(address_name=i)
+                obj.source_address.add(src)
+        else:
+            src = SrxAddress.objects.get(address_name=v['src'])
+            obj.source_address.add(src)
 
-        val = v.get('dest')
-        dst = SrxAddress.objects.get(address_name=val)
-        obj.destination_address.add(dst)
+        if isinstance(v['dest'], list):
+            for i in v['dest']:
+                dst = SrxAddress.objects.get(address_name=i)
+                obj.destination_address.add(dst)
+        else:
+            dst = SrxAddress.objects.get(address_name=v['dest'])
+            obj.destination_address.add(dst)

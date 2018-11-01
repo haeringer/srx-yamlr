@@ -24,12 +24,11 @@ policies:
     from: ZoneOne
     to: ZoneTwo
     src: HostOne
-    dest: NetworkOne
+    dest: Network2One
     apps: snmp
   allow-network2one-to-hosts3:
     from: ZoneTwo
     to: ZoneThree
     src: Network2One
-    dest: Host3One
-    # dest: [Host3One,Host3Two,Host3Three]
+    dest: [Host3One,Host3Two,Host3Three]
     apps: [snmp,dns]
