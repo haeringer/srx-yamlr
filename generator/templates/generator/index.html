@@ -48,9 +48,9 @@
 
               <input class="form-control" type="text" id="searchFrom" onkeyup="objectSearch(this)" placeholder="Search IP address or object name" aria-label="Search">
 
-              <ul class="list-inline d-none" id="searchFromUl">
+              <ul class="list-inline d-none search-results-list" id="searchFromUl">
               {% for adr in addresses %}
-                <li><a href="#">{{ adr }}</a></li>
+                <li class="search-results-item"><a href="#">{{ adr }}</a></li>
               {% endfor %}
               </ul>
 
@@ -63,9 +63,9 @@
 
               <input class="form-control" type="text" id="searchTo" onkeyup="objectSearch(this)" placeholder="Search IP address or object name" aria-label="Search">
 
-              <ul class="list-inline d-none" id="searchToUl">
+              <ul class="list-inline d-none search-results-list" id="searchToUl">
               {% for adr in addresses %}
-                <li><a href="#">{{ adr }}</a></li>
+                <li class="search-results-item"><a href="#">{{ adr }}</a></li>
               {% endfor %}
               </ul>
 
@@ -78,9 +78,9 @@
 
               <input class="form-control" type="text" id="searchAllow" onkeyup="objectSearch(this)" placeholder="Search application or protocol port" aria-label="Search">
 
-              <ul class="list-inline d-none" id="searchAllowUl">
+              <ul class="list-inline d-none search-results-list" id="searchAllowUl">
               {% for adr in applications %}
-                <li><a href="#">{{ adr }}</a></li>
+                <li class="search-results-item"><a href="#">{{ adr }}</a></li>
               {% endfor %}
               </ul>
 
@@ -88,7 +88,6 @@
 
 
           </div>
-          lower item test________________________________________________________________________
 
         </main>
       </div>

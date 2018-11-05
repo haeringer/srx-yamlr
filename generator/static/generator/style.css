@@ -2,6 +2,25 @@ body {
     font-size: .875rem;
   }
 
+  .search-results-list {
+    position: fixed;
+    margin-top: 4px;
+  }
+
+  .search-results-item {
+    border: 1px solid #ddd;
+    background-color: #fff;
+    color: black;
+    margin-top: -1px;
+    padding: 10px;
+    text-decoration: none;
+  }
+
+  .search-results-item a {
+    color: black;
+    text-decoration: none;
+  }
+
   .feather {
     width: 16px;
     height: 16px;
