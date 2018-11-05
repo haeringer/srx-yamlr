@@ -16,9 +16,8 @@
   </head>
 
   <body>
-    <nav class="navbar navbar-dark fixed-top bg-dark flex-md-nowrap p-0 shadow">
-      <a class="navbar-brand col-sm-3 col-md-2 mr-0" href="#">Config Generator</a>
-      <input class="form-control form-control-dark w-100" placeholder="Search" aria-label="Search" type="text">
+    <nav class="navbar navbar-dark fixed-top bg-dark p-0 shadow">
+      <a class="navbar-brand col-sm-3" href="#">Config Generator</a>
       <ul class="navbar-nav px-3">
         <li class="nav-item text-nowrap">
           <a class="nav-link" href="#">Sign out</a>
@@ -28,30 +27,68 @@
 
     <div class="container-fluid">
       <div class="row">
-        <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-4">
+        <main role="main" class="col-sm">
 
           <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
             <h1 class="h2">Firewall Policies</h1>
             <div class="btn-toolbar mb-2 mb-md-0">
               <div class="btn-group mr-2">
-                <button class="btn btn-sm btn-outline-secondary">Do something</button>
-                <button class="btn btn-sm btn-outline-secondary">Or something else</button>
+                <button class="btn btn-sm btn-outline-secondary">Save</button>
               </div>
 
             </div>
           </div>
 
-          <h4>From...</h4>
+          <div class="row">
 
-          {% if zones %}
-              <ul>
-              {% for zone in zones %}
-                  <li>{{ zone }}</li>
+
+            <div class="col-sm">
+
+              <h4>From...</h4>
+
+              <input class="form-control" type="text" id="searchFrom" onkeyup="objectSearch(this)" placeholder="Search IP address or object name" aria-label="Search">
+
+              <ul class="list-inline d-none" id="searchFromUl">
+              {% for adr in addresses %}
+                <li><a href="#">{{ adr }}</a></li>
               {% endfor %}
               </ul>
-          {% else %}
-              <p>No zones available</p>
-          {% endif %}
+
+            </div>
+
+
+            <div class="col-sm">
+
+              <h4>To...</h4>
+
+              <input class="form-control" type="text" id="searchTo" onkeyup="objectSearch(this)" placeholder="Search IP address or object name" aria-label="Search">
+
+              <ul class="list-inline d-none" id="searchToUl">
+              {% for adr in addresses %}
+                <li><a href="#">{{ adr }}</a></li>
+              {% endfor %}
+              </ul>
+
+            </div>
+
+
+            <div class="col-sm">
+
+              <h4>Allow...</h4>
+
+              <input class="form-control" type="text" id="searchAllow" onkeyup="objectSearch(this)" placeholder="Search application or protocol port" aria-label="Search">
+
+              <ul class="list-inline d-none" id="searchAllowUl">
+              {% for adr in applications %}
+                <li><a href="#">{{ adr }}</a></li>
+              {% endfor %}
+              </ul>
+
+            </div>
+
+
+          </div>
+          lower item test________________________________________________________________________
 
         </main>
       </div>
@@ -63,6 +100,10 @@
     <script>window.jQuery || document.write('<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"><\/script>')</script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+
+    <!-- ConfigGen JavaScript -->
+    {% load static %}
+    <script src="{% static "generator/main.js" %}"></script>
 
     <!-- Icons -->
     <script src="https://unpkg.com/feather-icons/dist/feather.min.js"></script>
