@@ -9,9 +9,9 @@
     <title>Config Generator</title>
 
     <!-- Bootstrap core CSS -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+    <link rel="stylesheet" href="/static/bootstrap.min.css">
 
-    <!-- Custom styles for this template -->
+    <!-- Custom CSS -->
     <link rel="stylesheet" type="text/css" href="/static/generator/style.css">
   </head>
 
@@ -33,13 +33,13 @@
             <h1 class="h2">Firewall Policies</h1>
             <div class="btn-toolbar mb-2 mb-md-0">
               <div class="btn-group mr-2">
-                <button class="btn btn-sm btn-primary">Save</button>
+                <button class="btn btn-primary">Save</button>
               </div>
 
             </div>
           </div>
 
-          <div class="d-flex justify-content-between pt-3 pb-5 mb-4 border-bottom">
+          <div class="d-flex justify-content-between pt-3 pb-4">
 
 
             <div class="col-sm">
@@ -76,9 +76,9 @@
 
               <h4>Allow...</h4>
 
-              <input class="form-control" type="text" id="search-allow" onkeyup="objectSearch(this)" placeholder="Search application or protocol port" aria-label="Search" autocomplete="off">
+              <input class="form-control" type="text" id="search-app" onkeyup="objectSearch(this)" placeholder="Search application or protocol port" aria-label="Search" autocomplete="off">
 
-              <ul class="list-inline d-none search-results-list" id="search-allow-ul">
+              <ul class="list-inline d-none search-results-list" id="search-app-ul">
               {% for app in applications %}
                 <li class="search-results-item" id="app_{{ app.id }}"><a href="#">{{ app }}</a></li>
               {% endfor %}
@@ -124,7 +124,6 @@
 
               </div>
 
-
             </div>
 
 
@@ -132,19 +131,18 @@
       </div>
     </div>
 
-    <!-- Bootstrap core JavaScript
+    <!-- Bootstrap core JavaScript + dependencies
     ================================================== -->
-    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
-    <script>window.jQuery || document.write('<script src="https://code.jquery.com/jquery-3.3.1.min.js"><\/script>')</script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
+    <script src="/static/jquery.min.js"></script>
+    <script>window.jQuery || document.write('<script src="/static/jquery.min.js"><\/script>')</script>
+    <script src="/static/popper.min.js"></script>
+    <script src="/static/bootstrap.min.js"></script>
 
     <!-- ConfigGen JavaScript -->
-    {% load static %}
-    <script src="{% static "generator/main.js" %}"></script>
+    <script src="/static/generator/main.js"></script>
 
     <!-- Icons -->
-    <script src="https://unpkg.com/feather-icons/dist/feather.min.js"></script>
+    <script src="/static/feather.min.js"></script>
     <script>
       feather.replace()
     </script>
