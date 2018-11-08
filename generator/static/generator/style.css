@@ -4,7 +4,11 @@ body {
 
   .search-results-list {
     position: fixed;
-    margin-top: 4px;
+    z-index: 2;
+    margin-top: 5px;
+    -webkit-box-shadow: 6px 6px 32px 0px rgba(0,0,0,0.1);
+    -moz-box-shadow: 6px 6px 32px 0px rgba(0,0,0,0.1);
+    box-shadow: 6px 6px 32px 0px rgba(0,0,0,0.1);
   }
 
   .search-results-item {
