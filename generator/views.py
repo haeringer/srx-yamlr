@@ -1,7 +1,6 @@
 from django.shortcuts import render, get_list_or_404
-
+from django.http import JsonResponse
 from .models import *
-
 from .helpers import importyaml
 
 
@@ -13,6 +12,7 @@ try:
 except Exception as e:
     print('YAML import failed because of the following error:')
     print(e)
+
 
 def index(request):
     try:
@@ -29,3 +29,10 @@ def index(request):
     except:
         raise Http404("HTTP 404 Error")
     return render(request, 'generator/index.html', context)
+
+
+def getparentzone(request):
+    objectid = request.GET.get('objectid', None)
+    obj = SrxAddress.objects.get(id=objectid)
+    parentzone = SrxZone.objects.get(id=obj.zone_id)
+    return JsonResponse(parentzone.zone_name, safe=False)

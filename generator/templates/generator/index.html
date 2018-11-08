@@ -33,24 +33,24 @@
             <h1 class="h2">Firewall Policies</h1>
             <div class="btn-toolbar mb-2 mb-md-0">
               <div class="btn-group mr-2">
-                <button class="btn btn-sm btn-outline-secondary">Save</button>
+                <button class="btn btn-sm btn-primary">Save</button>
               </div>
 
             </div>
           </div>
 
-          <div class="row">
+          <div class="d-flex justify-content-between pt-3 pb-5 mb-4 border-bottom">
 
 
             <div class="col-sm">
 
               <h4>From...</h4>
 
-              <input class="form-control" type="text" id="searchFrom" onkeyup="objectSearch(this)" placeholder="Search IP address or object name" aria-label="Search">
+              <input class="form-control" type="text" id="search-from" onkeyup="objectSearch(this)" placeholder="Search IP address or object name" aria-label="Search" autocomplete="off">
 
-              <ul class="list-inline d-none search-results-list" id="searchFromUl">
+              <ul class="list-inline d-none search-results-list" id="search-from-ul">
               {% for adr in addresses %}
-                <li class="search-results-item"><a href="#">{{ adr }}</a></li>
+                <li class="search-results-item" id="from_{{ adr.id }}"><a href="#">{{ adr }}</a></li>
               {% endfor %}
               </ul>
 
@@ -61,11 +61,11 @@
 
               <h4>To...</h4>
 
-              <input class="form-control" type="text" id="searchTo" onkeyup="objectSearch(this)" placeholder="Search IP address or object name" aria-label="Search">
+              <input class="form-control" type="text" id="search-to" onkeyup="objectSearch(this)" placeholder="Search IP address or object name" aria-label="Search" autocomplete="off">
 
-              <ul class="list-inline d-none search-results-list" id="searchToUl">
+              <ul class="list-inline d-none search-results-list" id="search-to-ul">
               {% for adr in addresses %}
-                <li class="search-results-item"><a href="#">{{ adr }}</a></li>
+                <li class="search-results-item" id="to_{{ adr.id }}"><a href="#">{{ adr }}</a></li>
               {% endfor %}
               </ul>
 
@@ -76,11 +76,11 @@
 
               <h4>Allow...</h4>
 
-              <input class="form-control" type="text" id="searchAllow" onkeyup="objectSearch(this)" placeholder="Search application or protocol port" aria-label="Search">
+              <input class="form-control" type="text" id="search-allow" onkeyup="objectSearch(this)" placeholder="Search application or protocol port" aria-label="Search" autocomplete="off">
 
-              <ul class="list-inline d-none search-results-list" id="searchAllowUl">
-              {% for adr in applications %}
-                <li class="search-results-item"><a href="#">{{ adr }}</a></li>
+              <ul class="list-inline d-none search-results-list" id="search-allow-ul">
+              {% for app in applications %}
+                <li class="search-results-item" id="app_{{ app.id }}"><a href="#">{{ app }}</a></li>
               {% endfor %}
               </ul>
 
@@ -88,6 +88,45 @@
 
 
           </div>
+          <div class="d-flex justify-content-between pt-3 pb-5 mb-4 border-bottom">
+
+
+              <div class="col-sm">
+
+                <div class="card panel-default d-none" id="added-obj-from">
+                  <div class="card-header text-black-50" id="added-zone-from">
+                  </div>
+                  <ul class="list-group list-group-flush" id="added-list-from">
+                  </ul>
+                </div>
+
+              </div>
+
+
+              <div class="col-sm">
+
+                <div class="card panel-default d-none" id="added-obj-to">
+                  <div class="card-header text-black-50" id="added-zone-to">
+                  </div>
+                  <ul class="list-group list-group-flush" id="added-list-to">
+                  </ul>
+                </div>
+
+              </div>
+
+
+              <div class="col-sm">
+
+                <div class="card panel-default d-none" id="added-obj-app">
+                  <ul class="list-group list-group-flush" id="added-list-app">
+                  </ul>
+                </div>
+
+              </div>
+
+
+            </div>
+
 
         </main>
       </div>
@@ -95,10 +134,10 @@
 
     <!-- Bootstrap core JavaScript
     ================================================== -->
-    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
-    <script>window.jQuery || document.write('<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"><\/script>')</script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script>window.jQuery || document.write('<script src="https://code.jquery.com/jquery-3.3.1.min.js"><\/script>')</script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
 
     <!-- ConfigGen JavaScript -->
     {% load static %}
