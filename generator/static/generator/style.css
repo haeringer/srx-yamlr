@@ -2,6 +2,12 @@ body {
     font-size: .875rem;
   }
 
+  * {
+    -webkit-border-radius: 0 !important;
+    -moz-border-radius: 0 !important;
+    border-radius: 0 !important;
+  }
+
   .search-results-list {
     position: fixed;
     z-index: 2;
@@ -20,17 +26,17 @@ body {
     text-decoration: none;
   }
 
+  .search-results-item:hover {
+    -webkit-box-shadow: 1px 1px 7px 0px rgba(0,0,0,0.15);
+    -moz-box-shadow: 1px 1px 7px 0px rgba(0,0,0,0.15);
+    box-shadow: 1px 1px 7px 0px rgba(0,0,0,0.15);
+    cursor: pointer;
+  }
+
   .search-results-item a {
     color: black;
     text-decoration: none;
   }
-
-  * {
-    -webkit-border-radius: 0 !important;
-    -moz-border-radius: 0 !important;
-    border-radius: 0 !important;
-  }
-
 
 
   /* Starter Template Kram */
