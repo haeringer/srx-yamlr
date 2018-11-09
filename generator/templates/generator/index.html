@@ -53,7 +53,7 @@
 
               <ul class="list-inline d-none search-results-list" id="search-from-ul">
               {% for adr in addresses %}
-                <li class="search-results-item" id="from_{{ adr.id }}"><a href="#">{{ adr }}</a></li>
+                <li class="search-results-item" id="from_{{ adr.uuid }}"><a href="#">{{ adr }}</a></li>
               {% endfor %}
               </ul>
 
@@ -68,7 +68,7 @@
 
               <ul class="list-inline d-none search-results-list" id="search-to-ul">
               {% for adr in addresses %}
-                <li class="search-results-item" id="to_{{ adr.id }}"><a href="#">{{ adr }}</a></li>
+                <li class="search-results-item" id="to_{{ adr.uuid }}"><a href="#">{{ adr }}</a></li>
               {% endfor %}
               </ul>
 
@@ -83,7 +83,7 @@
 
               <ul class="list-inline d-none search-results-list" id="search-app-ul">
               {% for app in applications %}
-                <li class="search-results-item" id="app_{{ app.id }}"><a href="#">{{ app }}</a></li>
+                <li class="search-results-item" id="app_{{ app.uuid }}"><a href="#">{{ app }}</a></li>
               {% endfor %}
               </ul>
 

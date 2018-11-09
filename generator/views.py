@@ -33,6 +33,6 @@ def index(request):
 
 def getparentzone(request):
     objectid = request.GET.get('objectid', None)
-    obj = SrxAddress.objects.get(id=objectid)
+    obj = SrxAddress.objects.get(uuid=objectid)
     parentzone = SrxZone.objects.get(id=obj.zone_id)
     return JsonResponse(parentzone.zone_name, safe=False)

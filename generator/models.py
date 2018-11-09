@@ -1,3 +1,4 @@
+import uuid
 from django.db import models
 
 
@@ -10,12 +11,14 @@ class SrxAddress(models.Model):
     zone = models.ForeignKey(SrxZone, on_delete=models.CASCADE)
     address_name = models.CharField(max_length=255)
     address_ip = models.CharField(max_length=255)
+    uuid = models.CharField(max_length=36, default=uuid.uuid4)
     def __str__(self):
         return self.address_name
 
 class SrxAddrSet(models.Model):
     zone = models.ForeignKey(SrxZone, on_delete=models.CASCADE)
     addrset_name = models.CharField(max_length=255)
+    uuid = models.CharField(max_length=36, default=uuid.uuid4)
     address = models.ManyToManyField(SrxAddress)
     def __str__(self):
         return self.addrset_name
@@ -28,6 +31,7 @@ class SrxProtocol(models.Model):
 class SrxApplication(models.Model):
     application_name = models.CharField(max_length=255)
     protocol = models.ForeignKey(SrxProtocol, on_delete=models.PROTECT, default=0)
+    uuid = models.CharField(max_length=36, default=uuid.uuid4)
     application_port = models.IntegerField()
     def __str__(self):
         return self.application_name
@@ -35,6 +39,7 @@ class SrxApplication(models.Model):
 class SrxAppSet(models.Model):
     applicationset_name = models.CharField(max_length=255)
     applications = models.ManyToManyField(SrxApplication)
+    uuid = models.CharField(max_length=36, default=uuid.uuid4)
     def __str__(self):
         return self.applicationset_name
 
