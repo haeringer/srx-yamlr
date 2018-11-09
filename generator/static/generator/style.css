@@ -38,6 +38,16 @@ body {
     text-decoration: none;
   }
 
+  .list-group-item:hover {
+    -webkit-box-shadow: 1px 1px 7px 0px rgba(0,0,0,0.15);
+    -moz-box-shadow: 1px 1px 7px 0px rgba(0,0,0,0.15);
+    box-shadow: 1px 1px 7px 0px rgba(0,0,0,0.15);
+  }
+
+  .lgi-icon {
+    opacity: 0.5;
+  }
+
 
   /* Starter Template Kram */
 
