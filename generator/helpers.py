@@ -8,12 +8,21 @@ def importyaml(yamlfile):
     with open(yamlfile, 'r') as stream:
         configdata = yaml.load(stream)
 
-    # import zones
+    # always populate protocol with tcp + udp
+    SrxProtocol.objects.update_or_create(protocol_type='tcp')
+    SrxProtocol.objects.update_or_create(protocol_type='udp')
+
+    '''
+    import zones
+    '''
     SrxZone.objects.all().delete()
     for zone in configdata['zones']:
         SrxZone.objects.update_or_create(zone_name=zone)
 
-    # import addresses
+    '''
+    import addresses
+    '''
+    SrxAddress.objects.all().delete()
     for zone, values in configdata['zones'].items():
         address = values['addresses'] # {'HostOne': '10.1.1.1/32'}
         for name, ip in address.items():
@@ -25,7 +34,30 @@ def importyaml(yamlfile):
                 address_ip=ip
             )
 
-    # import applications
+    '''
+    import address sets
+    '''
+    SrxAddrSet.objects.all().delete()
+    for zone, values in configdata['zones'].items():
+        if 'addrsets' in values:
+            addrset = values['addrsets']
+            for setname, addresses in addrset.items():
+                srxzone_ = SrxZone.objects.get(zone_name=zone)
+                obj, created = SrxAddrSet.objects.update_or_create(
+                    zone=srxzone_,
+                    addrset_name=setname
+                )
+                if isinstance(addresses, list):
+                    for i in addresses:
+                        addr = SrxAddress.objects.get(address_name=i)
+                        obj.address.add(addr)
+                else:
+                    addr = SrxAddress.objects.get(address_name=addresses)
+                    obj.address.add(addr)
+
+    '''
+    import applications
+    '''
     SrxApplication.objects.all().delete()
     for app, values in configdata['applications'].items():
         port = values.get('port')
@@ -37,30 +69,48 @@ def importyaml(yamlfile):
             application_port=port
         )
 
-    # import policies
-    SrxPolicy.objects.all().delete()
-    for p, v in configdata['policies'].items():
+    '''
+    import application sets
+    '''
+    SrxAppSet.objects.all().delete()
+    for appset, values in configdata['appsets'].items():
+        obj, created = SrxAppSet.objects.update_or_create(applicationset_name=appset)
+        if isinstance(values, list):
+            for i in values:
+                app = SrxApplication.objects.get(application_name=i)
+                obj.applications.add(app)
+        else:
+            app = SrxApplication.objects.get(application_name=values)
+            obj.applications.add(app)
 
-        obj, created = SrxPolicy.objects.update_or_create(policy_name=p)
+
+    '''
+    import policies
+    '''
+    SrxPolicy.objects.all().delete()
+    for policy, values in configdata['policies'].items():
+
+        obj, created = SrxPolicy.objects.update_or_create(policy_name=policy)
+
+        frm = SrxZone.objects.get(zone_name=values['from'])
+        to = SrxZone.objects.get(zone_name=values['to'])
+        src = values['src']
+        dest = values['dest']
+        apps = values['apps']
 
         # manytomany fields cannot be populated with
         # update_or_create(), therefore use .add()
-        frm = SrxZone.objects.get(zone_name=v['from'])
         obj.from_zone.add(frm)
-
-        to = SrxZone.objects.get(zone_name=v['to'])
         obj.to_zone.add(to)
 
-        src = v['src']
         if isinstance(src, list):
             for i in src:
-                src = SrxAddress.objects.get(address_name=i)
-                obj.source_address.add(src)
+                s = SrxAddress.objects.get(address_name=i)
+                obj.source_address.add(s)
         else:
-            src = SrxAddress.objects.get(address_name=src)
-            obj.source_address.add(src)
+            s = SrxAddress.objects.get(address_name=src)
+            obj.source_address.add(s)
 
-        dest = v['dest']
         if isinstance(dest, list):
             for i in dest:
                 dst = SrxAddress.objects.get(address_name=i)
@@ -69,7 +119,6 @@ def importyaml(yamlfile):
             dst = SrxAddress.objects.get(address_name=dest)
             obj.destination_address.add(dst)
 
-        apps = v['apps']
         if isinstance(apps, list):
             for i in apps:
                 app = SrxApplication.objects.get(application_name=i)
