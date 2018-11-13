@@ -6,4 +6,5 @@ app_name = 'generator'
 urlpatterns = [
     path('', views.index, name='index'),
     path('getparentzone/', views.getparentzone, name='getparentzone'),
+    path('getapplicationdata/', views.getapplicationdata, name='getapplicationdata'),
 ]

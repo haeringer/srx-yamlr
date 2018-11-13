@@ -53,7 +53,13 @@
 
               <ul class="list-inline d-none search-results-list" id="search-from-ul">
               {% for adr in addresses %}
-                <li class="search-results-item" id="from_{{ adr.uuid }}"><a href="#">{{ adr }}</a></li>
+                <li class="search-results-item" id="from_{{ adr.uuid }}">
+                  <div class="row">
+                    <div class="col-auto mr-auto lgi-name"><a href="#">{{ adr.address_name }}</a></div>
+                    <div class="w-100"></div>
+                    <div class="col-auto mr-auto lgi-name"><small><a href="#" class="text-black-50">{{ adr.address_ip }}</a></small></div>
+                  </div>
+                </li>
               {% endfor %}
               </ul>
 
@@ -68,7 +74,13 @@
 
               <ul class="list-inline d-none search-results-list" id="search-to-ul">
               {% for adr in addresses %}
-                <li class="search-results-item" id="to_{{ adr.uuid }}"><a href="#">{{ adr }}</a></li>
+                <li class="search-results-item" id="to_{{ adr.uuid }}">
+                  <div class="row">
+                    <div class="col-auto mr-auto lgi-name"><a href="#">{{ adr.address_name }}</a></div>
+                    <div class="w-100"></div>
+                    <div class="col-auto mr-auto lgi-name"><small><a href="#" class="text-black-50">{{ adr.address_ip }}</a></small></div>
+                  </div>
+                </li>
               {% endfor %}
               </ul>
 
@@ -83,7 +95,13 @@
 
               <ul class="list-inline d-none search-results-list" id="search-app-ul">
               {% for app in applications %}
-                <li class="search-results-item" id="app_{{ app.uuid }}"><a href="#">{{ app }}</a></li>
+                <li class="search-results-item" id="app_{{ app.uuid }}">
+                  <div class="row">
+                    <div class="col-auto mr-auto lgi-name"><a href="#">{{ app.application_name }}</a></div>
+                    <div class="w-100"></div>
+                    <div class="col-auto mr-auto lgi-name"><small><a href="#" class="text-black-50">{{ app.protocol }} {{ app.application_port }}</a></small></div>
+                  </div>
+                </li>
               {% endfor %}
               </ul>
 
