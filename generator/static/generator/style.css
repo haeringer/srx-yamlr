@@ -44,7 +44,11 @@ body {
     box-shadow: 1px 1px 7px 0px rgba(0,0,0,0.15);
   }
 
-  .lgi-icon {
+  .lgi-icon-close {
+    opacity: 0;
+  }
+
+  .list-group-item:hover .lgi-icon-close {
     opacity: 0.5;
   }
 
