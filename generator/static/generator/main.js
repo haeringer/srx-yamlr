@@ -21,7 +21,7 @@ function addObject(obj) {
 
     if (source === 'from' || source === 'to') {
 
-        $.getJSON('/generator/getparentzone/', {objectid: objectId_dj})
+        $.getJSON('/generator/getaddressdata/', {objectid: objectId_dj})
 
         .done(function(response) {
             var objVal = response.obj_val

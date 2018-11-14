@@ -35,7 +35,7 @@ def index(request):
     return render(request, 'generator/index.html', context)
 
 
-def getparentzone(request):
+def getaddressdata(request):
     objectid = request.GET.get('objectid', None)
     is_address = False
 
