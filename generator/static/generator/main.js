@@ -29,9 +29,18 @@ function addObject(obj) {
                 objVal = objVal.join(', ');
             }
             // blend in card element
+            if ($('#added-zone-'+source).hasClass('d-none')) {
+                $('#added-zone-'+source).removeClass('d-none');
+                $('#added-zone-body-'+source).html(response.parentzone);
+            } else {
+                var zonePresent = $('#added-zone-body-'+source).html();
+                if (zonePresent !== response.parentzone) {
+                    alert("You cannot add objects from different zones!");
+                    throw 'Cannot add objects from different zones!';
+                }
+            }
+
             $('#added-obj-'+source).removeClass('d-none');
-            $('#added-zone-'+source).removeClass('d-none');
-            $('#added-zone-body-'+source).html(response.parentzone);
             $('#added-list-'+source).append(
                 `<li class="list-group-item" id="${source}_${objectId_dj}_added">
                   <div class="row">
