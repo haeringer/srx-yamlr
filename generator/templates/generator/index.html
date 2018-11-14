@@ -61,6 +61,20 @@
                   </div>
                 </li>
               {% endfor %}
+              {% for adrset in addrsets %}
+                <li class="search-results-item" id="from_{{ adrset.uuid }}">
+                  <div class="row">
+                    <div class="col-auto mr-auto lgi-name"><a href="#">{{ adrset.addrset_name }}</a></div>
+                    <div class="w-100"></div>
+                    <div class="col-auto mr-auto lgi-name"><small><a href="#" class="text-black-50">
+                      {% for a in adrset.address.all %}
+                        {{ a }}<br>
+                      {% endfor %}
+                      </a></small>
+                    </div>
+                  </div>
+                </li>
+              {% endfor %}
               </ul>
 
             </div>

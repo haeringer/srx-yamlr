@@ -48,10 +48,10 @@ class SrxPolicy(models.Model):
     from_zone = models.ManyToManyField(SrxZone, related_name='from_zones')
     to_zone = models.ManyToManyField(SrxZone, related_name='to_zones')
     source_address = models.ManyToManyField(SrxAddress, related_name='source_addresses')
-    # plus address sets ??
+    source_addrset = models.ManyToManyField(SrxAddrSet, related_name='source_addrsets')
     destination_address = models.ManyToManyField(SrxAddress, related_name='destination_addresses')
-    # plus address sets ??
+    destination_addrset = models.ManyToManyField(SrxAddrSet, related_name='destination_addrsets')
     applications = models.ManyToManyField(SrxApplication)
-    # plus application sets ??
+    appsets = models.ManyToManyField(SrxAppSet, related_name='appsets')
     def __str__(self):
         return self.policy_name

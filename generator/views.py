@@ -18,12 +18,16 @@ def index(request):
     try:
         zones = get_list_or_404(SrxZone)
         addresses = get_list_or_404(SrxAddress)
+        addrsets = get_list_or_404(SrxAddrSet)
         applications = get_list_or_404(SrxApplication)
+        appsets = get_list_or_404(SrxAppSet)
         policies = get_list_or_404(SrxPolicy)
         context = {
             'zones': zones,
             'addresses': addresses,
+            'addrsets': addrsets,
             'applications': applications,
+            'appsets': appsets,
             'policies': policies
         }
     except:
@@ -33,14 +37,27 @@ def index(request):
 
 def getparentzone(request):
     objectid = request.GET.get('objectid', None)
+    is_address = False
 
-    obj = SrxAddress.objects.get(uuid=objectid)
+    try:
+        obj = SrxAddress.objects.get(uuid=objectid)
+        is_address = True
+    except:
+        obj = SrxAddrSet.objects.get(uuid=objectid)
+
     parentzone = SrxZone.objects.get(id=obj.zone_id)
 
     response_data = {}
-    response_data['obj_name'] = obj.address_name
-    response_data['obj_ip'] = obj.address_ip
     response_data['parentzone'] = parentzone.zone_name
+    if is_address == True:
+        response_data['obj_name'] = obj.address_name
+        response_data['obj_val'] = obj.address_ip
+        print(obj.address_ip)
+    else:
+        response_data['obj_name'] = obj.addrset_name
+        response_data['obj_val'] = []
+        for adr in obj.address.all():
+            response_data['obj_val'].append(str(adr))
 
     return JsonResponse(response_data, safe=False)
 

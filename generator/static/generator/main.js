@@ -24,6 +24,10 @@ function addObject(obj) {
         $.getJSON('/generator/getparentzone/', {objectid: objectId_dj})
 
         .done(function(response) {
+            var objVal = response.obj_val
+            if (Array.isArray(objVal) == true) {
+                objVal = objVal.join(', ');
+            }
             // blend in card element
             $('#added-obj-'+source).removeClass('d-none');
             $('#added-zone-'+source).removeClass('d-none');
@@ -38,7 +42,7 @@ function addObject(obj) {
                       </button>
                     </div>
                     <div class="w-100"></div>
-                    <div class="col-auto mr-auto lgi-name text-black-50"><small>${response.obj_ip}</small></div>
+                    <div class="col-auto mr-auto lgi-name text-black-50"><small>${objVal}</small></div>
                   </div>
                 </li>`
             );
