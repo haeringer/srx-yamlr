@@ -105,24 +105,24 @@ def importyaml(yamlfile):
 
         if isinstance(src, list):
             for i in src:
-                s = SrxAddress.objects.get(address_name=i)
-                obj.source_address.add(s)
+                try: obj.source_address.add(SrxAddress.objects.get(address_name=i))
+                except: obj.source_addrset.add(SrxAddrSet.objects.get(addrset_name=i))
         else:
-            s = SrxAddress.objects.get(address_name=src)
-            obj.source_address.add(s)
+            try: obj.source_address.add(SrxAddress.objects.get(address_name=src))
+            except: obj.source_addrset.add(SrxAddrSet.objects.get(addrset_name=src))
 
         if isinstance(dest, list):
             for i in dest:
-                dst = SrxAddress.objects.get(address_name=i)
-                obj.destination_address.add(dst)
+                try: obj.destination_address.add(SrxAddress.objects.get(address_name=i))
+                except: obj.destination_addrset.add(SrxAddrSet.objects.get(addrset_name=i))
         else:
-            dst = SrxAddress.objects.get(address_name=dest)
-            obj.destination_address.add(dst)
+            try: obj.destination_address.add(SrxAddress.objects.get(address_name=dest))
+            except: obj.destination_addrset.add(SrxAddrSet.objects.get(addrset_name=dest))
 
         if isinstance(apps, list):
             for i in apps:
-                app = SrxApplication.objects.get(application_name=i)
-                obj.applications.add(app)
+                try: obj.applications.add(SrxApplication.objects.get(application_name=i))
+                except: obj.appsets.add(SrxAppSet.objects.get(applicationset_name=i))
         else:
-            app = SrxApplication.objects.get(application_name=apps)
-            obj.applications.add(app)
+            try: obj.applications.add(SrxApplication.objects.get(application_name=apps))
+            except: obj.appsets.add(SrxAppSet.objects.get(applicationset_name=apps))
