@@ -1,4 +1,17 @@
 
+/* Loading animation */
+
+var timeout;
+function loading() {
+    timeout = setTimeout(showPage, 1200);
+}
+
+function showPage() {
+    document.getElementById("loader").style.display = "none";
+    document.getElementById("mainDiv").style.display = "block";
+}
+
+
 /*
 * Event listeners etc. - run once DOM is ready
 */
