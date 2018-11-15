@@ -52,7 +52,6 @@ def getaddressdata(request):
     if is_address == True:
         response_data['obj_name'] = obj.address_name
         response_data['obj_val'] = obj.address_ip
-        print(obj.address_ip)
     else:
         response_data['obj_name'] = obj.addrset_name
         response_data['obj_val'] = []
@@ -64,14 +63,28 @@ def getaddressdata(request):
 
 def getapplicationdata(request):
     objectid = request.GET.get('objectid', None)
+    is_application = False
 
-    obj = SrxApplication.objects.get(uuid=objectid)
-    protocol = SrxProtocol.objects.get(id=obj.protocol_id)
+    try:
+        obj = SrxApplication.objects.get(uuid=objectid)
+        is_application = True
+    except:
+        obj = SrxAppSet.objects.get(uuid=objectid)
 
     response_data = {}
-    response_data['obj_name'] = obj.application_name
-    response_data['obj_port'] = obj.application_port
-    response_data['obj_protocol'] = protocol.protocol_type
+    if is_application == True:
+        protocol = SrxProtocol.objects.get(id=obj.protocol_id)
+        response_data['obj_name'] = obj.application_name
+        # response_data['obj_val'] = []
+        # response_data['obj_val'].append(str(protocol.protocol_type))
+        # response_data['obj_val'].append(str(obj.application_port))
+        response_data['obj_port'] = obj.application_port
+        response_data['obj_protocol'] = protocol.protocol_type
+    else:
+        response_data['obj_name'] = obj.applicationset_name
+        response_data['obj_apps'] = []
+        for app in obj.applications.all():
+            response_data['obj_apps'].append(str(app))
 
     return JsonResponse(response_data, safe=False)
 

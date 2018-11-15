@@ -135,6 +135,20 @@
                     </div>
                   </li>
                 {% endfor %}
+                {% for appset in appsets %}
+                  <li class="search-results-item" id="app_{{ appset.uuid }}">
+                    <div class="row">
+                      <div class="col-auto mr-auto lgi-name"><a href="#">{{ appset.applicationset_name }}</a></div>
+                      <div class="w-100"></div>
+                      <div class="col-auto mr-auto lgi-name"><small><a href="#" class="text-black-50">
+                        {% for a in appset.applications.all %}
+                          {{ a }}<br>
+                        {% endfor %}
+                        </a></small>
+                      </div>
+                    </div>
+                  </li>
+                {% endfor %}
                 </ul>
 
               </div>

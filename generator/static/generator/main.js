@@ -91,7 +91,12 @@ function addObject(obj) {
         $.getJSON('/generator/getapplicationdata/', {objectid: objectId_dj})
 
         .done(function(response) {
-            // blend in card element
+            var objVal;
+            if (response.hasOwnProperty('obj_protocol')) {
+                objVal = response.obj_protocol + ' ' + response.obj_port;
+            } else {
+                objVal = response.obj_apps.join(', ');
+            }
             $('#added-obj-app').removeClass('d-none');
             $('#added-list-app').append(
                 `<li class="list-group-item" id="app_${objectId_dj}_added">
@@ -103,7 +108,7 @@ function addObject(obj) {
                       </button>
                     </div>
                   <div class="w-100"></div>
-                  <div class="col-auto mr-auto lgi-name text-black-50"><small>${response.obj_protocol} ${response.obj_port}</small></div>
+                  <div class="col-auto mr-auto lgi-name text-black-50"><small>${objVal}</small></div>
                   </div>
                 </li>`
             );
