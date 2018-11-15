@@ -21,6 +21,11 @@ $(function() {
 });
 
 
+var currentObjects = {};
+currentObjects['from'] = [];
+currentObjects['to'] = [];
+currentObjects['app'] = [];
+
 /* After click on search result item (see event listener),
 retrieve parent zone and add object to card element */
 function addObject(obj) {
@@ -36,21 +41,15 @@ function addObject(obj) {
             if (Array.isArray(objVal) == true) {
                 objVal = objVal.join(', ');
             }
+
+            if (currentObjects.from.includes(objectId_dj) ||
+                currentObjects.to.includes(objectId_dj) ) {
+                swal("Object already in use!");
+                return;
+            }
+
             // blend in card element
             if ($('#added-zone-'+source).hasClass('d-none')) {
-                if (source === 'to') {
-                    var zoneFrom = $('#added-zone-body-from').html();
-                    if (zoneFrom === response.parentzone) {
-                        swal("Please choose an object from another zone!");
-                        return;
-                    }
-                } else if (source === 'from') {
-                    var zoneFrom = $('#added-zone-body-to').html();
-                    if (zoneFrom === response.parentzone) {
-                        swal("Please choose an object from another zone!");
-                        return;
-                    }
-                }
                 $('#added-zone-'+source).removeClass('d-none');
                 $('#added-zone-body-'+source).html(response.parentzone);
             } else {
@@ -76,6 +75,13 @@ function addObject(obj) {
                   </div>
                 </li>`
             );
+
+            if (source === 'from') {
+                currentObjects.from.push(objectId_dj);
+            } else if (source === 'to') {
+                currentObjects.to.push(objectId_dj);
+            }
+            console.log(currentObjects)
         })
 
         .fail(function(errorThrown) {
@@ -92,6 +98,12 @@ function addObject(obj) {
             } else {
                 objVal = response.obj_apps.join(', ');
             }
+
+            if (currentObjects.app.includes(objectId_dj)) {
+                swal("Object already in use!");
+                return;
+            }
+
             $('#added-obj-app').removeClass('d-none');
             $('#added-list-app').append(
                 `<li class="list-group-item" id="app_${objectId_dj}_added">
@@ -107,6 +119,9 @@ function addObject(obj) {
                   </div>
                 </li>`
             );
+
+            currentObjects.app.push(objectId_dj);
+            console.log(currentObjects)
         })
 
         .fail(function(errorThrown) {
@@ -115,19 +130,39 @@ function addObject(obj) {
 
     }
     $(obj).closest('.list-inline').addClass('d-none');
-    $('#search-'+source).val('')
+    $('#search-'+source).val('');
 }
 
 
 function removeObject(obj) {
-    listitem = $(obj).parents('.list-group-item').remove();
-    listitemid = $(listitem).attr('id');
-    var source = listitemid.split("_").shift();
+    var listitem = $(obj).parents('.list-group-item').remove();
+    var listitemId = $(listitem).attr('id');
+    var objectId = listitemId.split('_', 2).join('_');
+    var source = listitemId.split('_').shift();
+    var objectId_dj = objectId.split('_').pop();
 
     if (!$('#added-list-'+source).has('li').length) {
         $('#added-obj-'+source).addClass('d-none');
         $('#added-zone-'+source).addClass('d-none');
     }
+
+    if (source === 'from') {
+        var index = currentObjects.from.indexOf(objectId_dj);
+        if (index > -1) {
+            currentObjects.from.splice(index, 1);
+        }
+    } else if (source === 'to') {
+        var index = currentObjects.to.indexOf(objectId_dj);
+        if (index > -1) {
+            currentObjects.to.splice(index, 1);
+        }
+    } else if (source === 'app') {
+        var index = currentObjects.app.indexOf(objectId_dj);
+        if (index > -1) {
+            currentObjects.app.splice(index, 1);
+        }
+    }
+    console.log(currentObjects)
 }
 
 
