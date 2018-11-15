@@ -18,192 +18,189 @@
     <link rel="stylesheet" type="text/css" href="/static/generator/style.css">
   </head>
 
-  <body onload="loading()">
+  <body>
 
-    <div id="loader"></div>
-    <div id="mainDiv" class="blend-in">
+    <div class="loading">Loading&#8230;</div>
 
-      <nav class="navbar navbar-dark fixed-top bg-dark p-0 shadow">
-        <a class="navbar-brand col-sm-3" href="#">Config Generator</a>
-        <ul class="navbar-nav px-3">
-          <li class="nav-item text-nowrap">
-            <a class="nav-link" href="#">Sign out</a>
-          </li>
-        </ul>
-      </nav>
+    <nav class="navbar navbar-dark fixed-top bg-dark p-0 shadow">
+      <a class="navbar-brand col-sm-3" href="#">Config Generator</a>
+      <ul class="navbar-nav px-3">
+        <li class="nav-item text-nowrap">
+          <a class="nav-link" href="#">Sign out</a>
+        </li>
+      </ul>
+    </nav>
 
-      <div class="container-fluid">
-        <div class="row">
-          <main role="main" class="col-sm">
+    <div class="container-fluid">
+      <div class="row">
+        <main role="main" class="col-sm">
 
-            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-              <h1 class="h2">Firewall Policies</h1>
-              <div class="btn-toolbar mb-2 mb-md-0">
-                <div class="btn-group mr-2">
-                  <button class="btn btn-primary">Save</button>
-                </div>
-
+          <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+            <h1 class="h2">Firewall Policies</h1>
+            <div class="btn-toolbar mb-2 mb-md-0">
+              <div class="btn-group mr-2">
+                <button class="btn btn-primary">Save</button>
               </div>
-            </div>
-
-            <div class="d-flex justify-content-between pt-3 pb-4">
-
-
-              <div class="col-sm">
-
-                <h4>From...</h4>
-
-                <input class="form-control" type="text" id="search-from" onkeyup="objectSearch(this)" placeholder="Search IP address or object name" aria-label="Search" autocomplete="off">
-
-                <ul class="list-inline d-none search-results-list" id="search-from-ul">
-                {% for adr in addresses %}
-                  <li class="search-results-item" id="from_{{ adr.uuid }}">
-                    <div class="row">
-                      <div class="col-auto mr-auto lgi-name"><a href="#">{{ adr.address_name }}</a></div>
-                      <div class="w-100"></div>
-                      <div class="col-auto mr-auto lgi-name"><small><a href="#" class="text-black-50">{{ adr.address_ip }}</a></small></div>
-                    </div>
-                  </li>
-                {% endfor %}
-                {% for adrset in addrsets %}
-                  <li class="search-results-item" id="from_{{ adrset.uuid }}">
-                    <div class="row">
-                      <div class="col-auto mr-auto lgi-name"><a href="#">{{ adrset.addrset_name }}</a></div>
-                      <div class="w-100"></div>
-                      <div class="col-auto mr-auto lgi-name"><small><a href="#" class="text-black-50">
-                        {% for a in adrset.address.all %}
-                          {{ a }}<br>
-                        {% endfor %}
-                        </a></small>
-                      </div>
-                    </div>
-                  </li>
-                {% endfor %}
-                </ul>
-
-              </div>
-
-
-              <div class="col-sm">
-
-                <h4>To...</h4>
-
-                <input class="form-control" type="text" id="search-to" onkeyup="objectSearch(this)" placeholder="Search IP address or object name" aria-label="Search" autocomplete="off">
-
-                <ul class="list-inline d-none search-results-list" id="search-to-ul">
-                {% for adr in addresses %}
-                  <li class="search-results-item" id="to_{{ adr.uuid }}">
-                    <div class="row">
-                      <div class="col-auto mr-auto lgi-name"><a href="#">{{ adr.address_name }}</a></div>
-                      <div class="w-100"></div>
-                      <div class="col-auto mr-auto lgi-name"><small><a href="#" class="text-black-50">{{ adr.address_ip }}</a></small></div>
-                    </div>
-                  </li>
-                {% endfor %}
-                {% for adrset in addrsets %}
-                  <li class="search-results-item" id="to_{{ adrset.uuid }}">
-                    <div class="row">
-                      <div class="col-auto mr-auto lgi-name"><a href="#">{{ adrset.addrset_name }}</a></div>
-                      <div class="w-100"></div>
-                      <div class="col-auto mr-auto lgi-name"><small><a href="#" class="text-black-50">
-                        {% for a in adrset.address.all %}
-                          {{ a }}<br>
-                        {% endfor %}
-                        </a></small>
-                      </div>
-                    </div>
-                  </li>
-                {% endfor %}
-                </ul>
-
-              </div>
-
-
-              <div class="col-sm">
-
-                <h4>Allow...</h4>
-
-                <input class="form-control" type="text" id="search-app" onkeyup="objectSearch(this)" placeholder="Search application or protocol port" aria-label="Search" autocomplete="off">
-
-                <ul class="list-inline d-none search-results-list" id="search-app-ul">
-                {% for app in applications %}
-                  <li class="search-results-item" id="app_{{ app.uuid }}">
-                    <div class="row">
-                      <div class="col-auto mr-auto lgi-name"><a href="#">{{ app.application_name }}</a></div>
-                      <div class="w-100"></div>
-                      <div class="col-auto mr-auto lgi-name"><small><a href="#" class="text-black-50">{{ app.protocol }} {{ app.application_port }}</a></small></div>
-                    </div>
-                  </li>
-                {% endfor %}
-                {% for appset in appsets %}
-                  <li class="search-results-item" id="app_{{ appset.uuid }}">
-                    <div class="row">
-                      <div class="col-auto mr-auto lgi-name"><a href="#">{{ appset.applicationset_name }}</a></div>
-                      <div class="w-100"></div>
-                      <div class="col-auto mr-auto lgi-name"><small><a href="#" class="text-black-50">
-                        {% for a in appset.applications.all %}
-                          {{ a }}<br>
-                        {% endfor %}
-                        </a></small>
-                      </div>
-                    </div>
-                  </li>
-                {% endfor %}
-                </ul>
-
-              </div>
-
 
             </div>
-            <div class="d-flex justify-content-between pt-3 pb-5 mb-4 border-bottom">
+          </div>
+
+          <div class="d-flex justify-content-between pt-3 pb-4">
 
 
-              <div class="col-sm">
+            <div class="col-sm">
 
-                <div class="card text-black-50 mb-2 d-none" id="added-zone-from">
-                  <div class="card-body bg-light pt-3 pb-3 font-weight-bold" id="added-zone-body-from">
+              <h4>From...</h4>
+
+              <input class="form-control" type="text" id="search-from" onkeyup="objectSearch(this)" placeholder="Search IP address or object name" aria-label="Search" autocomplete="off">
+
+              <ul class="list-inline d-none search-results-list" id="search-from-ul">
+              {% for adr in addresses %}
+                <li class="search-results-item" id="from_{{ adr.uuid }}">
+                  <div class="row">
+                    <div class="col-auto mr-auto lgi-name"><a href="#">{{ adr.address_name }}</a></div>
+                    <div class="w-100"></div>
+                    <div class="col-auto mr-auto lgi-name"><small><a href="#" class="text-black-50">{{ adr.address_ip }}</a></small></div>
                   </div>
-                </div>
-
-                <div class="card panel-default d-none" id="added-obj-from">
-                  <ul class="list-group list-group-flush" id="added-list-from">
-                  </ul>
-                </div>
-
-              </div>
-
-
-              <div class="col-sm">
-
-                <div class="card text-black-50 mb-2 d-none" id="added-zone-to">
-                  <div class="card-body bg-light pt-3 pb-3 font-weight-bold" id="added-zone-body-to">
+                </li>
+              {% endfor %}
+              {% for adrset in addrsets %}
+                <li class="search-results-item" id="from_{{ adrset.uuid }}">
+                  <div class="row">
+                    <div class="col-auto mr-auto lgi-name"><a href="#">{{ adrset.addrset_name }}</a></div>
+                    <div class="w-100"></div>
+                    <div class="col-auto mr-auto lgi-name"><small><a href="#" class="text-black-50">
+                      {% for a in adrset.address.all %}
+                        {{ a }}<br>
+                      {% endfor %}
+                      </a></small>
+                    </div>
                   </div>
-                </div>
+                </li>
+              {% endfor %}
+              </ul>
 
-                <div class="card panel-default d-none" id="added-obj-to">
-                  <ul class="list-group list-group-flush" id="added-list-to">
-                  </ul>
-                </div>
+            </div>
 
+
+            <div class="col-sm">
+
+              <h4>To...</h4>
+
+              <input class="form-control" type="text" id="search-to" onkeyup="objectSearch(this)" placeholder="Search IP address or object name" aria-label="Search" autocomplete="off">
+
+              <ul class="list-inline d-none search-results-list" id="search-to-ul">
+              {% for adr in addresses %}
+                <li class="search-results-item" id="to_{{ adr.uuid }}">
+                  <div class="row">
+                    <div class="col-auto mr-auto lgi-name"><a href="#">{{ adr.address_name }}</a></div>
+                    <div class="w-100"></div>
+                    <div class="col-auto mr-auto lgi-name"><small><a href="#" class="text-black-50">{{ adr.address_ip }}</a></small></div>
+                  </div>
+                </li>
+              {% endfor %}
+              {% for adrset in addrsets %}
+                <li class="search-results-item" id="to_{{ adrset.uuid }}">
+                  <div class="row">
+                    <div class="col-auto mr-auto lgi-name"><a href="#">{{ adrset.addrset_name }}</a></div>
+                    <div class="w-100"></div>
+                    <div class="col-auto mr-auto lgi-name"><small><a href="#" class="text-black-50">
+                      {% for a in adrset.address.all %}
+                        {{ a }}<br>
+                      {% endfor %}
+                      </a></small>
+                    </div>
+                  </div>
+                </li>
+              {% endfor %}
+              </ul>
+
+            </div>
+
+
+            <div class="col-sm">
+
+              <h4>Allow...</h4>
+
+              <input class="form-control" type="text" id="search-app" onkeyup="objectSearch(this)" placeholder="Search application or protocol port" aria-label="Search" autocomplete="off">
+
+              <ul class="list-inline d-none search-results-list" id="search-app-ul">
+              {% for app in applications %}
+                <li class="search-results-item" id="app_{{ app.uuid }}">
+                  <div class="row">
+                    <div class="col-auto mr-auto lgi-name"><a href="#">{{ app.application_name }}</a></div>
+                    <div class="w-100"></div>
+                    <div class="col-auto mr-auto lgi-name"><small><a href="#" class="text-black-50">{{ app.protocol }} {{ app.application_port }}</a></small></div>
+                  </div>
+                </li>
+              {% endfor %}
+              {% for appset in appsets %}
+                <li class="search-results-item" id="app_{{ appset.uuid }}">
+                  <div class="row">
+                    <div class="col-auto mr-auto lgi-name"><a href="#">{{ appset.applicationset_name }}</a></div>
+                    <div class="w-100"></div>
+                    <div class="col-auto mr-auto lgi-name"><small><a href="#" class="text-black-50">
+                      {% for a in appset.applications.all %}
+                        {{ a }}<br>
+                      {% endfor %}
+                      </a></small>
+                    </div>
+                  </div>
+                </li>
+              {% endfor %}
+              </ul>
+
+            </div>
+
+
+          </div>
+          <div class="d-flex justify-content-between pt-3 pb-5 mb-4 border-bottom">
+
+
+            <div class="col-sm">
+
+              <div class="card text-black-50 mb-2 d-none" id="added-zone-from">
+                <div class="card-body bg-light pt-3 pb-3 font-weight-bold" id="added-zone-body-from">
+                </div>
               </div>
 
-
-              <div class="col-sm">
-
-                <div class="card panel-default d-none" id="added-obj-app">
-                  <ul class="list-group list-group-flush" id="added-list-app">
-                  </ul>
-                </div>
-
+              <div class="card panel-default d-none" id="added-obj-from">
+                <ul class="list-group list-group-flush" id="added-list-from">
+                </ul>
               </div>
 
             </div>
 
 
-          </main>
-        </div>
+            <div class="col-sm">
+
+              <div class="card text-black-50 mb-2 d-none" id="added-zone-to">
+                <div class="card-body bg-light pt-3 pb-3 font-weight-bold" id="added-zone-body-to">
+                </div>
+              </div>
+
+              <div class="card panel-default d-none" id="added-obj-to">
+                <ul class="list-group list-group-flush" id="added-list-to">
+                </ul>
+              </div>
+
+            </div>
+
+
+            <div class="col-sm">
+
+              <div class="card panel-default d-none" id="added-obj-app">
+                <ul class="list-group list-group-flush" id="added-list-app">
+                </ul>
+              </div>
+
+            </div>
+
+          </div>
+
+
+        </main>
       </div>
-
     </div>
 
     <!-- Bootstrap core JavaScript + dependencies
