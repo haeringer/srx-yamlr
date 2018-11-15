@@ -30,13 +30,26 @@ function addObject(obj) {
             }
             // blend in card element
             if ($('#added-zone-'+source).hasClass('d-none')) {
+                if (source === 'to') {
+                    var zoneFrom = $('#added-zone-body-from').html();
+                    if (zoneFrom === response.parentzone) {
+                        swal("Please choose an object from another zone!");
+                        return;
+                    }
+                } else if (source === 'from') {
+                    var zoneFrom = $('#added-zone-body-to').html();
+                    if (zoneFrom === response.parentzone) {
+                        swal("Please choose an object from another zone!");
+                        return;
+                    }
+                }
                 $('#added-zone-'+source).removeClass('d-none');
                 $('#added-zone-body-'+source).html(response.parentzone);
             } else {
                 var zonePresent = $('#added-zone-body-'+source).html();
                 if (zonePresent !== response.parentzone) {
-                    alert("You cannot add objects from different zones!");
-                    throw 'Cannot add objects from different zones!';
+                    swal("Can't use objects from different zones!");
+                    return;
                 }
             }
 
