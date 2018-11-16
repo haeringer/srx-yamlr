@@ -15,8 +15,14 @@ $(function() {
     /* Recognize clicks on search result item */
     // use .on 'click' with parent selected to recognize events also on newly added items
     $('.list-inline').on('click', '.search-results-item', function() { addObject(this) });
-
     $('.list-group').on('click', '.lgi-icon-close', function() { removeObject(this) });
+
+    $('#deploy-config').on('click', function() { deployConfig() });
+    $('#create-object-dropdown a').on('click', function () { createInputForm(this) });
+
+    $(function () {
+        $('[data-toggle="tooltip"]').tooltip()
+    })
 
 });
 
@@ -25,6 +31,31 @@ var currentObjects = {};
 currentObjects['from'] = [];
 currentObjects['to'] = [];
 currentObjects['app'] = [];
+
+
+function createInputForm(obj) {
+    var selItem = $(obj).text();
+
+    $('#form-container').find('form').addClass('d-none')
+
+    if (selItem === 'Address') {
+        $('#address-form').removeClass('d-none')
+    } else if (selItem === 'Address Set') {
+        $('#adrset-form').removeClass('d-none')
+    } else if (selItem === 'Application') {
+        $('#application-form').removeClass('d-none')
+    } else if (selItem === 'Application Set') {
+        $('#appset-form').removeClass('d-none')
+    } else if (selItem === 'Zone') {
+        swal('is noch nich implementiert')
+    }
+}
+
+function deployConfig() {
+    console.log('deploy config')
+}
+
+
 
 /* After click on search result item (see event listener),
 retrieve parent zone and add object to card element */

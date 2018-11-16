@@ -20,6 +20,115 @@
 
   <body>
 
+    <!-- Create-Object Modal -->
+    <div class="modal fade" id="create-object-modal" tabindex="-1" role="dialog" aria-labelledby="create-object-modal-label" aria-hidden="true">
+      <div class="modal-dialog shadow" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="create-object-modal-label">Create new firewall object</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close" id="create-object-modal-close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <div class="dropdown mb-4" id="create-object-dropdown">
+              <button class="btn btn-secondary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Object type
+              </button>
+              <div class="dropdown-menu shadow" aria-labelledby="create-object-dropdown">
+                <a class="dropdown-item" href="#">Address</a>
+                <a class="dropdown-item" href="#">Address Set</a>
+                <a class="dropdown-item" href="#">Application</a>
+                <a class="dropdown-item" href="#">Application Set</a>
+                <a class="dropdown-item" href="#">Zone</a>
+              </div>
+            </div>
+            <div id="form-container">
+              <form class="d-none border-top" id="address-form">
+                <div class="form-group mt-4">
+                  <h5>New Address</h5><br>
+                  <select class="custom-select" id="address-form-control-zone">
+                    <option selected>Choose Zone...</option>
+                    {% for zone in zones %}
+                    <option value="{{ zone.zone_name }}">{{ zone.zone_name }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="address-form-control-name">Object Name</label>
+                  <input type="text" class="form-control" id="address-form-control-name">
+                </div>
+                <div class="form-group">
+                  <label for="address-form-control-name">IP Address/Prefix</label>
+                  <input type="text" class="form-control" id="address-form-control-ip">
+                </div>
+              </form>
+              <form class="d-none border-top" id="adrset-form">
+                <div class="form-group mt-4">
+                  <h5>New Address Set</h5><br>
+                  <select class="custom-select" id="adrset-form-control-zone">
+                    <option selected>Choose Zone...</option>
+                    {% for zone in zones %}
+                    <option value="{{ zone.zone_name }}">{{ zone.zone_name }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="adrset-form-control-name">Object Name</label>
+                  <input type="text" class="form-control" id="adrset-form-control-name">
+                </div>
+                <div class="form-group">
+                  <label for="adrset-form-control-objects">Child Objects</label>
+                  <select multiple class="form-control" id="adrset-form-control-objects">
+                    {% for adr in addresses %}
+                    <option class="small" value="adr.address_name">{{ adr.address_name }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+              </form>
+              <form class="d-none border-top" id="application-form">
+                <div class="form-group mt-4">
+                  <h5>New Application</h5><br>
+                  <label for="application-form-control-name">Application Name</label>
+                  <input type="text" class="form-control" id="application-form-control-name">
+                </div>
+                <div class="form-group">
+                  <label for="application-form-control-port">Port Number</label>
+                  <input type="number" class="form-control" id="application-form-control-port">
+                </div>
+                <div class="form-group">
+                  <select class="custom-select" id="application-form-control-protocol">
+                    <option selected>Protocol</option>
+                    <option value="TCP">TCP</option>
+                    <option value="UDP">UDP</option>
+                  </select>
+                </div>
+              </form>
+              <form class="d-none border-top" id="appset-form">
+                <div class="form-group mt-4">
+                  <h5>New Application Set</h5><br>
+                  <label for="appset-form-control-name">Object Name</label>
+                  <input type="text" class="form-control" id="appset-form-control-name">
+                </div>
+                <div class="form-group">
+                  <label for="appset-form-control-objects">Child Objects</label>
+                  <select multiple class="form-control" id="appset-form-control-objects">
+                    {% for app in applications %}
+                    <option class="small" value="app.application_name">{{ app.application_name }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+              </form>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-primary">Save</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- End of Create-Object Modal -->
+
     <div class="loading">Loading&#8230;</div>
 
     <nav class="navbar navbar-dark fixed-top bg-dark p-0 shadow">
@@ -39,7 +148,15 @@
             <h1 class="h2">Firewall Policies</h1>
             <div class="btn-toolbar mb-2 mb-md-0 pr-2">
               <div class="btn-group mr-2">
-                <button class="btn btn-primary">Save</button>
+                <div data-toggle="tooltip" data-placement="bottom" title="Create new object">
+                  <button class="btn btn-primary" id="create-object" data-toggle="modal" data-target="#create-object-modal"><i class="ti-plus"></i></button>
+                </div>
+                <div data-toggle="tooltip" data-placement="bottom" title="Show YAML">
+                  <button class="btn btn-info ml-1" id="show-yaml"><i class="ti-align-left"></i></button>
+                </div>
+                <div data-toggle="tooltip" data-placement="bottom" title="Deploy config">
+                  <button class="btn btn-success disabled" id="deploy-config"><i class="ti-control-forward"></i></button>
+                </div>
               </div>
 
             </div>
@@ -52,7 +169,7 @@
 
               <h4>From...</h4>
 
-              <input class="form-control" type="text" id="search-from" onkeyup="objectSearch(this)" placeholder="Search IP address or object name" aria-label="Search" autocomplete="off">
+              <input autofocus class="form-control" type="text" id="search-from" onkeyup="objectSearch(this)" placeholder="Search IP address or object name" aria-label="Search" autocomplete="off">
 
               <ul class="list-inline d-none search-results-list" id="search-from-ul">
               {% for adr in addresses %}
@@ -197,11 +314,8 @@
             </div>
 
           </div>
-          <div class="d-flex justify-content-between pt-3 pb-5 mb-4 pl-3">
-            <h6>Saved config:</h6>
-
+          <div class="d-flex justify-content-between pt-3 pb-5 mb-4 pl-3" id="saved-config">
           </div>
-
 
         </main>
       </div>
