@@ -73,6 +73,18 @@ function addObject(obj) {
                 objVal = objVal.join(', ');
             }
 
+            if (source === 'from') {
+                var zoneTo = $('#added-zone-body-to').html()
+                if (zoneTo === response.parentzone) {
+                    swal("Can't use the same zone for source and destination!")
+                }
+            } else if (source === 'to') {
+                var zoneFrom = $('#added-zone-body-from').html()
+                if (zoneFrom === response.parentzone) {
+                    swal("Can't use the same zone for source and destination!")
+                }
+            }
+
             if (currentObjects.from.includes(objectId_dj) ||
                 currentObjects.to.includes(objectId_dj) ) {
                 swal("Object already in use!");
@@ -112,7 +124,6 @@ function addObject(obj) {
             } else if (source === 'to') {
                 currentObjects.to.push(objectId_dj);
             }
-            console.log(currentObjects)
         })
 
         .fail(function(errorThrown) {
