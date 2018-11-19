@@ -35,56 +35,52 @@ def index(request):
     return render(request, 'generator/index.html', context)
 
 
-def getaddressdata(request):
+def objectajax(request):
     objectid = request.GET.get('objectid', None)
-    is_address = False
+    obj_type = ''
 
-    try:
-        obj = SrxAddress.objects.get(uuid=objectid)
-        is_address = True
-    except:
-        obj = SrxAddrSet.objects.get(uuid=objectid)
-
-    parentzone = SrxZone.objects.get(id=obj.zone_id)
-
-    response_data = {}
-    response_data['parentzone'] = parentzone.zone_name
-    if is_address == True:
-        response_data['obj_name'] = obj.address_name
-        response_data['obj_val'] = obj.address_ip
+    obj = SrxAddress.objects.filter(uuid=objectid).first()
+    if obj != None:
+        obj_type = 'address'
     else:
-        response_data['obj_name'] = obj.addrset_name
-        response_data['obj_val'] = []
-        for adr in obj.address.all():
-            response_data['obj_val'].append(str(adr))
-
-    return JsonResponse(response_data, safe=False)
-
-
-def getapplicationdata(request):
-    objectid = request.GET.get('objectid', None)
-    is_application = False
-
-    try:
-        obj = SrxApplication.objects.get(uuid=objectid)
-        is_application = True
-    except:
-        obj = SrxAppSet.objects.get(uuid=objectid)
+        obj = SrxAddrSet.objects.filter(uuid=objectid).first()
+        if obj != None:
+            obj_type = 'addrset'
+        else:
+            obj = SrxApplication.objects.filter(uuid=objectid).first()
+            if obj != None:
+                obj_type = 'application'
+            else:
+                obj = SrxAppSet.objects.filter(uuid=objectid).first()
+                if obj != None:
+                    obj_type = 'appset'
 
     response_data = {}
-    if is_application == True:
+
+    if obj_type == 'address' or obj_type == 'addrset':
+        parentzone = SrxZone.objects.get(id=obj.zone_id)
+        response_data['parentzone'] = parentzone.zone_name
+
+        if obj_type == 'address':
+            response_data['obj_name'] = obj.address_name
+            response_data['obj_val'] = obj.address_ip
+
+        elif obj_type == 'addrset':
+            response_data['obj_name'] = obj.addrset_name
+            response_data['obj_val'] = []
+            for adr in obj.address.all():
+                response_data['obj_val'].append(str(adr))
+
+    elif obj_type == 'application':
         protocol = SrxProtocol.objects.get(id=obj.protocol_id)
         response_data['obj_name'] = obj.application_name
-        # response_data['obj_val'] = []
-        # response_data['obj_val'].append(str(protocol.protocol_type))
-        # response_data['obj_val'].append(str(obj.application_port))
         response_data['obj_port'] = obj.application_port
         response_data['obj_protocol'] = protocol.protocol_type
-    else:
+
+    elif obj_type == 'appset':
         response_data['obj_name'] = obj.applicationset_name
         response_data['obj_apps'] = []
         for app in obj.applications.all():
             response_data['obj_apps'].append(str(app))
 
     return JsonResponse(response_data, safe=False)
-

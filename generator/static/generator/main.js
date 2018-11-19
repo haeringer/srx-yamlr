@@ -65,7 +65,7 @@ function addObject(obj) {
 
     if (source === 'from' || source === 'to') {
 
-        $.getJSON('/generator/getaddressdata/', {objectid: objectId_dj})
+        $.getJSON('/generator/objectajax/', {objectid: objectId_dj})
 
         .done(function(response) {
             var objVal = response.obj_val
@@ -120,7 +120,7 @@ function addObject(obj) {
         });
     } else if (source === 'app') {
 
-        $.getJSON('/generator/getapplicationdata/', {objectid: objectId_dj})
+        $.getJSON('/generator/objectajax/', {objectid: objectId_dj})
 
         .done(function(response) {
             var objVal;
