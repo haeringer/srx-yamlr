@@ -12,7 +12,7 @@
 
     <!-- Bootstrap core CSS, Themify icons -->
     <link rel="stylesheet" href="/static/bootstrap.min.css">
-    <link rel="stylesheet" href="/static/themify-icons/themify-icons.min.css"></link>
+    <link rel="stylesheet" href="/static/fontawesome-all.min.css"></link>
 
     <!-- Custom CSS -->
     <link rel="stylesheet" type="text/css" href="/static/generator/style.css">
@@ -149,13 +149,16 @@
             <div class="btn-toolbar mb-2 mb-md-0 pr-2">
               <div class="btn-group mr-2">
                 <div data-toggle="tooltip" data-placement="bottom" title="Create new object">
-                  <button class="btn btn-primary" id="create-object" data-toggle="modal" data-target="#create-object-modal"><i class="ti-plus"></i></button>
+                  <button class="btn btn-primary" id="create-object" data-toggle="modal" data-target="#create-object-modal"><i class="fas fa-plus"></i></button>
                 </div>
                 <div data-toggle="tooltip" data-placement="bottom" title="Show YAML">
-                  <button class="btn btn-info ml-1" id="show-yaml"><i class="ti-align-left"></i></button>
+                  <button class="btn btn-info ml-1" id="show-yaml"><i class="fas fa-align-left"></i></button>
+                </div>
+                <div data-toggle="tooltip" data-placement="bottom" title="Check config">
+                  <button class="btn btn-success" id="check-config"><i class="fas fa-check"></i></button>
                 </div>
                 <div data-toggle="tooltip" data-placement="bottom" title="Deploy config">
-                  <button class="btn btn-success disabled" id="deploy-config"><i class="ti-control-forward"></i></button>
+                  <button class="btn btn-danger disabled" id="deploy-config"><i class="fas fa-angle-double-right"></i></button>
                 </div>
               </div>
 
