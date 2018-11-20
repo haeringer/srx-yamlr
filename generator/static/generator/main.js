@@ -76,12 +76,16 @@ function addObject(obj) {
             if (source === 'from') {
                 var zoneTo = $('#added-zone-body-to').html()
                 if (zoneTo === response.parentzone) {
+                    console.log(zoneTo)
                     swal("Can't use the same zone for source and destination!")
+                    return;
                 }
             } else if (source === 'to') {
                 var zoneFrom = $('#added-zone-body-from').html()
                 if (zoneFrom === response.parentzone) {
+                    console.log(zoneFrom)
                     swal("Can't use the same zone for source and destination!")
+                    return;
                 }
             }
 
@@ -186,6 +190,7 @@ function removeObject(obj) {
     if (!$('#added-list-'+source).has('li').length) {
         $('#added-obj-'+source).addClass('d-none');
         $('#added-zone-'+source).addClass('d-none');
+        $('#added-zone-body-'+source).html('');
     }
 
     if (source === 'from') {
