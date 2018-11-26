@@ -49,7 +49,7 @@
                   <select class="custom-select" id="address-form-control-zone">
                     <option selected>Choose Zone...</option>
                     {% for zone in zones %}
-                    <option value="{{ zone.zone_name }}">{{ zone.zone_name }}</option>
+                    <option value="{{ zone.name }}">{{ zone.name }}</option>
                     {% endfor %}
                   </select>
                 </div>
@@ -68,7 +68,7 @@
                   <select class="custom-select" id="adrset-form-control-zone">
                     <option selected>Choose Zone...</option>
                     {% for zone in zones %}
-                    <option value="{{ zone.zone_name }}">{{ zone.zone_name }}</option>
+                    <option value="{{ zone.name }}">{{ zone.name }}</option>
                     {% endfor %}
                   </select>
                 </div>
@@ -80,7 +80,7 @@
                   <label for="adrset-form-control-objects">Child Objects</label>
                   <select multiple class="form-control" id="adrset-form-control-objects">
                     {% for adr in addresses %}
-                    <option class="small" value="adr.address_name">{{ adr.address_name }}</option>
+                    <option class="small" value="adr.name">{{ adr.name }}</option>
                     {% endfor %}
                   </select>
                 </div>
@@ -113,7 +113,7 @@
                   <label for="appset-form-control-objects">Child Objects</label>
                   <select multiple class="form-control" id="appset-form-control-objects">
                     {% for app in applications %}
-                    <option class="small" value="app.application_name">{{ app.application_name }}</option>
+                    <option class="small" value="app.name">{{ app.name }}</option>
                     {% endfor %}
                   </select>
                 </div>
@@ -177,16 +177,16 @@
               {% for adr in addresses %}
                 <li class="search-results-item" id="from_{{ adr.uuid }}">
                   <div class="row">
-                    <div class="col-auto mr-auto lgi-name"><a href="#">{{ adr.address_name }}</a></div>
+                    <div class="col-auto mr-auto lgi-name"><a href="#">{{ adr.name }}</a></div>
                     <div class="w-100"></div>
-                    <div class="col-auto mr-auto lgi-name"><small><a href="#" class="text-black-50">{{ adr.address_ip }}</a></small></div>
+                    <div class="col-auto mr-auto lgi-name"><small><a href="#" class="text-black-50">{{ adr.ip }}</a></small></div>
                   </div>
                 </li>
               {% endfor %}
               {% for adrset in addrsets %}
                 <li class="search-results-item" id="from_{{ adrset.uuid }}">
                   <div class="row">
-                    <div class="col-auto mr-auto lgi-name"><a href="#">{{ adrset.addrset_name }}</a></div>
+                    <div class="col-auto mr-auto lgi-name"><a href="#">{{ adrset.name }}</a></div>
                     <div class="w-100"></div>
                     <div class="col-auto mr-auto lgi-name"><small><a href="#" class="text-black-50">
                       {% for a in adrset.address.all %}
@@ -212,16 +212,16 @@
               {% for adr in addresses %}
                 <li class="search-results-item" id="to_{{ adr.uuid }}">
                   <div class="row">
-                    <div class="col-auto mr-auto lgi-name"><a href="#">{{ adr.address_name }}</a></div>
+                    <div class="col-auto mr-auto lgi-name"><a href="#">{{ adr.name }}</a></div>
                     <div class="w-100"></div>
-                    <div class="col-auto mr-auto lgi-name"><small><a href="#" class="text-black-50">{{ adr.address_ip }}</a></small></div>
+                    <div class="col-auto mr-auto lgi-name"><small><a href="#" class="text-black-50">{{ adr.ip }}</a></small></div>
                   </div>
                 </li>
               {% endfor %}
               {% for adrset in addrsets %}
                 <li class="search-results-item" id="to_{{ adrset.uuid }}">
                   <div class="row">
-                    <div class="col-auto mr-auto lgi-name"><a href="#">{{ adrset.addrset_name }}</a></div>
+                    <div class="col-auto mr-auto lgi-name"><a href="#">{{ adrset.name }}</a></div>
                     <div class="w-100"></div>
                     <div class="col-auto mr-auto lgi-name"><small><a href="#" class="text-black-50">
                       {% for a in adrset.address.all %}
@@ -247,16 +247,16 @@
               {% for app in applications %}
                 <li class="search-results-item" id="app_{{ app.uuid }}">
                   <div class="row">
-                    <div class="col-auto mr-auto lgi-name"><a href="#">{{ app.application_name }}</a></div>
+                    <div class="col-auto mr-auto lgi-name"><a href="#">{{ app.name }}</a></div>
                     <div class="w-100"></div>
-                    <div class="col-auto mr-auto lgi-name"><small><a href="#" class="text-black-50">{{ app.protocol }} {{ app.application_port }}</a></small></div>
+                    <div class="col-auto mr-auto lgi-name"><small><a href="#" class="text-black-50">{{ app.protocol }} {{ app.port }}</a></small></div>
                   </div>
                 </li>
               {% endfor %}
               {% for appset in appsets %}
                 <li class="search-results-item" id="app_{{ appset.uuid }}">
                   <div class="row">
-                    <div class="col-auto mr-auto lgi-name"><a href="#">{{ appset.applicationset_name }}</a></div>
+                    <div class="col-auto mr-auto lgi-name"><a href="#">{{ appset.name }}</a></div>
                     <div class="w-100"></div>
                     <div class="col-auto mr-auto lgi-name"><small><a href="#" class="text-black-50">
                       {% for a in appset.applications.all %}

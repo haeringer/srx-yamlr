@@ -62,31 +62,39 @@ def objectdata(request):
     if obj_type == 'address' or obj_type == 'addrset':
         src = request.GET.get('source')
         parentzone = SrxZone.objects.get(id=obj.zone_id)
-        response_data['parentzone'] = parentzone.zone_name
+        response_data['parentzone'] = parentzone.name
 
         if obj_type == 'address':
-            response_data['obj_name'] = obj.address_name
-            response_data['obj_val'] = obj.address_ip
+            response_data['obj_name'] = obj.name
+            response_data['obj_val'] = obj.ip
+            response_data['obj_type'] = obj_type
 
         elif obj_type == 'addrset':
-            response_data['obj_name'] = obj.addrset_name
+            response_data['obj_name'] = obj.name
             response_data['obj_val'] = []
+            response_data['obj_type'] = obj_type
             for adr in obj.address.all():
                 response_data['obj_val'].append(str(adr))
 
     elif obj_type == 'application':
         protocol = SrxProtocol.objects.get(id=obj.protocol_id)
-        response_data['obj_name'] = obj.application_name
-        response_data['obj_port'] = obj.application_port
-        response_data['obj_protocol'] = protocol.protocol_type
+        response_data['obj_name'] = obj.name
+        response_data['obj_port'] = obj.port
+        response_data['obj_protocol'] = protocol.ptype
+        response_data['obj_type'] = obj_type
 
     elif obj_type == 'appset':
-        response_data['obj_name'] = obj.applicationset_name
+        response_data['obj_name'] = obj.name
         response_data['obj_apps'] = []
+        response_data['obj_type'] = obj_type
         for app in obj.applications.all():
             response_data['obj_apps'].append(str(app))
 
-    yaml = buildyaml(response_data, src, configid)
-    print(yaml)
+    try:
+        yaml = buildyaml(response_data, src, configid)
+        print(yaml)
+    except Exception as e:
+        print('YAML build failed because of the following error:')
+        print(e)
 
     return JsonResponse(response_data, safe=False)

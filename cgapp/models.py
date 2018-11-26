@@ -3,58 +3,59 @@ from django.db import models
 
 
 class SrxZone(models.Model):
-    zone_name = models.CharField(max_length=255)
+    name = models.CharField(max_length=255)
     def __str__(self):
-        return self.zone_name
+        return self.name
 
 class SrxAddress(models.Model):
     zone = models.ForeignKey(SrxZone, on_delete=models.CASCADE)
-    address_name = models.CharField(max_length=255)
-    address_ip = models.CharField(max_length=255)
+    name = models.CharField(max_length=255)
+    ip = models.CharField(max_length=255)
     uuid = models.CharField(max_length=36, default=uuid.uuid4)
     def __str__(self):
-        return self.address_name
+        return self.name
 
 class SrxAddrSet(models.Model):
     zone = models.ForeignKey(SrxZone, on_delete=models.CASCADE)
-    addrset_name = models.CharField(max_length=255)
+    name = models.CharField(max_length=255)
     uuid = models.CharField(max_length=36, default=uuid.uuid4)
     address = models.ManyToManyField(SrxAddress)
     def __str__(self):
-        return self.addrset_name
+        return self.name
 
 class SrxProtocol(models.Model):
-    protocol_type = models.CharField(max_length=3)
+    ptype = models.CharField(max_length=3)
     def __str__(self):
-        return self.protocol_type
+        return self.ptype
 
 class SrxApplication(models.Model):
-    application_name = models.CharField(max_length=255)
+    name = models.CharField(max_length=255)
     protocol = models.ForeignKey(SrxProtocol, on_delete=models.PROTECT, default=0)
     uuid = models.CharField(max_length=36, default=uuid.uuid4)
-    application_port = models.IntegerField()
+    port = models.IntegerField()
     def __str__(self):
-        return self.application_name
+        return self.name
 
 class SrxAppSet(models.Model):
-    applicationset_name = models.CharField(max_length=255)
+    name = models.CharField(max_length=255)
     applications = models.ManyToManyField(SrxApplication)
     uuid = models.CharField(max_length=36, default=uuid.uuid4)
     def __str__(self):
-        return self.applicationset_name
+        return self.name
 
 class SrxPolicy(models.Model):
-    policy_name = models.CharField(max_length=255)
-    from_zone = models.ManyToManyField(SrxZone, related_name='from_zones')
-    to_zone = models.ManyToManyField(SrxZone, related_name='to_zones')
+    name = models.CharField(max_length=255)
+    fromzone = models.ManyToManyField(SrxZone, related_name='fromzones')
+    tozone = models.ManyToManyField(SrxZone, related_name='tozones')
     source_address = models.ManyToManyField(SrxAddress, related_name='source_addresses')
     source_addrset = models.ManyToManyField(SrxAddrSet, related_name='source_addrsets')
     destination_address = models.ManyToManyField(SrxAddress, related_name='destination_addresses')
     destination_addrset = models.ManyToManyField(SrxAddrSet, related_name='destination_addrsets')
     applications = models.ManyToManyField(SrxApplication)
     appsets = models.ManyToManyField(SrxAppSet, related_name='appsets')
+    uuid = models.CharField(max_length=36, default=uuid.uuid4)
     def __str__(self):
-        return self.policy_name
+        return self.name
 
 class SrxNewConfig(models.Model):
     configid = models.CharField(max_length=255, default='', primary_key=True)

@@ -9,15 +9,15 @@ def importyaml(yamlfile):
         configdata = yaml.load(infile)
 
     # always populate protocol with tcp + udp
-    SrxProtocol.objects.update_or_create(protocol_type='tcp')
-    SrxProtocol.objects.update_or_create(protocol_type='udp')
+    SrxProtocol.objects.update_or_create(ptype='tcp')
+    SrxProtocol.objects.update_or_create(ptype='udp')
 
     '''
     import zones
     '''
     SrxZone.objects.all().delete()
     for zone in configdata['zones']:
-        SrxZone.objects.update_or_create(zone_name=zone)
+        SrxZone.objects.update_or_create(name=zone)
 
     '''
     import addresses
@@ -27,11 +27,11 @@ def importyaml(yamlfile):
         address = values['addresses'] # {'HostOne': '10.1.1.1/32'}
         for name, ip in address.items():
             # retrieve zone object from zone model to make foreign key connection
-            srxzone_ = SrxZone.objects.get(zone_name=zone)
+            srxzonename = SrxZone.objects.get(name=zone)
             SrxAddress.objects.update_or_create(
-                zone=srxzone_,
-                address_name=name,
-                address_ip=ip
+                zone=srxzonename,
+                name=name,
+                ip=ip
             )
 
     '''
@@ -42,17 +42,17 @@ def importyaml(yamlfile):
         if 'addrsets' in values:
             addrset = values['addrsets']
             for setname, addresses in addrset.items():
-                srxzone_ = SrxZone.objects.get(zone_name=zone)
+                srxzonename = SrxZone.objects.get(name=zone)
                 obj, created = SrxAddrSet.objects.update_or_create(
-                    zone=srxzone_,
-                    addrset_name=setname
+                    zone=srxzonename,
+                    name=setname
                 )
                 if isinstance(addresses, list):
                     for i in addresses:
-                        addr = SrxAddress.objects.get(address_name=i)
+                        addr = SrxAddress.objects.get(name=i)
                         obj.address.add(addr)
                 else:
-                    addr = SrxAddress.objects.get(address_name=addresses)
+                    addr = SrxAddress.objects.get(name=addresses)
                     obj.address.add(addr)
 
     '''
@@ -62,11 +62,11 @@ def importyaml(yamlfile):
     for app, values in configdata['applications'].items():
         port = values.get('port')
         protocol = values.get('protocol')
-        protocol_ = SrxProtocol.objects.get(protocol_type=protocol)
+        srxprotocoltype = SrxProtocol.objects.get(ptype=protocol)
         SrxApplication.objects.update_or_create(
-            application_name=app,
-            protocol=protocol_,
-            application_port=port
+            name=app,
+            protocol=srxprotocoltype,
+            port=port
         )
 
     '''
@@ -74,13 +74,13 @@ def importyaml(yamlfile):
     '''
     SrxAppSet.objects.all().delete()
     for appset, values in configdata['applicationsets'].items():
-        obj, created = SrxAppSet.objects.update_or_create(applicationset_name=appset)
+        obj, created = SrxAppSet.objects.update_or_create(name=appset)
         if isinstance(values, list):
             for i in values:
-                app = SrxApplication.objects.get(application_name=i)
+                app = SrxApplication.objects.get(name=i)
                 obj.applications.add(app)
         else:
-            app = SrxApplication.objects.get(application_name=values)
+            app = SrxApplication.objects.get(name=values)
             obj.applications.add(app)
 
 
@@ -90,42 +90,42 @@ def importyaml(yamlfile):
     SrxPolicy.objects.all().delete()
     for policy, values in configdata['policies'].items():
 
-        obj, created = SrxPolicy.objects.update_or_create(policy_name=policy)
+        obj, created = SrxPolicy.objects.update_or_create(name=policy)
 
-        frm = SrxZone.objects.get(zone_name=values['fromzone'])
-        to = SrxZone.objects.get(zone_name=values['tozone'])
+        frm = SrxZone.objects.get(name=values['fromzone'])
+        to = SrxZone.objects.get(name=values['tozone'])
         src = values['source']
         dest = values['destination']
         apps = values['applications']
 
         # manytomany fields cannot be populated with
         # update_or_create(), therefore use .add()
-        obj.from_zone.add(frm)
-        obj.to_zone.add(to)
+        obj.fromzone.add(frm)
+        obj.tozone.add(to)
 
         if isinstance(src, list):
             for i in src:
-                try: obj.source_address.add(SrxAddress.objects.get(address_name=i))
-                except: obj.source_addrset.add(SrxAddrSet.objects.get(addrset_name=i))
+                try: obj.source_address.add(SrxAddress.objects.get(name=i))
+                except: obj.source_addrset.add(SrxAddrSet.objects.get(name=i))
         else:
-            try: obj.source_address.add(SrxAddress.objects.get(address_name=src))
-            except: obj.source_addrset.add(SrxAddrSet.objects.get(addrset_name=src))
+            try: obj.source_address.add(SrxAddress.objects.get(name=src))
+            except: obj.source_addrset.add(SrxAddrSet.objects.get(name=src))
 
         if isinstance(dest, list):
             for i in dest:
-                try: obj.destination_address.add(SrxAddress.objects.get(address_name=i))
-                except: obj.destination_addrset.add(SrxAddrSet.objects.get(addrset_name=i))
+                try: obj.destination_address.add(SrxAddress.objects.get(name=i))
+                except: obj.destination_addrset.add(SrxAddrSet.objects.get(name=i))
         else:
-            try: obj.destination_address.add(SrxAddress.objects.get(address_name=dest))
-            except: obj.destination_addrset.add(SrxAddrSet.objects.get(addrset_name=dest))
+            try: obj.destination_address.add(SrxAddress.objects.get(name=dest))
+            except: obj.destination_addrset.add(SrxAddrSet.objects.get(name=dest))
 
         if isinstance(apps, list):
             for i in apps:
-                try: obj.applications.add(SrxApplication.objects.get(application_name=i))
-                except: obj.appsets.add(SrxAppSet.objects.get(applicationset_name=i))
+                try: obj.applications.add(SrxApplication.objects.get(name=i))
+                except: obj.appsets.add(SrxAppSet.objects.get(name=i))
         else:
-            try: obj.applications.add(SrxApplication.objects.get(application_name=apps))
-            except: obj.appsets.add(SrxAppSet.objects.get(applicationset_name=apps))
+            try: obj.applications.add(SrxApplication.objects.get(name=apps))
+            except: obj.appsets.add(SrxAppSet.objects.get(name=apps))
 
 
 def buildyaml(objdata, src, configid):
@@ -147,7 +147,7 @@ def buildyaml(objdata, src, configid):
         od_applications = objdata['obj_name']
 
     # create new config in database with current config id from frontend
-    obj, created = SrxNewConfig.objects.update_or_create(configid=configid)
+    obj, created = SrxPolicy.objects.update_or_create(uuid=configid)
 
     # query database for config that has already been created
     cfg = SrxNewConfig.objects.filter(configid=configid)
