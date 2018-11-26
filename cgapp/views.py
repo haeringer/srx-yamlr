@@ -58,6 +58,8 @@ def objectdata(request):
                     obj_type = 'appset'
 
     response_data = {}
+    response_data['obj_type'] = obj_type
+    response_data['obj_name'] = obj.name
 
     if obj_type == 'address' or obj_type == 'addrset':
         src = request.GET.get('source')
@@ -65,28 +67,20 @@ def objectdata(request):
         response_data['parentzone'] = parentzone.name
 
         if obj_type == 'address':
-            response_data['obj_name'] = obj.name
             response_data['obj_val'] = obj.ip
-            response_data['obj_type'] = obj_type
 
         elif obj_type == 'addrset':
-            response_data['obj_name'] = obj.name
             response_data['obj_val'] = []
-            response_data['obj_type'] = obj_type
             for adr in obj.address.all():
                 response_data['obj_val'].append(str(adr))
 
     elif obj_type == 'application':
         protocol = SrxProtocol.objects.get(id=obj.protocol_id)
-        response_data['obj_name'] = obj.name
         response_data['obj_port'] = obj.port
         response_data['obj_protocol'] = protocol.ptype
-        response_data['obj_type'] = obj_type
 
     elif obj_type == 'appset':
-        response_data['obj_name'] = obj.name
         response_data['obj_apps'] = []
-        response_data['obj_type'] = obj_type
         for app in obj.applications.all():
             response_data['obj_apps'].append(str(app))
 
