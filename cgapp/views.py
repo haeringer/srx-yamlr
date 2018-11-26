@@ -58,7 +58,6 @@ def objectdata(request):
                     obj_type = 'appset'
 
     response_data = {}
-    response_data['obj_type'] = obj_type
     response_data['obj_name'] = obj.name
 
     if obj_type == 'address' or obj_type == 'addrset':
@@ -85,7 +84,7 @@ def objectdata(request):
             response_data['obj_apps'].append(str(app))
 
     try:
-        yaml = buildyaml(response_data, src, configid)
+        yaml = buildyaml(response_data, src, obj_type, configid)
         print(yaml)
     except Exception as e:
         print('YAML build failed because of the following error:')

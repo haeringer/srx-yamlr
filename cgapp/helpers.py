@@ -105,19 +105,19 @@ def importyaml(yamlfile):
 
         if isinstance(src, list):
             for i in src:
-                try: obj.source_address.add(SrxAddress.objects.get(name=i))
-                except: obj.source_addrset.add(SrxAddrSet.objects.get(name=i))
+                try: obj.srcaddress.add(SrxAddress.objects.get(name=i))
+                except: obj.srcaddrset.add(SrxAddrSet.objects.get(name=i))
         else:
-            try: obj.source_address.add(SrxAddress.objects.get(name=src))
-            except: obj.source_addrset.add(SrxAddrSet.objects.get(name=src))
+            try: obj.srcaddress.add(SrxAddress.objects.get(name=src))
+            except: obj.srcaddrset.add(SrxAddrSet.objects.get(name=src))
 
         if isinstance(dest, list):
             for i in dest:
-                try: obj.destination_address.add(SrxAddress.objects.get(name=i))
-                except: obj.destination_addrset.add(SrxAddrSet.objects.get(name=i))
+                try: obj.destaddress.add(SrxAddress.objects.get(name=i))
+                except: obj.destaddrset.add(SrxAddrSet.objects.get(name=i))
         else:
-            try: obj.destination_address.add(SrxAddress.objects.get(name=dest))
-            except: obj.destination_addrset.add(SrxAddrSet.objects.get(name=dest))
+            try: obj.destaddress.add(SrxAddress.objects.get(name=dest))
+            except: obj.destaddrset.add(SrxAddrSet.objects.get(name=dest))
 
         if isinstance(apps, list):
             for i in apps:
@@ -128,7 +128,7 @@ def importyaml(yamlfile):
             except: obj.appsets.add(SrxAppSet.objects.get(name=apps))
 
 
-def buildyaml(objdata, src, configid):
+def buildyaml(objdata, src, objtype, configid):
 
     od_fromzone = ''
     od_source = ''
