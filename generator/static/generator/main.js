@@ -27,10 +27,11 @@ $(function() {
 });
 
 
-var currentObjects = {};
-currentObjects['from'] = [];
-currentObjects['to'] = [];
-currentObjects['app'] = [];
+var currentObj = {};
+currentObj['from'] = [];
+currentObj['to'] = [];
+currentObj['app'] = [];
+currentObj['configid'] = [];
 
 
 function createInputForm(obj) {
@@ -60,12 +61,22 @@ function deployConfig() {
 /* After click on search result item (see event listener),
 retrieve parent zone and add object to card element */
 function addObject(obj) {
+
+    if (currentObjIsEmpty(currentObj)) {
+        var newID = uuidv4();
+        currentObj['configid'] = newID;
+    }
+
     var objectId_dj = obj.id.split("_").pop();
     var source = obj.id.split("_").shift();
 
     if (source === 'from' || source === 'to') {
 
-        $.getJSON('/generator/objectajax/', {objectid: objectId_dj})
+        $.getJSON('/generator/ajax/objectdata/', {
+            configid: currentObj.configid,
+            objectid: objectId_dj,
+            source: source
+            })
 
         .done(function(response) {
             var objVal = response.obj_val
@@ -76,21 +87,19 @@ function addObject(obj) {
             if (source === 'from') {
                 var zoneTo = $('#added-zone-body-to').html()
                 if (zoneTo === response.parentzone) {
-                    console.log(zoneTo)
                     swal("Can't use the same zone for source and destination!")
                     return;
                 }
             } else if (source === 'to') {
                 var zoneFrom = $('#added-zone-body-from').html()
                 if (zoneFrom === response.parentzone) {
-                    console.log(zoneFrom)
                     swal("Can't use the same zone for source and destination!")
                     return;
                 }
             }
 
-            if (currentObjects.from.includes(objectId_dj) ||
-                currentObjects.to.includes(objectId_dj) ) {
+            if (currentObj.from.includes(objectId_dj) ||
+                currentObj.to.includes(objectId_dj) ) {
                 swal("Object already in use!");
                 return;
             }
@@ -124,9 +133,9 @@ function addObject(obj) {
             );
 
             if (source === 'from') {
-                currentObjects.from.push(objectId_dj);
+                currentObj.from.push(objectId_dj);
             } else if (source === 'to') {
-                currentObjects.to.push(objectId_dj);
+                currentObj.to.push(objectId_dj);
             }
         })
 
@@ -135,7 +144,10 @@ function addObject(obj) {
         });
     } else if (source === 'app') {
 
-        $.getJSON('/generator/objectajax/', {objectid: objectId_dj})
+        $.getJSON('/generator/ajax/objectdata/', {
+            configid: currentObj.configid,
+            objectid: objectId_dj
+        })
 
         .done(function(response) {
             var objVal;
@@ -145,7 +157,7 @@ function addObject(obj) {
                 objVal = response.obj_apps.join(', ');
             }
 
-            if (currentObjects.app.includes(objectId_dj)) {
+            if (currentObj.app.includes(objectId_dj)) {
                 swal("Object already in use!");
                 return;
             }
@@ -166,8 +178,7 @@ function addObject(obj) {
                 </li>`
             );
 
-            currentObjects.app.push(objectId_dj);
-            console.log(currentObjects)
+            currentObj.app.push(objectId_dj);
         })
 
         .fail(function(errorThrown) {
@@ -194,22 +205,23 @@ function removeObject(obj) {
     }
 
     if (source === 'from') {
-        var index = currentObjects.from.indexOf(objectId_dj);
+        var index = currentObj.from.indexOf(objectId_dj);
         if (index > -1) {
-            currentObjects.from.splice(index, 1);
+            currentObj.from.splice(index, 1);
         }
     } else if (source === 'to') {
-        var index = currentObjects.to.indexOf(objectId_dj);
+        var index = currentObj.to.indexOf(objectId_dj);
         if (index > -1) {
-            currentObjects.to.splice(index, 1);
+            currentObj.to.splice(index, 1);
         }
     } else if (source === 'app') {
-        var index = currentObjects.app.indexOf(objectId_dj);
+        var index = currentObj.app.indexOf(objectId_dj);
         if (index > -1) {
-            currentObjects.app.splice(index, 1);
+            currentObj.app.splice(index, 1);
         }
     }
-    console.log(currentObjects)
+
+
 }
 
 
@@ -231,5 +243,23 @@ function objectSearch(e) {
         } else {
             li[i].style.display = 'none';
         }
+    }
+}
+
+
+/* UUID generator helper function */
+function uuidv4() {
+    return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
+        (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
+    )
+}
+
+/* Check if arrays inside object are empty helper function */
+function currentObjIsEmpty(obj) {
+    var i = obj['from'].length + obj['to'].length + obj['app'].length
+    if (i == 0) {
+        return true;
+    } else {
+        return false;
     }
 }

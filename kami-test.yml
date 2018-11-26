@@ -29,25 +29,25 @@ applications:
   ssh:
     protocol: tcp
     port: 22
-appsets:
+applicationsets:
   test-set: [snmp,api]
   set2: [dns,ssh]
 policies:
   allow-hostone-to-networkone:
-    from: ZoneOne
-    to: ZoneTwo
-    src: HostOne
-    dest: Network2One
-    apps: snmp
+    fromzone: ZoneOne
+    tozone: ZoneTwo
+    source: HostOne
+    destination: Network2One
+    applications: snmp
   allow-network2one-to-hosts3:
-    from: ZoneTwo
-    to: ZoneThree
-    src: Network2One
-    dest: [Host3One,Host3Two,Host3Three]
-    apps: [snmp,api]
+    fromzone: ZoneTwo
+    tozone: ZoneThree
+    source: Network2One
+    destination: [Host3One,Host3Two,Host3Three]
+    applications: [snmp,api]
   allow-setone-to-set3:
-    from: ZoneOne
-    to: ZoneThree
-    src: SetOne
-    dest: Set3
-    apps: set2
+    fromzone: ZoneOne
+    tozone: ZoneThree
+    source: SetOne
+    destination: Set3
+    applications: set2
