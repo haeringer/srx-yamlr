@@ -55,3 +55,13 @@ class SrxPolicy(models.Model):
     appsets = models.ManyToManyField(SrxAppSet, related_name='appsets')
     def __str__(self):
         return self.policy_name
+
+class SrxNewConfig(models.Model):
+    configid = models.CharField(max_length=255, default='', primary_key=True)
+    fromzone = models.CharField(max_length=255, default='')
+    tozone = models.CharField(max_length=255, default='')
+    source = models.CharField(max_length=255, default='')
+    destination = models.CharField(max_length=255, default='')
+    applications = models.CharField(max_length=255, default='')
+    def __str__(self):
+        return self.configid
