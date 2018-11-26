@@ -32,7 +32,7 @@ def index(request):
         }
     except:
         raise Http404("HTTP 404 Error")
-    return render(request, 'generator/index.html', context)
+    return render(request, 'cgapp/index.html', context)
 
 
 def objectdata(request):

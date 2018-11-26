@@ -72,7 +72,7 @@ function addObject(obj) {
 
     if (source === 'from' || source === 'to') {
 
-        $.getJSON('/generator/ajax/objectdata/', {
+        $.getJSON('/cgapp/ajax/objectdata/', {
             configid: currentObj.configid,
             objectid: objectId_dj,
             source: source
@@ -144,7 +144,7 @@ function addObject(obj) {
         });
     } else if (source === 'app') {
 
-        $.getJSON('/generator/ajax/objectdata/', {
+        $.getJSON('/cgapp/ajax/objectdata/', {
             configid: currentObj.configid,
             objectid: objectId_dj
         })
@@ -247,7 +247,7 @@ function objectSearch(e) {
 }
 
 
-/* UUID generator helper function */
+/* UUID cgapp helper function */
 function uuidv4() {
     return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
         (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)

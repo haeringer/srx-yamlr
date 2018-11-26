@@ -17,6 +17,6 @@ from django.contrib import admin
 from django.urls import include, path
 
 urlpatterns = [
-    path('generator/', include('generator.urls')),
+    path('cgapp/', include('cgapp.urls')),
     path('admin/', admin.site.urls),
 ]
