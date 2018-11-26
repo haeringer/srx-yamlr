@@ -5,5 +5,5 @@ from . import views
 app_name = 'generator'
 urlpatterns = [
     path('', views.index, name='index'),
-    path('objectajax/', views.objectajax, name='objectajax'),
+    path('ajax/objectdata/', views.objectdata, name='objectdata'),
 ]

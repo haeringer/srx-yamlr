@@ -1,7 +1,7 @@
 from django.shortcuts import render, get_list_or_404
 from django.http import JsonResponse
 from .models import *
-from .helpers import importyaml
+from .helpers import importyaml, buildyaml
 
 
 yamlfile = 'kami-test.yml'
@@ -35,8 +35,10 @@ def index(request):
     return render(request, 'generator/index.html', context)
 
 
-def objectajax(request):
+def objectdata(request):
     objectid = request.GET.get('objectid', None)
+    configid = request.GET.get('configid', None)
+    src = None
     obj_type = ''
 
     obj = SrxAddress.objects.filter(uuid=objectid).first()
@@ -58,6 +60,7 @@ def objectajax(request):
     response_data = {}
 
     if obj_type == 'address' or obj_type == 'addrset':
+        src = request.GET.get('source')
         parentzone = SrxZone.objects.get(id=obj.zone_id)
         response_data['parentzone'] = parentzone.zone_name
 
@@ -82,5 +85,8 @@ def objectajax(request):
         response_data['obj_apps'] = []
         for app in obj.applications.all():
             response_data['obj_apps'].append(str(app))
+
+    yaml = buildyaml(response_data, src, configid)
+    print(yaml)
 
     return JsonResponse(response_data, safe=False)
