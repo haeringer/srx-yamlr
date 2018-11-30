@@ -45,14 +45,14 @@ class SrxAppSet(models.Model):
 
 class SrxPolicy(models.Model):
     name = models.CharField(max_length=255)
-    fromzone = models.ManyToManyField(SrxZone, related_name='fromzones')
-    tozone = models.ManyToManyField(SrxZone, related_name='tozones')
-    srcaddress = models.ManyToManyField(SrxAddress, related_name='srcaddresses')
-    srcaddrset = models.ManyToManyField(SrxAddrSet, related_name='srcaddrsets')
-    destaddress = models.ManyToManyField(SrxAddress, related_name='destaddresses')
-    destaddrset = models.ManyToManyField(SrxAddrSet, related_name='destaddrsets')
-    applications = models.ManyToManyField(SrxApplication)
-    appsets = models.ManyToManyField(SrxAppSet, related_name='appsets')
+    fromzone = models.ManyToManyField(SrxZone, related_name='fromzone')
+    tozone = models.ManyToManyField(SrxZone, related_name='tozone')
+    srcaddress = models.ManyToManyField(SrxAddress, related_name='srcaddress')
+    srcaddrset = models.ManyToManyField(SrxAddrSet, related_name='srcaddrset')
+    destaddress = models.ManyToManyField(SrxAddress, related_name='destaddress')
+    destaddrset = models.ManyToManyField(SrxAddrSet, related_name='destaddrset')
+    application = models.ManyToManyField(SrxApplication, related_name='application')
+    appset = models.ManyToManyField(SrxAppSet, related_name='appset')
     uuid = models.CharField(max_length=36, default=uuid.uuid4)
     def __str__(self):
         return self.name

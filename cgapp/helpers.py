@@ -121,107 +121,213 @@ def importyaml(yamlfile):
 
         if isinstance(apps, list):
             for i in apps:
-                try: obj.applications.add(SrxApplication.objects.get(name=i))
-                except: obj.appsets.add(SrxAppSet.objects.get(name=i))
+                try: obj.application.add(SrxApplication.objects.get(name=i))
+                except: obj.appset.add(SrxAppSet.objects.get(name=i))
         else:
-            try: obj.applications.add(SrxApplication.objects.get(name=apps))
-            except: obj.appsets.add(SrxAppSet.objects.get(name=apps))
+            try: obj.application.add(SrxApplication.objects.get(name=apps))
+            except: obj.appset.add(SrxAppSet.objects.get(name=apps))
 
 
 def buildyaml(objdata, src, objtype, configid):
 
     od_fromzone = ''
-    od_source = ''
     od_tozone = ''
-    od_destination = ''
-    od_applications = ''
+    od_srcaddress = ''
+    od_srcaddrset = ''
+    od_destaddress = ''
+    od_destaddrset = ''
+    od_application = ''
+    od_appset = ''
 
-    # read object data delivered at function call
+    '''
+    read object data delivered at function call
+    '''
+    n = objdata['obj_name']
     if src == 'from':
         od_fromzone = objdata['parentzone']
-        od_source = objdata['obj_name']
+        if objtype == 'address':
+            od_srcaddress = n
+            objtype = 'srcaddress'
+        else:
+            od_srcaddrset = n
+            objtype = 'srcaddrset'
     elif src == 'to':
         od_tozone = objdata['parentzone']
-        od_destination = objdata['obj_name']
+        if objtype == 'address':
+            od_destaddress = n
+            objtype = 'destaddress'
+        else:
+            od_destaddrset = n
+            objtype = 'destaddrset'
     else:
-        od_applications = objdata['obj_name']
+        if objtype == 'application':
+            od_application = n
+            objtype = 'application'
+        elif objtype == 'appset':
+            od_appset = n
+            objtype = 'appset'
 
-    # create new config in database with current config id from frontend
+    '''
+    create new policy in database with current config id from frontend
+    '''
     obj, created = SrxPolicy.objects.update_or_create(uuid=configid)
 
-    # query database for config that has already been created
-    cfg = SrxNewConfig.objects.filter(configid=configid)
+    '''
+    add delivered object to created policy
+    '''
+    if od_fromzone != '':
+        obj.fromzone.add(SrxZone.objects.get(name=od_fromzone))
 
-    if cfg:
-        # retrieve strings from queryset
-        db_fromzone = cfg[0].fromzone
-        db_tozone = cfg[0].tozone
-        db_source = cfg[0].source
-        db_destination = cfg[0].destination
-        db_applications = cfg[0].applications
+    if od_tozone != '':
+        obj.tozone.add(SrxZone.objects.get(name=od_tozone))
 
-        # add new objects to empty fields or concatenate with existing objects
-        fromzone = od_fromzone if not db_fromzone else db_fromzone
-        tozone = od_tozone if not db_tozone else db_tozone
+    if od_srcaddress != '':
+        obj.srcaddress.add(SrxAddress.objects.get(name=od_srcaddress))
 
-        if od_source and db_source:
-            if not isinstance(db_source, list):
-                print('is not list')
-                source = [db_source, od_source]
-                print(type(db_source))
-            else:
-                source = db_source.append(od_source)
-        elif od_source and not db_source: source = od_source
-        else: source = db_source
+    if od_srcaddrset != '':
+        obj.srcaddrset.add(SrxAddrSet.objects.get(name=od_srcaddrset))
 
-        if od_destination and db_destination:
-            if db_destination[-1:] == ']':
-                destination = db_destination[:-1]+','+od_destination+']'
-            else:
-                destination = '['+db_destination+','+od_destination+']'
-        elif od_destination and not db_destination: destination = od_destination
-        else: destination = db_destination
+    if od_destaddress != '':
+        obj.destaddress.add(SrxAddress.objects.get(name=od_destaddress))
 
-        if od_applications and db_applications:
-            if db_applications[-1:] == ']':
-                applications = db_applications[:-1]+','+od_applications+']'
-            else:
-                applications = '['+db_applications+','+od_applications+']'
-        elif od_applications and not db_applications: applications = od_applications
-        else: applications = db_applications
+    if od_destaddrset != '':
+        obj.destaddrset.add(SrxAddrSet.objects.get(name=od_destaddrset))
 
-        # update objects in database
-        obj, created = SrxNewConfig.objects.update_or_create(
-            configid=configid,
-            defaults={
-                'configid': configid,
-                'fromzone': fromzone,
-                'tozone': tozone,
-                'source': source,
-                'destination': destination,
-                'applications': applications,
-            }
-        )
+    if od_application != '':
+        obj.application.add(SrxApplication.objects.get(name=od_application))
 
-    # prepare new dictionary with values from current config
+    if od_appset != '':
+        obj.appset.add(SrxAppSet.objects.get(name=od_appset))
+
+
+    '''
+    query database for objects (existing and newly created ones) and assign
+    values to yaml_variables
+    '''
+    ### SourceClass.objects.filter(m2mfield__m2mfield=value)
+    ### - the first field is the manytomanyfield of the referencing
+    ###   class, of which we want to retrieve the value
+    ### - the second field is a m2mfield of the referencing class
+    ###   of which we know the value, so we can use it as a filter
+    q = SrxZone.objects.filter(fromzone__uuid=configid)
+    yaml_fromzone = od_fromzone if not q else str(q[0])
+
+    q = SrxZone.objects.filter(tozone__uuid=configid)
+    yaml_tozone = od_tozone if not q else str(q[0])
+
+
+    q = SrxAddress.objects.filter(srcaddress__uuid=configid)
+    if q:
+        if len(q) > 1:
+            srcaddress = []
+            for i in q:
+                srcaddress.append(str(i))
+        else: srcaddress = str(q[0])
+    else: srcaddress = ''
+
+    q = SrxAddrSet.objects.filter(srcaddrset__uuid=configid)
+    if q:
+        if len(q) > 1:
+            srcaddrset = []
+            for i in q:
+                srcaddrset.append(str(i))
+        else: srcaddrset = str(q[0])
+    else: srcaddrset = ''
+
+    if srcaddress and srcaddrset:
+        if not isinstance(srcaddress, list): srcaddress = [srcaddress]
+        if not isinstance(srcaddrset, list): srcaddrset = [srcaddrset]
+        yaml_source = srcaddress + srcaddrset
+    if srcaddress and not srcaddrset: yaml_source = srcaddress
+    if srcaddrset and not srcaddress: yaml_source = srcaddrset
+    if not srcaddress and not srcaddrset: yaml_source = ''
+
+
+    q = SrxAddress.objects.filter(destaddress__uuid=configid)
+    if q:
+        if len(q) > 1:
+            destaddress = []
+            for i in q:
+                destaddress.append(str(i))
+        else: destaddress = str(q[0])
+    else: destaddress = ''
+
+    q = SrxAddrSet.objects.filter(destaddrset__uuid=configid)
+    if q:
+        if len(q) > 1:
+            destaddrset = []
+            for i in q:
+                destaddrset.append(str(i))
+        else: destaddrset = str(q[0])
+    else: destaddrset = ''
+
+    if destaddress and destaddrset:
+        if not isinstance(destaddress, list): destaddress = [destaddress]
+        if not isinstance(destaddrset, list): destaddrset = [destaddrset]
+        yaml_destination = destaddress + destaddrset
+    if destaddress and not destaddrset: yaml_destination = destaddress
+    if destaddrset and not destaddress: yaml_destination = destaddrset
+    if not destaddress and not destaddrset: yaml_destination = ''
+
+
+    q = SrxApplication.objects.filter(application__uuid=configid)
+    if q:
+        if len(q) > 1:
+            application = []
+            for i in q:
+                application.append(str(i))
+        else: application = str(q[0])
+    else: application = ''
+
+    q = SrxAppSet.objects.filter(appset__uuid=configid)
+    if q:
+        if len(q) > 1:
+            appset = []
+            for i in q:
+                appset.append(str(i))
+        else: appset = str(q[0])
+    else: appset = ''
+
+    if application and appset:
+        if not isinstance(application, list): application = [application]
+        if not isinstance(appset, list): appset = [appset]
+        yaml_applications = application + appset
+    if application and not appset: yaml_applications = application
+    if appset and not application: yaml_applications = appset
+    if not application and not appset: yaml_applications = ''
+
+
+
+    '''
+    prepare dictionary with values from current config
+    '''
     policy_prep = dict(
         policyname_dummy = dict(
-            fromzone = fromzone,
-            tozone = tozone,
-            source = source,
-            destination = destination,
-            applications = applications,
+            fromzone = yaml_fromzone,
+            tozone = yaml_tozone,
+            source = yaml_source,
+            destination = yaml_destination,
+            applications = yaml_applications,
         )
     )
-    # build policy name and swap prepared key with actual name
-    # policyname = 'allow-' + source + '-to-' + destination
-    policyname = 'policyname_temp'
+
+    '''
+    build policy name and swap prepared key with actual name
+    '''
+    source = ''.join(yaml_source)
+    destination = ''.join(yaml_destination)
+    policyname = 'allow-' + source + '-to-' + destination
     policy_prep[policyname] = policy_prep.pop('policyname_dummy')
     # put prepared policy into final policies dict
     dict_yaml = {}
     dict_yaml['policies'] = policy_prep
 
-    # dump dict into yaml file
+    SrxPolicy.objects.update_or_create(uuid=configid, defaults={'name': policyname})
+
+
+    '''
+    dump dict into yaml file
+    '''
     with open('config-new.yml', 'w') as outfile:
         newconfig = yaml.dump(dict_yaml, outfile, default_flow_style=False)
 
