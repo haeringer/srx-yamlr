@@ -3,6 +3,7 @@ from .models import *
 import oyaml as yaml
 
 
+
 def importyaml(yamlfile):
 
     with open(yamlfile, 'r') as infile:
@@ -103,6 +104,8 @@ def importyaml(yamlfile):
         obj.fromzone.add(frm)
         obj.tozone.add(to)
 
+        # abuse try/except error handling for application logic
+        # in order to keep things simple
         if isinstance(src, list):
             for i in src:
                 try: obj.srcaddress.add(SrxAddress.objects.get(name=i))
@@ -128,7 +131,10 @@ def importyaml(yamlfile):
             except: obj.appset.add(SrxAppSet.objects.get(name=apps))
 
 
-def buildyaml(objdata, src, objtype, configid):
+
+def buildyaml(objdata, src, objtype, configid, action):
+
+    print(action)
 
     od_fromzone = ''
     od_tozone = ''
@@ -159,7 +165,7 @@ def buildyaml(objdata, src, objtype, configid):
         else:
             od_destaddrset = n
             objtype = 'destaddrset'
-    else:
+    elif src == 'app':
         if objtype == 'application':
             od_application = n
             objtype = 'application'
@@ -297,7 +303,6 @@ def buildyaml(objdata, src, objtype, configid):
     if not application and not appset: yaml_applications = ''
 
 
-
     '''
     prepare dictionary with values from current config
     '''
@@ -323,7 +328,6 @@ def buildyaml(objdata, src, objtype, configid):
     dict_yaml['policies'] = policy_prep
 
     SrxPolicy.objects.update_or_create(uuid=configid, defaults={'name': policyname})
-
 
     '''
     dump dict into yaml file

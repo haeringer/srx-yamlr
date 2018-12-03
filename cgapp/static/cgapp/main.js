@@ -15,7 +15,7 @@ $(function() {
     /* Recognize clicks on search result item */
     // use .on 'click' with parent selected to recognize events also on newly added items
     $('.list-inline').on('click', '.search-results-item', function() { addObject(this) });
-    $('.list-group').on('click', '.lgi-icon-close', function() { removeObject(this) });
+    $('.list-group').on('click', '.lgi-icon-close', function() { deleteObject(this) });
 
     $('#deploy-config').on('click', function() { deployConfig() });
     $('#create-object-dropdown a').on('click', function () { createInputForm(this) });
@@ -69,13 +69,15 @@ function addObject(obj) {
 
     var objectId_dj = obj.id.split("_").pop();
     var source = obj.id.split("_").shift();
+    var action = 'add';
 
     if (source === 'from' || source === 'to') {
 
         $.getJSON('/cgapp/ajax/objectdata/', {
             configid: currentObj.configid,
             objectid: objectId_dj,
-            source: source
+            source: source,
+            action: action,
             })
 
         .done(function(response) {
@@ -146,7 +148,9 @@ function addObject(obj) {
 
         $.getJSON('/cgapp/ajax/objectdata/', {
             configid: currentObj.configid,
-            objectid: objectId_dj
+            objectid: objectId_dj,
+            source: source,
+            action: action,
         })
 
         .done(function(response) {
@@ -191,12 +195,13 @@ function addObject(obj) {
 }
 
 
-function removeObject(obj) {
+function deleteObject(obj) {
     var listitem = $(obj).parents('.list-group-item').remove();
     var listitemId = $(listitem).attr('id');
     var objectId = listitemId.split('_', 2).join('_');
     var source = listitemId.split('_').shift();
     var objectId_dj = objectId.split('_').pop();
+    var action = 'delete';
 
     if (!$('#added-list-'+source).has('li').length) {
         $('#added-obj-'+source).addClass('d-none');
@@ -221,6 +226,21 @@ function removeObject(obj) {
         }
     }
 
+    $.getJSON('/cgapp/ajax/objectdata/', {
+        configid: currentObj.configid,
+        objectid: objectId_dj,
+        source: source,
+        action: action,
+    })
+
+    .done(function(response) {
+        console.log(response)
+        console.log('do something with returned yaml here')
+    })
+
+    .fail(function(errorThrown) {
+        console.log(errorThrown.toString());
+    });
 
 }
 

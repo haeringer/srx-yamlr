@@ -56,13 +56,3 @@ class SrxPolicy(models.Model):
     uuid = models.CharField(max_length=36, default=uuid.uuid4)
     def __str__(self):
         return self.name
-
-class SrxNewConfig(models.Model):
-    configid = models.CharField(max_length=255, default='', primary_key=True)
-    fromzone = models.CharField(max_length=255, default='')
-    tozone = models.CharField(max_length=255, default='')
-    source = models.CharField(max_length=255, default='')
-    destination = models.CharField(max_length=255, default='')
-    applications = models.CharField(max_length=255, default='')
-    def __str__(self):
-        return self.configid
