@@ -133,9 +133,11 @@ def importyaml(yamlfile):
 
 
 def buildyaml(objdata, src, objtype, configid, action):
-
-    print(action)
-
+    print(
+        'objdata: ', objdata,
+        '\nobjtype: ', objtype,
+        '\nconfigid: ', configid,
+        )
     od_fromzone = ''
     od_tozone = ''
     od_srcaddress = ''
@@ -179,32 +181,40 @@ def buildyaml(objdata, src, objtype, configid, action):
     obj, created = SrxPolicy.objects.update_or_create(uuid=configid)
 
     '''
-    add delivered object to created policy
+    add or delete delivered object to/from created policy
     '''
-    if od_fromzone != '':
-        obj.fromzone.add(SrxZone.objects.get(name=od_fromzone))
-
-    if od_tozone != '':
-        obj.tozone.add(SrxZone.objects.get(name=od_tozone))
-
-    if od_srcaddress != '':
-        obj.srcaddress.add(SrxAddress.objects.get(name=od_srcaddress))
-
-    if od_srcaddrset != '':
-        obj.srcaddrset.add(SrxAddrSet.objects.get(name=od_srcaddrset))
-
-    if od_destaddress != '':
-        obj.destaddress.add(SrxAddress.objects.get(name=od_destaddress))
-
-    if od_destaddrset != '':
-        obj.destaddrset.add(SrxAddrSet.objects.get(name=od_destaddrset))
-
-    if od_application != '':
-        obj.application.add(SrxApplication.objects.get(name=od_application))
-
-    if od_appset != '':
-        obj.appset.add(SrxAppSet.objects.get(name=od_appset))
-
+    if action == 'add':
+        if od_fromzone:
+            obj.fromzone.add(SrxZone.objects.get(name=od_fromzone))
+        if od_tozone:
+            obj.tozone.add(SrxZone.objects.get(name=od_tozone))
+        if od_srcaddress:
+            obj.srcaddress.add(SrxAddress.objects.get(name=od_srcaddress))
+        if od_srcaddrset:
+            obj.srcaddrset.add(SrxAddrSet.objects.get(name=od_srcaddrset))
+        if od_destaddress:
+            obj.destaddress.add(SrxAddress.objects.get(name=od_destaddress))
+        if od_destaddrset:
+            obj.destaddrset.add(SrxAddrSet.objects.get(name=od_destaddrset))
+        if od_application:
+            obj.application.add(SrxApplication.objects.get(name=od_application))
+        if od_appset:
+            obj.appset.add(SrxAppSet.objects.get(name=od_appset))
+    if action == 'delete':
+        # zones are not removed until last address object is deleted -
+        # see database queries + filling yaml_variables below
+        if od_srcaddress:
+            obj.srcaddress.remove(SrxAddress.objects.get(name=od_srcaddress))
+        if od_srcaddrset:
+            obj.srcaddrset.remove(SrxAddrSet.objects.get(name=od_srcaddrset))
+        if od_destaddress:
+            obj.destaddress.remove(SrxAddress.objects.get(name=od_destaddress))
+        if od_destaddrset:
+            obj.destaddrset.remove(SrxAddrSet.objects.get(name=od_destaddrset))
+        if od_application:
+            obj.application.remove(SrxApplication.objects.get(name=od_application))
+        if od_appset:
+            obj.appset.remove(SrxAppSet.objects.get(name=od_appset))
 
     '''
     query database for objects (existing and newly created ones) and assign
@@ -248,6 +258,10 @@ def buildyaml(objdata, src, objtype, configid, action):
     if srcaddrset and not srcaddress: yaml_source = srcaddrset
     if not srcaddress and not srcaddrset: yaml_source = ''
 
+    if action == 'delete' and not yaml_source:
+        obj.fromzone.remove(SrxZone.objects.get(name=od_fromzone))
+        yaml_fromzone = ''
+
 
     q = SrxAddress.objects.filter(destaddress__uuid=configid)
     if q:
@@ -274,6 +288,10 @@ def buildyaml(objdata, src, objtype, configid, action):
     if destaddress and not destaddrset: yaml_destination = destaddress
     if destaddrset and not destaddress: yaml_destination = destaddrset
     if not destaddress and not destaddrset: yaml_destination = ''
+
+    if action == 'delete' and not yaml_destination:
+        obj.tozone.remove(SrxZone.objects.get(name=od_tozone))
+        yaml_tozone = ''
 
 
     q = SrxApplication.objects.filter(application__uuid=configid)
