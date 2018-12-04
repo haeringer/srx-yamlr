@@ -94,9 +94,10 @@ def objectdata(request):
 
     try:
         yaml = buildyaml(response_data, src, obj_type, configid, action)
-        print(yaml)
+        response_data['yamlconfig'] = yaml
     except Exception as e:
         print('YAML build failed because of the following error:')
         print(e)
+
 
     return JsonResponse(response_data, safe=False)

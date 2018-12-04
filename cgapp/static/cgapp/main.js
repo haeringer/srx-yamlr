@@ -20,9 +20,7 @@ $(function() {
     $('#deploy-config').on('click', function() { deployConfig() });
     $('#create-object-dropdown a').on('click', function () { createInputForm(this) });
 
-    $(function () {
-        $('[data-toggle="tooltip"]').tooltip()
-    })
+    $('[data-toggle="tooltip"]').tooltip()
 
 });
 
@@ -139,11 +137,16 @@ function addObject(obj) {
             } else if (source === 'to') {
                 currentObj.to.push(objectId_dj);
             }
+
+            $('#yamlcontainer').html(response.yamlconfig);
+            $('#yamlcard').removeClass('d-none');
+
         })
 
         .fail(function(errorThrown) {
             console.log(errorThrown.toString());
         });
+
     } else if (source === 'app') {
 
         $.getJSON('/cgapp/ajax/objectdata/', {
@@ -183,6 +186,9 @@ function addObject(obj) {
             );
 
             currentObj.app.push(objectId_dj);
+
+            $('#yamlcontainer').html(response.yamlconfig);
+            $('#yamlcard').removeClass('d-none');
         })
 
         .fail(function(errorThrown) {
@@ -234,8 +240,11 @@ function deleteObject(obj) {
     })
 
     .done(function(response) {
-        console.log(response)
-        console.log('do something with returned yaml here')
+        $('#yamlcontainer').html(response.yamlconfig);
+        if (currentObjIsEmpty(currentObj)) {
+            $('#yamlcard').addClass('d-none');
+        }
+
     })
 
     .fail(function(errorThrown) {

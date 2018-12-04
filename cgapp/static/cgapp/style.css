@@ -1,5 +1,15 @@
+html,body{height:100%;}
+
 body {
     font-size: .875rem;
+  }
+
+  .container-fluid {
+    height:100%;
+  }
+
+  .full-height{
+    min-height:100%;
   }
 
   * {
