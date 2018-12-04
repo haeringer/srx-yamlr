@@ -133,11 +133,7 @@ def importyaml(yamlfile):
 
 
 def buildyaml(objdata, src, objtype, configid, action):
-    print(
-        'objdata: ', objdata,
-        '\nobjtype: ', objtype,
-        '\nconfigid: ', configid,
-        )
+
     od_fromzone = ''
     od_tozone = ''
     od_srcaddress = ''
@@ -258,7 +254,7 @@ def buildyaml(objdata, src, objtype, configid, action):
     if srcaddrset and not srcaddress: yaml_source = srcaddrset
     if not srcaddress and not srcaddrset: yaml_source = ''
 
-    if action == 'delete' and not yaml_source:
+    if src == 'from' and action == 'delete' and not yaml_source:
         obj.fromzone.remove(SrxZone.objects.get(name=od_fromzone))
         yaml_fromzone = ''
 
@@ -289,7 +285,7 @@ def buildyaml(objdata, src, objtype, configid, action):
     if destaddrset and not destaddress: yaml_destination = destaddrset
     if not destaddress and not destaddrset: yaml_destination = ''
 
-    if action == 'delete' and not yaml_destination:
+    if src == 'to' and action == 'delete' and not yaml_destination:
         obj.tozone.remove(SrxZone.objects.get(name=od_tozone))
         yaml_tozone = ''
 
@@ -348,9 +344,11 @@ def buildyaml(objdata, src, objtype, configid, action):
     SrxPolicy.objects.update_or_create(uuid=configid, defaults={'name': policyname})
 
     '''
-    dump dict into yaml file
+    dump dict into yaml file and into variable for return
     '''
     with open('config-new.yml', 'w') as outfile:
-        newconfig = yaml.dump(dict_yaml, outfile, default_flow_style=False)
+        yaml.dump(dict_yaml, outfile, default_flow_style=False)
 
-    return 'return config in yaml format here'
+    yamlconfig = yaml.dump(dict_yaml, default_flow_style=False)
+
+    return yamlconfig
