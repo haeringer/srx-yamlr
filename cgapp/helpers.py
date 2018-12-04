@@ -177,6 +177,36 @@ def buildyaml(objdata, src, objtype, configid, action):
     obj, created = SrxPolicy.objects.update_or_create(uuid=configid)
 
     '''
+    validate zone logic
+    '''
+    if src == 'from':
+        q = SrxZone.objects.filter(tozone__uuid=configid)
+        if q:
+            tozone = str(q[0])
+            if tozone == od_fromzone:
+                print('zone validation error')
+                return
+        q = SrxZone.objects.filter(fromzone__uuid=configid)
+        if q:
+            fromzone = str(q[0])
+            if fromzone != od_fromzone:
+                print('zone validation error')
+                return
+    elif src == 'to':
+        q = SrxZone.objects.filter(fromzone__uuid=configid)
+        if q:
+            fromzone = str(q[0])
+            if fromzone == od_tozone:
+                print('zone validation error')
+                return
+        q = SrxZone.objects.filter(tozone__uuid=configid)
+        if q:
+            tozone = str(q[0])
+            if tozone != od_tozone:
+                print('zone validation error')
+                return
+
+    '''
     add or delete delivered object to/from created policy
     '''
     if action == 'add':
