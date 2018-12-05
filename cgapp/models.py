@@ -30,7 +30,8 @@ class SrxProtocol(models.Model):
 
 class SrxApplication(models.Model):
     name = models.CharField(max_length=255)
-    protocol = models.ForeignKey(SrxProtocol, on_delete=models.PROTECT, default=0)
+    protocol = models.ForeignKey(SrxProtocol, on_delete=models.PROTECT,
+                                 default=0)
     uuid = models.CharField(max_length=36, default=uuid.uuid4)
     port = models.IntegerField()
     def __str__(self):
@@ -49,9 +50,12 @@ class SrxPolicy(models.Model):
     tozone = models.ManyToManyField(SrxZone, related_name='tozone')
     srcaddress = models.ManyToManyField(SrxAddress, related_name='srcaddress')
     srcaddrset = models.ManyToManyField(SrxAddrSet, related_name='srcaddrset')
-    destaddress = models.ManyToManyField(SrxAddress, related_name='destaddress')
-    destaddrset = models.ManyToManyField(SrxAddrSet, related_name='destaddrset')
-    application = models.ManyToManyField(SrxApplication, related_name='application')
+    destaddress = models.ManyToManyField(SrxAddress,
+                                         related_name='destaddress')
+    destaddrset = models.ManyToManyField(SrxAddrSet,
+                                         related_name='destaddrset')
+    application = models.ManyToManyField(SrxApplication,
+                                         related_name='application')
     appset = models.ManyToManyField(SrxAppSet, related_name='appset')
     uuid = models.CharField(max_length=36, default=uuid.uuid4)
     def __str__(self):

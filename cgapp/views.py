@@ -48,20 +48,16 @@ def objectdata(request):
     '''
     if src == 'from' or src == 'to':
         obj = SrxAddress.objects.filter(uuid=objectid).first()
-        if obj != None:
-            obj_type = 'address'
+        if obj: obj_type = 'address'
         else:
             obj = SrxAddrSet.objects.filter(uuid=objectid).first()
-            if obj != None:
-                obj_type = 'addrset'
+            if obj: obj_type = 'addrset'
     elif src == 'app':
         obj = SrxApplication.objects.filter(uuid=objectid).first()
-        if obj != None:
-            obj_type = 'application'
+        if obj: obj_type = 'application'
         else:
             obj = SrxAppSet.objects.filter(uuid=objectid).first()
-            if obj != None:
-                obj_type = 'appset'
+            if obj: obj_type = 'appset'
 
     '''
     Retrieve correlating data for object and put it into JSON response
