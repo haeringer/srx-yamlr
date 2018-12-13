@@ -72,6 +72,12 @@ body {
     opacity: 0.5;
   }
 
+  .yamlcol {
+    -webkit-box-shadow: inset 9px 0px 13px 0px rgba(0,0,0,0.05);
+    -moz-box-shadow: inset 9px 0px 13px 0px rgba(0,0,0,0.05);
+    box-shadow: inset 9px 0px 13px 0px rgba(0,0,0,0.05);
+  }
+
 
   /*
   ***** Loader
