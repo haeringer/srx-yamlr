@@ -1,9 +1,14 @@
 
-/* Loading animation */
-
+/*
+* Run on page load
+*/
 $(window).on('load', function() {
-    // Animate loader off screen
+    // fade out loader
     $(".loading").fadeOut("slow");
+
+    // generate an initial configuration id
+    var newID = uuidv4();
+    currentObj['configid'] = newID;
 });
 
 
@@ -12,7 +17,8 @@ $(window).on('load', function() {
 */
 $(function() {
 
-    /* Recognize clicks on search result item */
+    $("button#create-object-save").click(function() { createObject() });
+
     // use .on 'click' with parent selected to recognize events also on newly added items
     $('.list-inline').on('click', '.search-results-item', function() { addObject(this) });
     $('.list-group').on('click', '.lgi-icon-close', function() { deleteObject(this) });
@@ -30,25 +36,99 @@ currentObj['from'] = [];
 currentObj['to'] = [];
 currentObj['app'] = [];
 currentObj['configid'] = [];
+var selObj;
 
 
 function createInputForm(obj) {
-    var selItem = $(obj).text();
+    selObj = $(obj).text();
 
     $('#form-container').find('form').addClass('d-none')
 
-    if (selItem === 'Address') {
+    if (selObj === 'Address') {
         $('#address-form').removeClass('d-none')
-    } else if (selItem === 'Address Set') {
+    } else if (selObj === 'Address Set') {
         $('#adrset-form').removeClass('d-none')
-    } else if (selItem === 'Application') {
+    } else if (selObj === 'Application') {
         $('#application-form').removeClass('d-none')
-    } else if (selItem === 'Application Set') {
+    } else if (selObj === 'Application Set') {
         $('#appset-form').removeClass('d-none')
-    } else if (selItem === 'Zone') {
+    } else if (selObj === 'Zone') {
         swal('is noch nich implementiert')
     }
 }
+
+
+function createObject() {
+
+    if (selObj === 'Address') {
+        var objtype = 'address';
+        var addresszone = $("select#address-form-control-zone").val();
+        var addressname = $("input#address-form-control-name").val();
+        var addressip = $("input#address-form-control-ip").val();
+
+        if (addresszone == '' || addressname == '' || addressip == '') {
+            $('#address-form-alert').append('<div class="alert alert-info" ' +
+              'role="alert" id="field-empty">Please fill all values!</div>')
+            return false;
+        }
+
+        $.post({
+            url: '/cgapp/ajax/newobject/',
+            data: {
+                configid: currentObj.configid,
+                objtype: objtype,
+                addresszone: addresszone,
+                addressname: addressname,
+                addressip: addressip,
+            }
+        })
+        .done(function(response) {
+            $('#yamlcontainer').html(response.yamlconfig);
+            $('#yamlcard').removeClass('d-none');
+        })
+        .fail(function(jqXHR, textStatus, errorThrown) {
+            console.log(errorThrown.toString());
+        });
+
+    } else if (selObj === 'Address Set') {
+        var objtype = 'addrset';
+        var addrsetzone = $("select#adrset-form-control-zone").val();
+        var addrsetname = $("input#adrset-form-control-name").val();
+        var addrsetobjects = $("#adrset-form-control-objects").val();
+
+        if (addrsetzone == '' || addrsetname == '' || addrsetobjects == '') {
+            $('#address-form-alert').append('<div class="alert alert-info" ' +
+              'role="alert" id="field-empty">Please fill all values!</div>')
+            return false;
+        }
+
+        $.post({
+            url: '/cgapp/ajax/newobject/',
+            data: {
+                configid: currentObj.configid,
+                objtype: objtype,
+                addrsetzone: addrsetzone,
+                addrsetname: addrsetname,
+                addrsetobjects: addrsetobjects,
+            }
+        })
+        .done(function(response) {
+            $('#yamlcontainer').html(response.yamlconfig);
+            $('#yamlcard').removeClass('d-none');
+        })
+        .fail(function(jqXHR, textStatus, errorThrown) {
+            console.log(errorThrown.toString());
+        });
+
+    } else if (selObj === 'Application') {
+        // New Application
+    } else if (selObj === 'Application Set') {
+        // New Application Set
+    } else if (selObj === 'Zone') {
+        // New Zone
+    }
+}
+
 
 function deployConfig() {
     console.log('deploy config')
@@ -60,18 +140,13 @@ function deployConfig() {
 retrieve parent zone and add object to card element */
 function addObject(obj) {
 
-    if (currentObjIsEmpty(currentObj)) {
-        var newID = uuidv4();
-        currentObj['configid'] = newID;
-    }
-
-    var objectId_dj = obj.id.split("_").pop();
+    var objectId_dj = obj.id.split("_", 2).pop();
     var source = obj.id.split("_").shift();
     var action = 'add';
 
     if (source === 'from' || source === 'to') {
 
-        $.getJSON('/cgapp/ajax/objectdata/', {
+        $.post('/cgapp/ajax/objectdata/', {
             configid: currentObj.configid,
             objectid: objectId_dj,
             source: source,
@@ -149,7 +224,7 @@ function addObject(obj) {
 
     } else if (source === 'app') {
 
-        $.getJSON('/cgapp/ajax/objectdata/', {
+        $.post('/cgapp/ajax/objectdata/', {
             configid: currentObj.configid,
             objectid: objectId_dj,
             source: source,
@@ -232,7 +307,7 @@ function deleteObject(obj) {
         }
     }
 
-    $.getJSON('/cgapp/ajax/objectdata/', {
+    $.post('/cgapp/ajax/objectdata/', {
         configid: currentObj.configid,
         objectid: objectId_dj,
         source: source,
