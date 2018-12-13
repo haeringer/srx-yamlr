@@ -19,7 +19,7 @@ class SrxAddrSet(models.Model):
     zone = models.ForeignKey(SrxZone, on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
     uuid = models.CharField(max_length=36, default=uuid.uuid4)
-    address = models.ManyToManyField(SrxAddress)
+    addresses = models.ManyToManyField(SrxAddress, related_name='addresses')
     def __str__(self):
         return self.name
 

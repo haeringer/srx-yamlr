@@ -1,7 +1,10 @@
 from .models import *
 
 import oyaml as yaml
-
+import json
+import collections
+def makehash():
+    return collections.defaultdict(makehash)
 
 
 def importyaml(yamlfile):
@@ -43,19 +46,19 @@ def importyaml(yamlfile):
     for zone, values in configdata['zones'].items():
         if 'addrsets' in values:
             addrset = values['addrsets']
-            for setname, addresses in addrset.items():
+            for setname, addrss in addrset.items():
                 srxzonename = SrxZone.objects.get(name=zone)
                 obj, created = SrxAddrSet.objects.update_or_create(
                     zone=srxzonename,
                     name=setname
                 )
-                if isinstance(addresses, list):
-                    for i in addresses:
+                if isinstance(addrss, list):
+                    for i in addrss:
                         addr = SrxAddress.objects.get(name=i)
-                        obj.address.add(addr)
+                        obj.addresses.add(addr)
                 else:
-                    addr = SrxAddress.objects.get(name=addresses)
-                    obj.address.add(addr)
+                    addr = SrxAddress.objects.get(name=addrss)
+                    obj.addresses.add(addr)
 
     '''
     import applications
@@ -135,6 +138,14 @@ def importyaml(yamlfile):
 
 def buildyaml(objdata, src, objtype, configid, action):
 
+    # print(
+    #     'objdata:', objdata,
+    #     'src:', src,
+    #     'objtype:', objtype,
+    #     'configid:', configid,
+    #     'action:', action,
+    # )
+
     od_fromzone = ''
     od_tozone = ''
     od_srcaddress = ''
@@ -147,7 +158,9 @@ def buildyaml(objdata, src, objtype, configid, action):
     '''
     read object data delivered at function call
     '''
-    n = objdata['obj_name']
+    if src != 'newobj':
+        n = objdata['obj_name']
+
     if src == 'from':
         od_fromzone = objdata['parentzone']
         if objtype == 'address':
@@ -172,6 +185,7 @@ def buildyaml(objdata, src, objtype, configid, action):
             od_appset = n
             objtype = 'appset'
 
+
     '''
     create new policy in database with current config id from frontend
     '''
@@ -183,34 +197,30 @@ def buildyaml(objdata, src, objtype, configid, action):
     if src == 'from':
         q = SrxZone.objects.filter(tozone__uuid=configid)
         if q:
-            tozone = str(q[0])
+            tozone = q[0].name
             if tozone == od_fromzone:
-                print('zone validation error')
                 return
         q = SrxZone.objects.filter(fromzone__uuid=configid)
         if q:
-            fromzone = str(q[0])
+            fromzone = q[0].name
             if fromzone != od_fromzone:
-                print('zone validation error')
                 return
     elif src == 'to':
         q = SrxZone.objects.filter(fromzone__uuid=configid)
         if q:
-            fromzone = str(q[0])
+            fromzone = q[0].name
             if fromzone == od_tozone:
-                print('zone validation error')
                 return
         q = SrxZone.objects.filter(tozone__uuid=configid)
         if q:
-            tozone = str(q[0])
+            tozone = q[0].name
             if tozone != od_tozone:
-                print('zone validation error')
                 return
 
     '''
     add or delete delivered object to/from created policy
     '''
-    if action == 'add':
+    if action == 'add' and src != 'newobj':
         if od_fromzone:
             o = SrxZone.objects.get(name=od_fromzone)
             obj.fromzone.add(o)
@@ -258,19 +268,41 @@ def buildyaml(objdata, src, objtype, configid, action):
             obj.appset.remove(o)
 
     '''
+    add newly created object
+    '''
+    if action == 'add' and src == 'newobj':
+        if objtype == 'address':
+            zone = SrxZone.objects.get(name=objdata['addresszone'])
+            name = objdata['addressname']
+            ip = objdata['addressip']
+            SrxAddress.objects.create(zone=zone, name=name, ip=ip,
+                                      uuid=configid)
+        if objtype == 'addrset':
+            zone = SrxZone.objects.get(name=objdata['addrsetzone'])
+            name = objdata['addrsetname']
+            addresses = objdata['addrsetobjects']
+            obj = SrxAddrSet.objects.create(zone=zone, name=name,
+                                            uuid=configid)
+            for i in addresses:
+                o = SrxAddress.objects.get(name=i)
+                obj.addresses.add(o)
+
+
+    '''
     query database for objects (existing and newly created ones) and assign
     values to yaml_variables
     '''
     ### SourceClass.objects.filter(m2mfield__m2mfield=value)
-    ### - the first field is the manytomanyfield of the referencing
-    ###   class, of which we want to retrieve the value
-    ### - the second field is a m2mfield of the referencing class
-    ###   of which we know the value, so we can use it as a filter
+    # - the first field is the manytomanyfield of the referencing class
+    #   (SrxPolicy in this case), of which we want to retrieve the value
+    # - the second field is a m2mfield of the referencing class of which
+    #   we know the value, so we can use it as a filter
+    # - fields must have 'related_name'
     q = SrxZone.objects.filter(fromzone__uuid=configid)
-    yaml_fromzone = od_fromzone if not q else str(q[0])
+    yaml_fromzone = od_fromzone if not q else q[0].name
 
     q = SrxZone.objects.filter(tozone__uuid=configid)
-    yaml_tozone = od_tozone if not q else str(q[0])
+    yaml_tozone = od_tozone if not q else q[0].name
 
 
     q = SrxAddress.objects.filter(srcaddress__uuid=configid)
@@ -278,8 +310,8 @@ def buildyaml(objdata, src, objtype, configid, action):
         if len(q) > 1:
             srcaddress = []
             for i in q:
-                srcaddress.append(str(i))
-        else: srcaddress = str(q[0])
+                srcaddress.append(i.name)
+        else: srcaddress = q[0].name
     else: srcaddress = ''
 
     q = SrxAddrSet.objects.filter(srcaddrset__uuid=configid)
@@ -287,8 +319,8 @@ def buildyaml(objdata, src, objtype, configid, action):
         if len(q) > 1:
             srcaddrset = []
             for i in q:
-                srcaddrset.append(str(i))
-        else: srcaddrset = str(q[0])
+                srcaddrset.append(i.name)
+        else: srcaddrset = q[0].name
     else: srcaddrset = ''
 
     if srcaddress and srcaddrset:
@@ -309,8 +341,8 @@ def buildyaml(objdata, src, objtype, configid, action):
         if len(q) > 1:
             destaddress = []
             for i in q:
-                destaddress.append(str(i))
-        else: destaddress = str(q[0])
+                destaddress.append(i.name)
+        else: destaddress = q[0].name
     else: destaddress = ''
 
     q = SrxAddrSet.objects.filter(destaddrset__uuid=configid)
@@ -318,8 +350,8 @@ def buildyaml(objdata, src, objtype, configid, action):
         if len(q) > 1:
             destaddrset = []
             for i in q:
-                destaddrset.append(str(i))
-        else: destaddrset = str(q[0])
+                destaddrset.append(i.name)
+        else: destaddrset = q[0].name
     else: destaddrset = ''
 
     if destaddress and destaddrset:
@@ -340,8 +372,8 @@ def buildyaml(objdata, src, objtype, configid, action):
         if len(q) > 1:
             application = []
             for i in q:
-                application.append(str(i))
-        else: application = str(q[0])
+                application.append(i.name)
+        else: application = q[0].name
     else: application = ''
 
     q = SrxAppSet.objects.filter(appset__uuid=configid)
@@ -349,8 +381,8 @@ def buildyaml(objdata, src, objtype, configid, action):
         if len(q) > 1:
             appset = []
             for i in q:
-                appset.append(str(i))
-        else: appset = str(q[0])
+                appset.append(i.name)
+        else: appset = q[0].name
     else: appset = ''
 
     if application and appset:
@@ -361,35 +393,90 @@ def buildyaml(objdata, src, objtype, configid, action):
     if appset and not application: yaml_applications = appset
     if not application and not appset: yaml_applications = ''
 
+    # query for newly created objects
+    q = SrxAddress.objects.filter(uuid=configid)
+    if q:
+        # use collections.defaultdict to build nested dictionary
+        defaultdict_newaddress = makehash()
+        for i in q:
+            addresszone = str(SrxZone.objects.get(id = i.zone_id))
+            addressname = i.name
+            addressip = i.ip
+
+            # fill nested defaultdict with values
+            defaultdict_newaddress[addresszone]['addresses'][
+                addressname] = addressip
+
+            # because yaml.dump cannot handle defaultdict,
+            # convert it to standard dict via json library
+            temp_jsondump = json.dumps(defaultdict_newaddress)
+            yaml_newaddress = json.loads(temp_jsondump)
+    else: yaml_newaddress = ''
+
+    q = SrxAddrSet.objects.filter(uuid=configid)
+    if q:
+        defaultdict_newaddrset = makehash()
+        for i in q:
+            addrsetzone = str(SrxZone.objects.get(id = i.zone_id))
+            addrsetname = i.name
+
+            q_adr = SrxAddress.objects.filter(addresses__name=i.name)
+            if len(q_adr) > 1:
+                addrsetobjects = []
+                for a in q_adr:
+                    addrsetobjects.append(a.name)
+            else: addrsetobjects = q_adr[0].name
+
+            defaultdict_newaddrset[addrsetzone]['addrsets'][
+                addrsetname] = addrsetobjects
+            temp_jsondump = json.dumps(defaultdict_newaddrset)
+            yaml_newaddrset = json.loads(temp_jsondump)
+    else: yaml_newaddrset = ''
+
+    # TODO application
+
+    # TODO application set
+
 
     '''
     prepare dictionary with values from current config
     '''
-    policy_prep = dict(
-        policyname_dummy = dict(
-            fromzone = yaml_fromzone,
-            tozone = yaml_tozone,
-            source = yaml_source,
-            destination = yaml_destination,
-            applications = yaml_applications,
-        )
-    )
+    prep_policies = {}
+    if yaml_fromzone:
+        prep_policies.update({'fromzone': yaml_fromzone})
+    if yaml_tozone:
+        prep_policies.update({'tozone': yaml_tozone})
+    if yaml_source:
+        prep_policies.update({'source': yaml_source})
+    if yaml_destination:
+        prep_policies.update({'destination': yaml_destination})
+    if yaml_applications:
+        prep_policies.update({'applications': yaml_applications})
 
     '''
-    build policy name and swap prepared key with actual name
+    build policy name and put prepared dict into parent
     '''
-    source = ''.join(yaml_source)
-    destination = ''.join(yaml_destination)
+    if isinstance(yaml_source, list):
+        source = yaml_source[0]+'-etc'
+    else: source = yaml_source
+    if isinstance(yaml_destination, list):
+        destination = yaml_destination[0]+'-etc'
+    else: destination = yaml_destination
+
     policyname = 'allow-' + source + '-to-' + destination
-    policy_prep[policyname] = policy_prep.pop('policyname_dummy')
-    # put prepared policy into final policies dict
-    dict_yaml = {}
-    dict_yaml['policies'] = policy_prep
 
-    SrxPolicy.objects.update_or_create(
-        uuid=configid,
-        defaults={'name': policyname}
-        )
+    SrxPolicy.objects.update_or_create(uuid=configid,
+                                       defaults={'name': policyname})
+
+    dict_yaml = {}
+    if prep_policies:
+        dict_yaml['policies'] = {
+            policyname: prep_policies
+        }
+    if yaml_newaddress:
+        dict_yaml.update({'zones': yaml_newaddress})
+    if yaml_newaddrset:
+        dict_yaml.update({'zones': yaml_newaddrset})
 
     '''
     dump dict into yaml file and into variable for return
