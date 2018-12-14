@@ -2,7 +2,7 @@ from django.shortcuts import render, get_list_or_404
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from .models import *
-from .helpers import importyaml, buildyaml
+from .helpers import importyaml, buildyaml, queryset_to_var
 import sys
 
 
@@ -140,13 +140,7 @@ def filterobjects(request):
         return JsonResponse(None, safe=False)
 
     q = SrxAddress.objects.filter(zone_id=zone_id)
-    if q:
-        if len(q) > 1:
-            addresses = []
-            for i in q:
-                addresses.append(i.name)
-        else: addresses = q[0].name
-    else: addresses = ''
+    addresses = queryset_to_var(q)
 
     response_data = {}
     response_data['addresses'] = addresses

@@ -306,22 +306,10 @@ def buildyaml(objdata, src, objtype, configid, action):
 
 
     q = SrxAddress.objects.filter(srcaddress__uuid=configid)
-    if q:
-        if len(q) > 1:
-            srcaddress = []
-            for i in q:
-                srcaddress.append(i.name)
-        else: srcaddress = q[0].name
-    else: srcaddress = ''
+    srcaddress = queryset_to_var(q)
 
     q = SrxAddrSet.objects.filter(srcaddrset__uuid=configid)
-    if q:
-        if len(q) > 1:
-            srcaddrset = []
-            for i in q:
-                srcaddrset.append(i.name)
-        else: srcaddrset = q[0].name
-    else: srcaddrset = ''
+    srcaddrset = queryset_to_var(q)
 
     if srcaddress and srcaddrset:
         if not isinstance(srcaddress, list): srcaddress = [srcaddress]
@@ -337,22 +325,10 @@ def buildyaml(objdata, src, objtype, configid, action):
 
 
     q = SrxAddress.objects.filter(destaddress__uuid=configid)
-    if q:
-        if len(q) > 1:
-            destaddress = []
-            for i in q:
-                destaddress.append(i.name)
-        else: destaddress = q[0].name
-    else: destaddress = ''
+    destaddress = queryset_to_var(q)
 
     q = SrxAddrSet.objects.filter(destaddrset__uuid=configid)
-    if q:
-        if len(q) > 1:
-            destaddrset = []
-            for i in q:
-                destaddrset.append(i.name)
-        else: destaddrset = q[0].name
-    else: destaddrset = ''
+    destaddrset = queryset_to_var(q)
 
     if destaddress and destaddrset:
         if not isinstance(destaddress, list): destaddress = [destaddress]
@@ -368,22 +344,10 @@ def buildyaml(objdata, src, objtype, configid, action):
 
 
     q = SrxApplication.objects.filter(application__uuid=configid)
-    if q:
-        if len(q) > 1:
-            application = []
-            for i in q:
-                application.append(i.name)
-        else: application = q[0].name
-    else: application = ''
+    application = queryset_to_var(q)
 
     q = SrxAppSet.objects.filter(appset__uuid=configid)
-    if q:
-        if len(q) > 1:
-            appset = []
-            for i in q:
-                appset.append(i.name)
-        else: appset = q[0].name
-    else: appset = ''
+    appset = queryset_to_var(q)
 
     if application and appset:
         if not isinstance(application, list): application = [application]
@@ -487,3 +451,16 @@ def buildyaml(objdata, src, objtype, configid, action):
     yamlconfig = yaml.dump(dict_yaml, default_flow_style=False)
 
     return yamlconfig
+
+
+
+def queryset_to_var(queryset):
+    if queryset:
+        if len(queryset) > 1:
+            rval = []
+            for q in queryset:
+                rval.append(q.name)
+        else: rval = queryset[0].name
+    else:
+        rval = ''
+    return rval
