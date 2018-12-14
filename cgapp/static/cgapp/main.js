@@ -20,7 +20,8 @@ $(function() {
     $("button#create-object-save").click(function() { createObject() });
 
     // use .on 'click' with parent selected to recognize events also on newly added items
-    $('.list-inline').on('click', '.search-results-item', function() { addObject(this) });
+    $('#search-forms').on('click', '.search-results-item', function() { addObject(this) });
+
     $('.list-group').on('click', '.lgi-icon-close', function() { deleteObject(this) });
 
     $('#deploy-config').on('click', function() { deployConfig() });
@@ -85,6 +86,9 @@ function createObject() {
         .done(function(response) {
             $('#yamlcontainer').html(response.yamlconfig);
             $('#yamlcard').removeClass('d-none');
+            // reload specific div of index.html, but send along an additional
+            // parameter to indicate to backend that it's not a whole page load
+            $('#search-forms').load('/cgapp/?param=reload #search-forms');
         })
         .fail(function(jqXHR, textStatus, errorThrown) {
             console.log(errorThrown.toString());
@@ -115,6 +119,7 @@ function createObject() {
         .done(function(response) {
             $('#yamlcontainer').html(response.yamlconfig);
             $('#yamlcard').removeClass('d-none');
+            $('#search-forms').load('/cgapp/?param=reload #search-forms');
         })
         .fail(function(jqXHR, textStatus, errorThrown) {
             console.log(errorThrown.toString());

@@ -6,18 +6,20 @@ from .helpers import importyaml, buildyaml
 import sys
 
 
-yamlfile = 'kami-test.yml'
-
-# call function from helpers.py to import YAML data
-try:
-    importyaml(yamlfile)
-except Exception as e:
-    print('YAML import failed because of the following error:')
-    print(e)
-
-
-
 def index(request):
+
+    yamlfile = 'kami-test.yml'
+
+    param = request.GET.get('param', None)
+    # call function from helpers.py to import YAML data, but only
+    # at initial page load
+    if not param:
+        try:
+            importyaml(yamlfile)
+        except Exception as e:
+            print('YAML import failed because of the following error:')
+            print(e)
+
     try:
         zones = get_list_or_404(SrxZone)
         addresses = get_list_or_404(SrxAddress)
@@ -35,6 +37,7 @@ def index(request):
         }
     except:
         raise Http404("HTTP 404 Error")
+
     return render(request, 'cgapp/index.html', context)
 
 

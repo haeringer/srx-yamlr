@@ -168,113 +168,113 @@
           <div class="row full-height">
             <div class="col mt-3">
 
-              <div class="d-flex pt-3 pb-4">
+              <div id="search-forms">
+                <div class="d-flex pt-3 pb-4">
 
+                  <div class="col-sm">
 
-                <div class="col-sm">
+                    <h4>From...</h4>
 
-                  <h4>From...</h4>
+                    <input autofocus class="form-control" type="text" id="search-from" onkeyup="objectSearch(this)" placeholder="Search IP address or object name" aria-label="Search" autocomplete="off">
 
-                  <input autofocus class="form-control" type="text" id="search-from" onkeyup="objectSearch(this)" placeholder="Search IP address or object name" aria-label="Search" autocomplete="off">
-
-                  <ul class="list-inline d-none search-results-list" id="search-from-ul">
-                  {% for adr in addresses %}
-                    <li class="search-results-item" id="from_{{ adr.uuid }}_{{ adr.id }}">
-                      <div class="row">
-                        <div class="col-auto mr-auto lgi-name"><a href="#">{{ adr.name }}</a></div>
-                        <div class="w-100"></div>
-                        <div class="col-auto mr-auto lgi-name"><small><a href="#" class="text-black-50">{{ adr.ip }}</a></small></div>
-                      </div>
-                    </li>
-                  {% endfor %}
-                  {% for adrset in addrsets %}
-                    <li class="search-results-item" id="from_{{ adrset.uuid }}_{{ adrset.id }}">
-                      <div class="row">
-                        <div class="col-auto mr-auto lgi-name"><a href="#">{{ adrset.name }}</a></div>
-                        <div class="w-100"></div>
-                        <div class="col-auto mr-auto lgi-name"><small><a href="#" class="text-black-50">
-                          {% for a in adrset.addresses.all %}
-                            {{ a }}<br>
-                          {% endfor %}
-                          </a></small>
+                    <ul class="list-inline d-none search-results-list" id="search-from-ul">
+                    {% for adr in addresses %}
+                      <li class="search-results-item" id="from_{{ adr.uuid }}_{{ adr.id }}">
+                        <div class="row">
+                          <div class="col-auto mr-auto lgi-name"><a href="#">{{ adr.name }}</a></div>
+                          <div class="w-100"></div>
+                          <div class="col-auto mr-auto lgi-name"><small><a href="#" class="text-black-50">{{ adr.ip }}</a></small></div>
                         </div>
-                      </div>
-                    </li>
-                  {% endfor %}
-                  </ul>
-
-                </div>
-
-
-                <div class="col-sm">
-
-                  <h4>To...</h4>
-
-                  <input class="form-control" type="text" id="search-to" onkeyup="objectSearch(this)" placeholder="Search IP address or object name" aria-label="Search" autocomplete="off">
-
-                  <ul class="list-inline d-none search-results-list" id="search-to-ul">
-                  {% for adr in addresses %}
-                    <li class="search-results-item" id="to_{{ adr.uuid }}_{{ adr.id }}">
-                      <div class="row">
-                        <div class="col-auto mr-auto lgi-name"><a href="#">{{ adr.name }}</a></div>
-                        <div class="w-100"></div>
-                        <div class="col-auto mr-auto lgi-name"><small><a href="#" class="text-black-50">{{ adr.ip }}</a></small></div>
-                      </div>
-                    </li>
-                  {% endfor %}
-                  {% for adrset in addrsets %}
-                    <li class="search-results-item" id="to_{{ adrset.uuid }}_{{ adrset.id }}">
-                      <div class="row">
-                        <div class="col-auto mr-auto lgi-name"><a href="#">{{ adrset.name }}</a></div>
-                        <div class="w-100"></div>
-                        <div class="col-auto mr-auto lgi-name"><small><a href="#" class="text-black-50">
-                          {% for a in adrset.addresses.all %}
-                            {{ a }}<br>
-                          {% endfor %}
-                          </a></small>
+                      </li>
+                    {% endfor %}
+                    {% for adrset in addrsets %}
+                      <li class="search-results-item" id="from_{{ adrset.uuid }}_{{ adrset.id }}">
+                        <div class="row">
+                          <div class="col-auto mr-auto lgi-name"><a href="#">{{ adrset.name }}</a></div>
+                          <div class="w-100"></div>
+                          <div class="col-auto mr-auto lgi-name"><small><a href="#" class="text-black-50">
+                            {% for a in adrset.addresses.all %}
+                              {{ a }}<br>
+                            {% endfor %}
+                            </a></small>
+                          </div>
                         </div>
-                      </div>
-                    </li>
-                  {% endfor %}
-                  </ul>
+                      </li>
+                    {% endfor %}
+                    </ul>
 
-                </div>
+                  </div>
 
 
-                <div class="col-sm">
+                  <div class="col-sm">
 
-                  <h4>Allow...</h4>
+                    <h4>To...</h4>
 
-                  <input class="form-control" type="text" id="search-app" onkeyup="objectSearch(this)" placeholder="Search application or protocol port" aria-label="Search" autocomplete="off">
+                    <input class="form-control" type="text" id="search-to" onkeyup="objectSearch(this)" placeholder="Search IP address or object name" aria-label="Search" autocomplete="off">
 
-                  <ul class="list-inline d-none search-results-list" id="search-app-ul">
-                  {% for app in applications %}
-                    <li class="search-results-item" id="app_{{ app.uuid }}_{{ app.id }}">
-                      <div class="row">
-                        <div class="col-auto mr-auto lgi-name"><a href="#">{{ app.name }}</a></div>
-                        <div class="w-100"></div>
-                        <div class="col-auto mr-auto lgi-name"><small><a href="#" class="text-black-50">{{ app.protocol }} {{ app.port }}</a></small></div>
-                      </div>
-                    </li>
-                  {% endfor %}
-                  {% for appset in appsets %}
-                    <li class="search-results-item" id="app_{{ appset.uuid }}_{{ appset.id }}">
-                      <div class="row">
-                        <div class="col-auto mr-auto lgi-name"><a href="#">{{ appset.name }}</a></div>
-                        <div class="w-100"></div>
-                        <div class="col-auto mr-auto lgi-name"><small><a href="#" class="text-black-50">
-                          {% for a in appset.applications.all %}
-                            {{ a }}<br>
-                          {% endfor %}
-                          </a></small>
+                    <ul class="list-inline d-none search-results-list" id="search-to-ul">
+                    {% for adr in addresses %}
+                      <li class="search-results-item" id="to_{{ adr.uuid }}_{{ adr.id }}">
+                        <div class="row">
+                          <div class="col-auto mr-auto lgi-name"><a href="#">{{ adr.name }}</a></div>
+                          <div class="w-100"></div>
+                          <div class="col-auto mr-auto lgi-name"><small><a href="#" class="text-black-50">{{ adr.ip }}</a></small></div>
                         </div>
-                      </div>
-                    </li>
-                  {% endfor %}
-                  </ul>
+                      </li>
+                    {% endfor %}
+                    {% for adrset in addrsets %}
+                      <li class="search-results-item" id="to_{{ adrset.uuid }}_{{ adrset.id }}">
+                        <div class="row">
+                          <div class="col-auto mr-auto lgi-name"><a href="#">{{ adrset.name }}</a></div>
+                          <div class="w-100"></div>
+                          <div class="col-auto mr-auto lgi-name"><small><a href="#" class="text-black-50">
+                            {% for a in adrset.addresses.all %}
+                              {{ a }}<br>
+                            {% endfor %}
+                            </a></small>
+                          </div>
+                        </div>
+                      </li>
+                    {% endfor %}
+                    </ul>
 
+                  </div>
+
+
+                  <div class="col-sm">
+
+                    <h4>Allow...</h4>
+
+                    <input class="form-control" type="text" id="search-app" onkeyup="objectSearch(this)" placeholder="Search application or protocol port" aria-label="Search" autocomplete="off">
+
+                    <ul class="list-inline d-none search-results-list" id="search-app-ul">
+                    {% for app in applications %}
+                      <li class="search-results-item" id="app_{{ app.uuid }}_{{ app.id }}">
+                        <div class="row">
+                          <div class="col-auto mr-auto lgi-name"><a href="#">{{ app.name }}</a></div>
+                          <div class="w-100"></div>
+                          <div class="col-auto mr-auto lgi-name"><small><a href="#" class="text-black-50">{{ app.protocol }} {{ app.port }}</a></small></div>
+                        </div>
+                      </li>
+                    {% endfor %}
+                    {% for appset in appsets %}
+                      <li class="search-results-item" id="app_{{ appset.uuid }}_{{ appset.id }}">
+                        <div class="row">
+                          <div class="col-auto mr-auto lgi-name"><a href="#">{{ appset.name }}</a></div>
+                          <div class="w-100"></div>
+                          <div class="col-auto mr-auto lgi-name"><small><a href="#" class="text-black-50">
+                            {% for a in appset.applications.all %}
+                              {{ a }}<br>
+                            {% endfor %}
+                            </a></small>
+                          </div>
+                        </div>
+                      </li>
+                    {% endfor %}
+                    </ul>
+
+                  </div>
                 </div>
-
 
               </div>
               <div class="d-flex pt-3 pb-5 mb-4">
