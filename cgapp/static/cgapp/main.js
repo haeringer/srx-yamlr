@@ -24,10 +24,11 @@ $(function() {
 
     $('.list-group').on('click', '.lgi-icon-close', function() { deleteObject(this) });
 
-    $('#adrset-form-control-zone').on('click', function() {filterObjects(this) });
+    $('#create-object-dropdown a').on('click', function () { createInputForm(this) });
+    $('#adrset-form-control-zone').on('click', function() { filterObjects(this) });
 
     $('#deploy-config').on('click', function() { deployConfig() });
-    $('#create-object-dropdown a').on('click', function () { createInputForm(this) });
+    $('#clear-config').on('click', function() { window.location.reload(false) });
 
     $('[data-toggle="tooltip"]').tooltip()
 
