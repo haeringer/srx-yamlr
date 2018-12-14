@@ -24,6 +24,8 @@ $(function() {
 
     $('.list-group').on('click', '.lgi-icon-close', function() { deleteObject(this) });
 
+    $('#adrset-form-control-zone').on('click', function() {filterObjects(this) });
+
     $('#deploy-config').on('click', function() { deployConfig() });
     $('#create-object-dropdown a').on('click', function () { createInputForm(this) });
 
@@ -38,6 +40,41 @@ currentObj['to'] = [];
 currentObj['app'] = [];
 currentObj['configid'] = [];
 var selObj;
+
+
+function filterObjects(zoneselector) {
+    var selectedzone = $(zoneselector).val();
+
+    $.get({
+        url: '/cgapp/ajax/filterobjects/',
+        data: {
+            selectedzone: selectedzone,
+        }
+    })
+    .done(function(response) {
+        if (response === null) {
+            return;
+        }
+        addresses = response.addresses
+
+        if (Array.isArray(addresses) == true) {
+            $('#adrset-form-control-objects').html('')
+            $.each(addresses, function(key, value) {
+                $('#adrset-form-control-objects')
+                    .append($('<option class="small">', { value : key })
+                    .text(value));
+            });
+        } else {
+            $('#adrset-form-control-objects').html(
+                `<option class="small">${ addresses }</option>`
+            )
+        }
+
+    })
+    .fail(function(jqXHR, textStatus, errorThrown) {
+        console.log(errorThrown.toString());
+    });
+}
 
 
 function createInputForm(obj) {

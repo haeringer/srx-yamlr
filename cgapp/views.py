@@ -127,3 +127,28 @@ def newobject(request):
         print(e)
 
     return JsonResponse(response_data, safe=False)
+
+
+
+def filterobjects(request):
+    selectedzone = request.GET.get('selectedzone', None)
+
+    if selectedzone != 'Choose Zone...':
+        q = SrxZone.objects.filter(name=selectedzone)
+        zone_id = q[0].id
+    else:
+        return JsonResponse(None, safe=False)
+
+    q = SrxAddress.objects.filter(zone_id=zone_id)
+    if q:
+        if len(q) > 1:
+            addresses = []
+            for i in q:
+                addresses.append(i.name)
+        else: addresses = q[0].name
+    else: addresses = ''
+
+    response_data = {}
+    response_data['addresses'] = addresses
+
+    return JsonResponse(response_data, safe=False)
