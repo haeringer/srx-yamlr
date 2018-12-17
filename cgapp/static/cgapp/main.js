@@ -127,6 +127,7 @@ function createObject() {
             // reload specific div of index.html, but send along an additional
             // parameter to indicate to backend that it's not a whole page load
             $('#search-forms').load('/cgapp/?param=reload #search-forms');
+            $('#create-object-modal').modal('toggle');
         })
         .fail(function(jqXHR, textStatus, errorThrown) {
             console.log(errorThrown.toString());
@@ -158,6 +159,7 @@ function createObject() {
             $('#yamlcontainer').html(response.yamlconfig);
             $('#yamlcard').removeClass('d-none');
             $('#search-forms').load('/cgapp/?param=reload #search-forms');
+            $('#create-object-modal').modal('toggle');
         })
         .fail(function(jqXHR, textStatus, errorThrown) {
             console.log(errorThrown.toString());
@@ -184,6 +186,7 @@ retrieve parent zone and add object to card element */
 function addObject(obj) {
 
     var objectId_dj = obj.id.split("_", 2).pop();
+    var objectId_db = obj.id.split("_", 3).pop();
     var source = obj.id.split("_").shift();
     var action = 'add';
 
@@ -191,7 +194,7 @@ function addObject(obj) {
 
         $.post('/cgapp/ajax/objectdata/', {
             configid: currentObj.configid,
-            objectid: objectId_dj,
+            objectid: objectId_db,
             source: source,
             action: action,
             })
@@ -201,11 +204,14 @@ function addObject(obj) {
             if (Array.isArray(objVal) == true) {
                 objVal = objVal.join(', ');
             }
-
             if (source === 'from') {
                 var zoneTo = $('#added-zone-body-to').html()
                 if (zoneTo === response.parentzone) {
                     swal("Can't use the same zone for source and destination!")
+                    return;
+                }
+                if (currentObj.from.includes(objectId_db)) {
+                    swal("Object already in use!");
                     return;
                 }
             } else if (source === 'to') {
@@ -214,12 +220,10 @@ function addObject(obj) {
                     swal("Can't use the same zone for source and destination!")
                     return;
                 }
-            }
-
-            if (currentObj.from.includes(objectId_dj) ||
-                currentObj.to.includes(objectId_dj) ) {
-                swal("Object already in use!");
-                return;
+                if (currentObj.to.includes(objectId_db)) {
+                    swal("Object already in use!");
+                    return;
+                }
             }
 
             // blend in card element
@@ -236,7 +240,7 @@ function addObject(obj) {
 
             $('#added-obj-'+source).removeClass('d-none');
             $('#added-list-'+source).append(
-                `<li class="list-group-item" id="${source}_${objectId_dj}_added">
+                `<li class="list-group-item" id="${source}_${objectId_dj}_${objectId_db}_added">
                   <div class="row">
                     <div class="col-auto mr-auto lgi-name">${response.obj_name}</div>
                     <div class="lgi-icon-close pr-2">
@@ -251,9 +255,9 @@ function addObject(obj) {
             );
 
             if (source === 'from') {
-                currentObj.from.push(objectId_dj);
+                currentObj.from.push(objectId_db);
             } else if (source === 'to') {
-                currentObj.to.push(objectId_dj);
+                currentObj.to.push(objectId_db);
             }
 
             $('#yamlcontainer').html(response.yamlconfig);
@@ -269,7 +273,7 @@ function addObject(obj) {
 
         $.post('/cgapp/ajax/objectdata/', {
             configid: currentObj.configid,
-            objectid: objectId_dj,
+            objectid: objectId_db,
             source: source,
             action: action,
         })
@@ -282,14 +286,14 @@ function addObject(obj) {
                 objVal = response.obj_apps.join(', ');
             }
 
-            if (currentObj.app.includes(objectId_dj)) {
+            if (currentObj.app.includes(objectId_db)) {
                 swal("Object already in use!");
                 return;
             }
 
             $('#added-obj-app').removeClass('d-none');
             $('#added-list-app').append(
-                `<li class="list-group-item" id="app_${objectId_dj}_added">
+                `<li class="list-group-item" id="app_${objectId_dj}_${objectId_db}_added">
                   <div class="row">
                     <div class="col-auto mr-auto lgi-name">${response.obj_name}</div>
                     <div class="lgi-icon-close pr-2">
@@ -303,7 +307,7 @@ function addObject(obj) {
                 </li>`
             );
 
-            currentObj.app.push(objectId_dj);
+            currentObj.app.push(objectId_db);
 
             $('#yamlcontainer').html(response.yamlconfig);
             $('#yamlcard').removeClass('d-none');
@@ -322,9 +326,8 @@ function addObject(obj) {
 function deleteObject(obj) {
     var listitem = $(obj).parents('.list-group-item').remove();
     var listitemId = $(listitem).attr('id');
-    var objectId = listitemId.split('_', 2).join('_');
     var source = listitemId.split('_').shift();
-    var objectId_dj = objectId.split('_').pop();
+    var objectId_db = listitemId.split('_', 3).pop();
     var action = 'delete';
 
     if (!$('#added-list-'+source).has('li').length) {
@@ -334,17 +337,17 @@ function deleteObject(obj) {
     }
 
     if (source === 'from') {
-        var index = currentObj.from.indexOf(objectId_dj);
+        var index = currentObj.from.indexOf(objectId_db);
         if (index > -1) {
             currentObj.from.splice(index, 1);
         }
     } else if (source === 'to') {
-        var index = currentObj.to.indexOf(objectId_dj);
+        var index = currentObj.to.indexOf(objectId_db);
         if (index > -1) {
             currentObj.to.splice(index, 1);
         }
     } else if (source === 'app') {
-        var index = currentObj.app.indexOf(objectId_dj);
+        var index = currentObj.app.indexOf(objectId_db);
         if (index > -1) {
             currentObj.app.splice(index, 1);
         }
@@ -352,7 +355,7 @@ function deleteObject(obj) {
 
     $.post('/cgapp/ajax/objectdata/', {
         configid: currentObj.configid,
-        objectid: objectId_dj,
+        objectid: objectId_db,
         source: source,
         action: action,
     })

@@ -52,16 +52,16 @@ def objectdata(request):
     Search database for delivered object + determine object type
     '''
     if src == 'from' or src == 'to':
-        obj = SrxAddress.objects.filter(uuid=objectid).first()
+        obj = SrxAddress.objects.filter(id=objectid).first()
         if obj: objtype = 'address'
         else:
-            obj = SrxAddrSet.objects.filter(uuid=objectid).first()
+            obj = SrxAddrSet.objects.filter(id=objectid).first()
             if obj: objtype = 'addrset'
     elif src == 'app':
-        obj = SrxApplication.objects.filter(uuid=objectid).first()
+        obj = SrxApplication.objects.filter(id=objectid).first()
         if obj: objtype = 'application'
         else:
-            obj = SrxAppSet.objects.filter(uuid=objectid).first()
+            obj = SrxAppSet.objects.filter(id=objectid).first()
             if obj: objtype = 'appset'
 
     '''
