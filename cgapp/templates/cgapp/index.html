@@ -66,6 +66,7 @@
               <form class="d-none border-top" id="adrset-form">
                 <div class="form-group mt-4">
                   <h5>New Address Set</h5><br>
+                  <div id="addrset-form-alert"></div>
                   <select class="custom-select" id="adrset-form-control-zone" autocomplete="off">
                     <option selected>Choose Zone...</option>
                     {% for zone in zones %}
@@ -89,6 +90,7 @@
               <form class="d-none border-top" id="application-form">
                 <div class="form-group mt-4">
                   <h5>New Application</h5><br>
+                  <div id="application-form-alert"></div>
                   <label for="application-form-control-name">Application Name</label>
                   <input type="text" class="form-control" id="application-form-control-name" autocomplete="off">
                 </div>
@@ -99,14 +101,15 @@
                 <div class="form-group">
                   <select class="custom-select" id="application-form-control-protocol" autocomplete="off">
                     <option selected>Protocol</option>
-                    <option value="TCP">TCP</option>
-                    <option value="UDP">UDP</option>
+                    <option value="tcp">TCP</option>
+                    <option value="udp">UDP</option>
                   </select>
                 </div>
               </form>
               <form class="d-none border-top" id="appset-form">
                 <div class="form-group mt-4">
                   <h5>New Application Set</h5><br>
+                  <div id="appset-form-alert"></div>
                   <label for="appset-form-control-name">Object Name</label>
                   <input type="text" class="form-control" id="appset-form-control-name" autocomplete="off">
                 </div>

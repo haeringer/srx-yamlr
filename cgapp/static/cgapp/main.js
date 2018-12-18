@@ -122,12 +122,7 @@ function createObject() {
             }
         })
         .done(function(response) {
-            $('#yamlcontainer').html(response.yamlconfig);
-            $('#yamlcard').removeClass('d-none');
-            // reload specific div of index.html, but send along an additional
-            // parameter to indicate to backend that it's not a whole page load
-            $('#search-forms').load('/cgapp/?param=reload #search-forms');
-            $('#create-object-modal').modal('toggle');
+            closeModalAndRefresh(response)
         })
         .fail(function(jqXHR, textStatus, errorThrown) {
             console.log(errorThrown.toString());
@@ -140,7 +135,7 @@ function createObject() {
         var addrsetobjects = $("#adrset-form-control-objects").val();
 
         if (addrsetzone == '' || addrsetname == '' || addrsetobjects == '') {
-            $('#address-form-alert').append('<div class="alert alert-info" ' +
+            $('#addrset-form-alert').append('<div class="alert alert-info" ' +
               'role="alert" id="field-empty">Please fill all values!</div>')
             return false;
         }
@@ -156,22 +151,85 @@ function createObject() {
             }
         })
         .done(function(response) {
-            $('#yamlcontainer').html(response.yamlconfig);
-            $('#yamlcard').removeClass('d-none');
-            $('#search-forms').load('/cgapp/?param=reload #search-forms');
-            $('#create-object-modal').modal('toggle');
+            closeModalAndRefresh(response)
         })
         .fail(function(jqXHR, textStatus, errorThrown) {
             console.log(errorThrown.toString());
         });
 
     } else if (selObj === 'Application') {
-        // New Application
+        var objtype = 'application';
+        var appname = $("input#application-form-control-name").val();
+        var appport = $("input#application-form-control-port").val();
+        var appprotocol = $("select#application-form-control-protocol").val();
+
+        if (appprotocol == '' || appname == '' || appport == '') {
+            $('#application-form-alert').append('<div class="alert alert-info" ' +
+              'role="alert" id="field-empty">Please fill all values!</div>')
+            return false;
+        }
+
+        $.post({
+            url: '/cgapp/ajax/newobject/',
+            data: {
+                configid: currentObj.configid,
+                objtype: objtype,
+                appname: appname,
+                appport: appport,
+                appprotocol: appprotocol,
+            }
+        })
+        .done(function(response) {
+            closeModalAndRefresh(response)
+        })
+        .fail(function(jqXHR, textStatus, errorThrown) {
+            console.log(errorThrown.toString());
+        });
+
     } else if (selObj === 'Application Set') {
-        // New Application Set
+        var objtype = 'appset';
+        var appsetname = $("input#appset-form-control-name").val();
+        var appsetobjects = $("#appset-form-control-objects").val();
+
+        if (appsetname == '' || appsetobjects == '') {
+            $('#appset-form-alert').append('<div class="alert alert-info" ' +
+              'role="alert" id="field-empty">Please fill all values!</div>')
+            return false;
+        }
+
+        $.post({
+            url: '/cgapp/ajax/newobject/',
+            data: {
+                configid: currentObj.configid,
+                objtype: objtype,
+                appsetname: appsetname,
+                appsetobjects: appsetobjects,
+            }
+        })
+        .done(function(response) {
+            closeModalAndRefresh(response)
+        })
+        .fail(function(jqXHR, textStatus, errorThrown) {
+            console.log(errorThrown.toString());
+        });
+
     } else if (selObj === 'Zone') {
         // New Zone
     }
+}
+
+
+function closeModalAndRefresh(response) {
+    // update yaml config
+    $('#yamlcontainer').html(response.yamlconfig);
+    $('#yamlcard').removeClass('d-none');
+
+    // reload specific div of index.html, but send along an additional
+    // parameter to indicate to backend that it's not a whole page load
+    $('#search-forms').load('/cgapp/?param=refreshobjects #search-forms');
+
+    // close modal
+    $('#create-object-modal').modal('toggle');
 }
 
 

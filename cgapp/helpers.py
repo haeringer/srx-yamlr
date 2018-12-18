@@ -287,6 +287,21 @@ def buildyaml(objdata, src, objtype, configid, action):
                 o = SrxAddress.objects.get(name=i)
                 obj.addresses.add(o)
 
+        if objtype == 'application':
+            name = objdata['appname']
+            protocol = SrxProtocol.objects.get(ptype=objdata['appprotocol'])
+            port = objdata['appport']
+            SrxApplication.objects.create(name=name, protocol=protocol,
+                                          port=port, uuid=configid)
+
+        if objtype == 'appset':
+            name = objdata['appsetname']
+            applications = objdata['appsetobjects']
+            obj = SrxAppSet.objects.create(name=name, uuid=configid)
+            for i in applications:
+                o = SrxApplication.objects.get(name=i)
+                obj.applications.add(o)
+
 
     '''
     query database for objects (existing and newly created ones) and assign
@@ -357,13 +372,14 @@ def buildyaml(objdata, src, objtype, configid, action):
     if appset and not application: yaml_applications = appset
     if not application and not appset: yaml_applications = ''
 
+
     # query for newly created objects
     q = SrxAddress.objects.filter(uuid=configid)
     if q:
         # use collections.defaultdict to build nested dictionary
         defaultdict_newaddress = makehash()
         for i in q:
-            addresszone = str(SrxZone.objects.get(id = i.zone_id))
+            addresszone = str(SrxZone.objects.get(id=i.zone_id))
             addressname = i.name
             addressip = i.ip
 
@@ -381,9 +397,8 @@ def buildyaml(objdata, src, objtype, configid, action):
     if q:
         defaultdict_newaddrset = makehash()
         for i in q:
-            addrsetzone = str(SrxZone.objects.get(id = i.zone_id))
+            addrsetzone = str(SrxZone.objects.get(id=i.zone_id))
             addrsetname = i.name
-
             q_adr = SrxAddress.objects.filter(addresses__name=i.name)
             if len(q_adr) > 1:
                 addrsetobjects = []
@@ -397,9 +412,31 @@ def buildyaml(objdata, src, objtype, configid, action):
             yaml_newaddrset = json.loads(temp_jsondump)
     else: yaml_newaddrset = ''
 
-    # TODO application
+    q = SrxApplication.objects.filter(uuid=configid)
+    if q:
+        yaml_newapp = {}
+        for i in q:
+            appname = i.name
+            appport = i.port
+            appprotocol = str(SrxProtocol.objects.get(id=i.protocol_id))
 
-    # TODO application set
+            yaml_newapp.update({
+                appname: {'protocol': appprotocol, 'port': appport}
+            })
+    else: yaml_newapp = ''
+
+    q = SrxAppSet.objects.filter(uuid=configid)
+    if q:
+        yaml_newappset = {}
+        for i in q:
+            appsetname = i.name
+            q_app = SrxApplication.objects.filter(applications__name=i.name)
+            appsetobjects = queryset_to_var(q_app)
+
+            yaml_newappset.update({appsetname: appsetobjects})
+            print(yaml_newappset)
+    else: yaml_newappset = ''
+
 
 
     '''
@@ -440,7 +477,12 @@ def buildyaml(objdata, src, objtype, configid, action):
     if yaml_newaddress:
         dict_yaml.update({'zones': yaml_newaddress})
     if yaml_newaddrset:
+        # TODO Bug! zones: addresses gets overwritten
         dict_yaml.update({'zones': yaml_newaddrset})
+    if yaml_newapp:
+        dict_yaml.update({'applications': yaml_newapp})
+    if yaml_newappset:
+        dict_yaml.update({'applications': yaml_newappset})
 
     '''
     dump dict into yaml file and into variable for return

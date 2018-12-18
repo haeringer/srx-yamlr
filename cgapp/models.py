@@ -39,7 +39,8 @@ class SrxApplication(models.Model):
 
 class SrxAppSet(models.Model):
     name = models.CharField(max_length=255)
-    applications = models.ManyToManyField(SrxApplication)
+    applications = models.ManyToManyField(SrxApplication,
+                                          related_name='applications')
     uuid = models.CharField(max_length=36, default=uuid.uuid4)
     def __str__(self):
         return self.name

@@ -116,6 +116,11 @@ def newobject(request):
     objnew['addrsetzone'] = request.POST.get('addrsetzone', None)
     objnew['addrsetname'] = request.POST.get('addrsetname', None)
     objnew['addrsetobjects'] = request.POST.getlist('addrsetobjects[]', None)
+    objnew['appname'] = request.POST.get('appname', None)
+    objnew['appport'] = request.POST.get('appport', None)
+    objnew['appprotocol'] = request.POST.get('appprotocol', None)
+    objnew['appsetname'] = request.POST.get('appsetname', None)
+    objnew['appsetobjects'] = request.POST.getlist('appsetobjects[]', None)
 
 
     try:
