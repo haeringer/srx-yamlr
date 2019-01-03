@@ -33,7 +33,7 @@ class SrxApplication(models.Model):
     protocol = models.ForeignKey(SrxProtocol, on_delete=models.PROTECT,
                                  default=0)
     uuid = models.CharField(max_length=36, default=uuid.uuid4)
-    port = models.IntegerField()
+    port = models.CharField(max_length=11)
     def __str__(self):
         return self.name
 

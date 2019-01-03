@@ -45,20 +45,21 @@ def importyaml(yamlfile):
     SrxAddrSet.objects.all().delete()
     for zone, values in configdata['zones'].items():
         if 'addrsets' in values:
-            addrset = values['addrsets']
-            for setname, addrss in addrset.items():
-                srxzonename = SrxZone.objects.get(name=zone)
-                obj, created = SrxAddrSet.objects.update_or_create(
-                    zone=srxzonename,
-                    name=setname
-                )
-                if isinstance(addrss, list):
-                    for i in addrss:
-                        addr = SrxAddress.objects.get(name=i)
+            if values['addrsets']:
+                addrset = values['addrsets']
+                for setname, addrss in addrset.items():
+                    srxzonename = SrxZone.objects.get(name=zone)
+                    obj, created = SrxAddrSet.objects.update_or_create(
+                        zone=srxzonename,
+                        name=setname
+                    )
+                    if isinstance(addrss, list):
+                        for i in addrss:
+                            addr = SrxAddress.objects.get(name=i)
+                            obj.addresses.add(addr)
+                    else:
+                        addr = SrxAddress.objects.get(name=addrss)
                         obj.addresses.add(addr)
-                else:
-                    addr = SrxAddress.objects.get(name=addrss)
-                    obj.addresses.add(addr)
 
     '''
     import applications
