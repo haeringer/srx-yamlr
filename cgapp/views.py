@@ -3,22 +3,11 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from .models import *
 from .helpers import importyaml, buildyaml, queryset_to_var
-import sys
+from .process import runansible
+import sys, traceback, json
 
 
 def index(request):
-
-    yamlfile = 'kami-test.yml'
-
-    param = request.GET.get('param', None)
-    # call function from helpers.py to import YAML data, but only
-    # at initial page load
-    if not param:
-        try:
-            importyaml(yamlfile)
-        except Exception as e:
-            print('YAML import failed because of the following error:')
-            print(e)
 
     try:
         zones = get_list_or_404(SrxZone)
@@ -39,6 +28,23 @@ def index(request):
         raise Http404("HTTP 404 Error")
 
     return render(request, 'cgapp/index.html', context)
+
+
+
+def loaddata(request):
+
+    yamlfile = 'kami-kaze.yml'
+    response_data = {}
+
+    try:
+        importyaml(yamlfile)
+    except Exception as e:
+        print('YAML import failed because of the following error:')
+        print(traceback.format_exc())
+        response_data['importerror'] = json.dumps(traceback.format_exc())
+
+    return JsonResponse(response_data, safe=False)
+
 
 
 @csrf_exempt
@@ -149,5 +155,18 @@ def filterobjects(request):
 
     response_data = {}
     response_data['addresses'] = addresses
+
+    return JsonResponse(response_data, safe=False)
+
+
+
+@csrf_exempt
+def checkconfig(request):
+
+
+    runansible()
+
+    response_data = {}
+    response_data['output'] = 'bla'
 
     return JsonResponse(response_data, safe=False)

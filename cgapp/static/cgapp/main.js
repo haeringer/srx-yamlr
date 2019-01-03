@@ -3,12 +3,11 @@
 * Run on page load
 */
 $(window).on('load', function() {
-    // fade out loader
-    $(".loading").fadeOut("slow");
-
     // generate an initial configuration id
     var newID = uuidv4();
     currentObj['configid'] = newID;
+
+    loaddata();
 });
 
 
@@ -27,8 +26,9 @@ $(function() {
     $('#create-object-dropdown a').on('click', function () { createInputForm(this) });
     $('#adrset-form-control-zone').on('click', function() { filterObjects(this) });
 
-    $('#deploy-config').on('click', function() { deployConfig() });
     $('#clear-config').on('click', function() { window.location.reload(false) });
+    $('#check-config').on('click', function() { checkConfig() });
+    $('#deploy-config').on('click', function() { deployConfig() });
 
     $('[data-toggle="tooltip"]').tooltip()
 
@@ -41,6 +41,29 @@ currentObj['to'] = [];
 currentObj['app'] = [];
 currentObj['configid'] = [];
 var selObj;
+
+
+
+function loaddata() {
+    document.getElementById("overlay").style.display = "block";
+    Pace.start();
+    $.get({
+        url: '/cgapp/ajax/loaddata/',
+    })
+    .done(function(response) {
+        if (response.importerror != null) {
+            alert('YAML import failed because of the following error:\n\n'
+                + JSON.parse(response.importerror)
+            )
+        }
+        $('#search-forms').load('/cgapp/ #search-forms');
+        Pace.stop();
+        $("#overlay").fadeOut("slow");
+    })
+    .fail(function(jqXHR, textStatus, errorThrown) {
+        console.log(errorThrown.toString());
+    });
+}
 
 
 function filterObjects(zoneselector) {
@@ -224,12 +247,27 @@ function closeModalAndRefresh(response) {
     $('#yamlcontainer').html(response.yamlconfig);
     $('#yamlcard').removeClass('d-none');
 
-    // reload specific div of index.html, but send along an additional
-    // parameter to indicate to backend that it's not a whole page load
-    $('#search-forms').load('/cgapp/?param=refreshobjects #search-forms');
+    // reload specific div of index.html
+    $('#search-forms').load('/cgapp/ #search-forms');
 
     // close modal
     $('#create-object-modal').modal('toggle');
+}
+
+
+function checkConfig() {
+    $.post({
+        url: '/cgapp/ajax/checkconfig/',
+        data: {
+            configid: currentObj.configid,
+        }
+    })
+    .done(function(response) {
+        console.log(response.output)
+    })
+    .fail(function(jqXHR, textStatus, errorThrown) {
+        console.log(errorThrown.toString());
+    });
 }
 
 
