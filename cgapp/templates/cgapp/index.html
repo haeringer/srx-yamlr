@@ -132,7 +132,9 @@
     </div>
     <!-- End of Create-Object Modal -->
 
-    <div class="loading">Loading&#8230;</div>
+    <div id="overlay">
+      <div id="overlaytext">Loading YAML...</div>
+    </div>
 
     <nav class="navbar navbar-dark fixed-top bg-dark p-0 shadow">
       <a class="navbar-brand col-sm-3" href="#">SRX Config Generator</a>
@@ -160,8 +162,8 @@
                 <div data-toggle="tooltip" data-placement="bottom" title="Check config">
                   <button class="btn btn-primary" id="check-config"><i class="fas fa-check"></i></button>
                 </div>
-                <div data-toggle="tooltip" data-placement="bottom" title="Deploy config">
-                  <button class="btn btn-primary disabled" id="deploy-config"><i class="fas fa-angle-double-right"></i></button>
+                <div data-toggle="tooltip" data-placement="bottom" title="Deploy and commit config">
+                  <button class="btn btn-primary" id="deploy-config"><i class="fas fa-angle-double-right"></i></button>
                 </div>
               </div>
 
@@ -355,6 +357,13 @@
 
     <!-- Other plug ins -->
     <script src="/static/sweetalert.min.js"></script>
+    <script>
+      window.paceOptions = {
+          startOnPageLoad: false,
+          restartOnRequestAfter: false,
+      };
+    </script>
+    <script src="/static/pace.min.js"></script>
 
     <!-- ConfigGen JavaScript -->
     <script src="/static/cgapp/main.js"></script>
