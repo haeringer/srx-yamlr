@@ -6,8 +6,6 @@ $(window).on('load', function() {
     // generate an initial configuration id
     var newID = uuidv4();
     currentObj['configid'] = newID;
-
-    loaddata();
 });
 
 
@@ -26,7 +24,7 @@ $(function() {
     $('#create-object-dropdown a').on('click', function () { createInputForm(this) });
     $('#adrset-form-control-zone').on('click', function() { filterObjects(this) });
 
-    $('#clear-config').on('click', function() { window.location.reload(false) });
+    $('#clear-config').on('click', function() { window.location.replace('/load') });
     $('#check-config').on('click', function() { checkConfig() });
     $('#deploy-config').on('click', function() { deployConfig() });
 
@@ -44,33 +42,11 @@ var selObj;
 
 
 
-function loaddata() {
-    document.getElementById("overlay").style.display = "block";
-    Pace.start();
-    $.get({
-        url: '/cgapp/ajax/loaddata/',
-    })
-    .done(function(response) {
-        if (response.importerror != null) {
-            alert('YAML import failed because of the following error:\n\n'
-                + JSON.parse(response.importerror)
-            )
-        }
-        $('#search-forms').load('/cgapp/ #search-forms');
-        Pace.stop();
-        $("#overlay").fadeOut("slow");
-    })
-    .fail(function(jqXHR, textStatus, errorThrown) {
-        console.log(errorThrown.toString());
-    });
-}
-
-
 function filterObjects(zoneselector) {
     var selectedzone = $(zoneselector).val();
 
     $.get({
-        url: '/cgapp/ajax/filterobjects/',
+        url: '/ajax/filterobjects/',
         data: {
             selectedzone: selectedzone,
         }
@@ -114,8 +90,6 @@ function createInputForm(obj) {
         $('#application-form').removeClass('d-none')
     } else if (selObj === 'Application Set') {
         $('#appset-form').removeClass('d-none')
-    } else if (selObj === 'Zone') {
-        swal('is noch nich implementiert')
     }
 }
 
@@ -135,7 +109,7 @@ function createObject() {
         }
 
         $.post({
-            url: '/cgapp/ajax/newobject/',
+            url: '/ajax/newobject/',
             data: {
                 configid: currentObj.configid,
                 objtype: objtype,
@@ -164,7 +138,7 @@ function createObject() {
         }
 
         $.post({
-            url: '/cgapp/ajax/newobject/',
+            url: '/ajax/newobject/',
             data: {
                 configid: currentObj.configid,
                 objtype: objtype,
@@ -193,7 +167,7 @@ function createObject() {
         }
 
         $.post({
-            url: '/cgapp/ajax/newobject/',
+            url: '/ajax/newobject/',
             data: {
                 configid: currentObj.configid,
                 objtype: objtype,
@@ -221,7 +195,7 @@ function createObject() {
         }
 
         $.post({
-            url: '/cgapp/ajax/newobject/',
+            url: '/ajax/newobject/',
             data: {
                 configid: currentObj.configid,
                 objtype: objtype,
@@ -248,7 +222,7 @@ function closeModalAndRefresh(response) {
     $('#yamlcard').removeClass('d-none');
 
     // reload specific div of index.html
-    $('#search-forms').load('/cgapp/ #search-forms');
+    $('#search-forms').load('/?param=load #search-forms');
 
     // close modal
     $('#create-object-modal').modal('toggle');
@@ -257,7 +231,7 @@ function closeModalAndRefresh(response) {
 
 function checkConfig() {
     $.post({
-        url: '/cgapp/ajax/checkconfig/',
+        url: '/ajax/checkconfig/',
         data: {
             configid: currentObj.configid,
         }
@@ -288,7 +262,7 @@ function addObject(obj) {
 
     if (source === 'from' || source === 'to') {
 
-        $.post('/cgapp/ajax/objectdata/', {
+        $.post('/ajax/objectdata/', {
             configid: currentObj.configid,
             objectid: objectId_db,
             source: source,
@@ -296,6 +270,11 @@ function addObject(obj) {
             })
 
         .done(function(response) {
+            if (response.error != null) {
+                alert('YAML build failed because of the following error:\n\n'
+                    + JSON.parse(response.error)
+                )
+            }
             var objVal = response.obj_val
             if (Array.isArray(objVal) == true) {
                 objVal = objVal.join(', ');
@@ -367,7 +346,7 @@ function addObject(obj) {
 
     } else if (source === 'app') {
 
-        $.post('/cgapp/ajax/objectdata/', {
+        $.post('/ajax/objectdata/', {
             configid: currentObj.configid,
             objectid: objectId_db,
             source: source,
@@ -375,6 +354,11 @@ function addObject(obj) {
         })
 
         .done(function(response) {
+            if (response.error != null) {
+                alert('YAML build failed because of the following error:\n\n'
+                    + JSON.parse(response.error)
+                )
+            }
             var objVal;
             if (response.hasOwnProperty('obj_protocol')) {
                 objVal = response.obj_protocol + ' ' + response.obj_port;
@@ -449,7 +433,7 @@ function deleteObject(obj) {
         }
     }
 
-    $.post('/cgapp/ajax/objectdata/', {
+    $.post('/ajax/objectdata/', {
         configid: currentObj.configid,
         objectid: objectId_db,
         source: source,
@@ -457,6 +441,11 @@ function deleteObject(obj) {
     })
 
     .done(function(response) {
+        if (response.error != null) {
+            alert('YAML build failed because of the following error:\n\n'
+                + JSON.parse(response.error)
+            )
+        }
         $('#yamlcontainer').html(response.yamlconfig);
         if (currentObjIsEmpty(currentObj)) {
             $('#yamlcard').addClass('d-none');

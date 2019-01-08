@@ -16,6 +16,7 @@ zones:
       Host3Three: 10.3.3.4/32
     addrsets:
       Set3: [Host3One,Host3Two,Host3Three]
+protocols: [tcp,udp,icmp,1]
 applications:
   snmp:
     protocol: udp
@@ -29,6 +30,13 @@ applications:
   ssh:
     protocol: tcp
     port: 22
+default-applications:
+  junos-ping:
+    protocol: 1
+  junos-icmp:
+    protocol: icmp
+default-applicationsets:
+  junos-icmp-all: [junos-ping,junos-icmp]
 applicationsets:
   test-set: [snmp,api]
   set2: [dns,ssh]
@@ -38,16 +46,16 @@ policies:
     tozone: ZoneTwo
     source: HostOne
     destination: Network2One
-    applications: snmp
+    application: snmp
   allow-network2one-to-hosts3:
     fromzone: ZoneTwo
     tozone: ZoneThree
     source: Network2One
     destination: [Host3One,Host3Two,Host3Three]
-    applications: [snmp,api]
+    application: [snmp,api]
   allow-setone-to-set3:
     fromzone: ZoneOne
     tozone: ZoneThree
     source: SetOne
     destination: Set3
-    applications: set2
+    application: set2

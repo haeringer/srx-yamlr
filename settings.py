@@ -50,7 +50,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'cfgen.urls'
+ROOT_URLCONF = 'urls'
 
 TEMPLATES = [
     {
@@ -68,16 +68,24 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'cfgen.wsgi.application'
+WSGI_APPLICATION = 'wsgi.application'
 
 
 # Database
 # https://docs.djangoproject.com/en/2.1/ref/settings/#databases
 
 DATABASES = {
+    # 'default': {
+    #     'ENGINE': 'django.db.backends.sqlite3',
+    #     'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+    # }
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'cfgen_db',
+        'USER': 'cfgen',
+        'PASSWORD': 'rjBvtl2VinRA6QZKNPA46ZQwuR2jmz',
+        'HOST': '',
+        'PORT': '',
     }
 }
 
@@ -119,3 +127,8 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
 
 STATIC_URL = '/static/'
+
+LOGIN_URL = '/auth/login'
+LOGOUT_URL = '/auth/logout'
+LOGIN_REDIRECT_URL = '/load'
+LOGOUT_REDIRECT_URL = '/'

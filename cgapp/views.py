@@ -1,13 +1,29 @@
 from django.shortcuts import render, get_list_or_404
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.decorators import login_required
 from .models import *
 from .helpers import importyaml, buildyaml, queryset_to_var
 from .process import runansible
 import sys, traceback, json
 
 
-def index(request):
+yamlfile = 'kami-kaze.yml'
+
+
+@login_required(redirect_field_name=None)
+def mainView(request):
+    param = request.GET.get('param', None)
+    context = None
+
+    if param == 'clear':
+        print('importyaml start...')
+        try:
+            importyaml(yamlfile, False)
+        except Exception as e:
+            print('YAML import failed because of the following error:')
+            print(traceback.format_exc())
+        print('importyaml done')
 
     try:
         zones = get_list_or_404(SrxZone)
@@ -15,34 +31,33 @@ def index(request):
         addrsets = get_list_or_404(SrxAddrSet)
         applications = get_list_or_404(SrxApplication)
         appsets = get_list_or_404(SrxAppSet)
-        policies = get_list_or_404(SrxPolicy)
         context = {
             'zones': zones,
             'addresses': addresses,
             'addrsets': addrsets,
             'applications': applications,
             'appsets': appsets,
-            'policies': policies
         }
     except:
         raise Http404("HTTP 404 Error")
 
-    return render(request, 'cgapp/index.html', context)
+    return render(request, 'cgapp/main.html', context)
 
 
 
-def loaddata(request):
-
-    yamlfile = 'kami-kaze.yml'
+def loadobjects(request):
+    loadpolicies = request.GET.get('loadpolicies', 'False')
+    print('importyaml start;', 'loadpolicies:', loadpolicies)
     response_data = {}
 
     try:
-        importyaml(yamlfile)
+        importyaml(yamlfile, loadpolicies)
     except Exception as e:
         print('YAML import failed because of the following error:')
         print(traceback.format_exc())
-        response_data['importerror'] = json.dumps(traceback.format_exc())
+        response_data['error'] = json.dumps(traceback.format_exc())
 
+    print('importyaml done')
     return JsonResponse(response_data, safe=False)
 
 
@@ -104,7 +119,8 @@ def objectdata(request):
         response_data['yamlconfig'] = yaml
     except Exception as e:
         print('YAML build failed because of the following error:')
-        print(e)
+        print(traceback.format_exc())
+        response_data['error'] = json.dumps(traceback.format_exc())
 
 
     return JsonResponse(response_data, safe=False)

@@ -24,16 +24,16 @@ class SrxAddrSet(models.Model):
         return self.name
 
 class SrxProtocol(models.Model):
-    ptype = models.CharField(max_length=3)
+    ptype = models.CharField(max_length=12)
     def __str__(self):
         return self.ptype
 
 class SrxApplication(models.Model):
     name = models.CharField(max_length=255)
-    protocol = models.ForeignKey(SrxProtocol, on_delete=models.PROTECT,
+    protocol = models.ForeignKey(SrxProtocol, on_delete=models.CASCADE,
                                  default=0)
     uuid = models.CharField(max_length=36, default=uuid.uuid4)
-    port = models.CharField(max_length=11)
+    port = models.CharField(max_length=64)
     def __str__(self):
         return self.name
 

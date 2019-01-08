@@ -7,133 +7,155 @@ def makehash():
     return collections.defaultdict(makehash)
 
 
-def importyaml(yamlfile):
+def importyaml(yamlfile, policies):
 
     with open(yamlfile, 'r') as infile:
         configdata = yaml.load(infile)
 
-    # always populate protocol with tcp + udp
-    SrxProtocol.objects.update_or_create(ptype='tcp')
-    SrxProtocol.objects.update_or_create(ptype='udp')
+    if policies == 'False':
+        '''
+        import zones
+        '''
+        SrxZone.objects.all().delete()
+        for zone in configdata['zones']:
+            SrxZone.objects.update_or_create(name=zone)
 
-    '''
-    import zones
-    '''
-    SrxZone.objects.all().delete()
-    for zone in configdata['zones']:
-        SrxZone.objects.update_or_create(name=zone)
+        '''
+        import addresses
+        '''
+        SrxAddress.objects.all().delete()
+        for zone, values in configdata['zones'].items():
+            address = values['addresses'] # {'HostOne': '10.1.1.1/32'}
+            for name, ip in address.items():
+                # retrieve zone object from zone model
+                # to make foreign key connection
+                srxzonename = SrxZone.objects.get(name=zone)
+                SrxAddress.objects.update_or_create(
+                    zone=srxzonename,
+                    name=name,
+                    ip=ip
+                )
 
-    '''
-    import addresses
-    '''
-    SrxAddress.objects.all().delete()
-    for zone, values in configdata['zones'].items():
-        address = values['addresses'] # {'HostOne': '10.1.1.1/32'}
-        for name, ip in address.items():
-            # retrieve zone object from zone model
-            # to make foreign key connection
-            srxzonename = SrxZone.objects.get(name=zone)
-            SrxAddress.objects.update_or_create(
-                zone=srxzonename,
-                name=name,
-                ip=ip
+        '''
+        import address sets
+        '''
+        SrxAddrSet.objects.all().delete()
+        for zone, values in configdata['zones'].items():
+            if 'addrsets' in values:
+                if values['addrsets']:
+                    addrset = values['addrsets']
+                    for setname, addrss in addrset.items():
+                        srxzonename = SrxZone.objects.get(name=zone)
+                        obj, created = SrxAddrSet.objects.update_or_create(
+                            zone=srxzonename,
+                            name=setname
+                        )
+                        if isinstance(addrss, list):
+                            for i in addrss:
+                                addr = SrxAddress.objects.get(name=i)
+                                obj.addresses.add(addr)
+                        else:
+                            addr = SrxAddress.objects.get(name=addrss)
+                            obj.addresses.add(addr)
+
+        '''
+        import protocols
+        '''
+        SrxProtocol.objects.all().delete()
+        for p in configdata['protocols']:
+            SrxProtocol.objects.update_or_create(ptype=p)
+
+        '''
+        import applications
+        '''
+        SrxApplication.objects.all().delete()
+        for app, values in configdata['applications'].items():
+            port = values.get('port')
+            protocol = values.get('protocol')
+            srxprotocoltype = SrxProtocol.objects.get(ptype=protocol)
+            SrxApplication.objects.update_or_create(
+                name=app,
+                protocol=srxprotocoltype,
+                port=port
+            )
+        for app, values in configdata['default-applications'].items():
+            protocol = values.get('protocol')
+            srxprotocoltype = SrxProtocol.objects.get(ptype=protocol)
+            if 'port' in values:
+                port = values.get('port')
+            else: port = ''
+            SrxApplication.objects.update_or_create(
+                name=app,
+                protocol=srxprotocoltype,
+                port=port
             )
 
-    '''
-    import address sets
-    '''
-    SrxAddrSet.objects.all().delete()
-    for zone, values in configdata['zones'].items():
-        if 'addrsets' in values:
-            if values['addrsets']:
-                addrset = values['addrsets']
-                for setname, addrss in addrset.items():
-                    srxzonename = SrxZone.objects.get(name=zone)
-                    obj, created = SrxAddrSet.objects.update_or_create(
-                        zone=srxzonename,
-                        name=setname
-                    )
-                    if isinstance(addrss, list):
-                        for i in addrss:
-                            addr = SrxAddress.objects.get(name=i)
-                            obj.addresses.add(addr)
-                    else:
-                        addr = SrxAddress.objects.get(name=addrss)
-                        obj.addresses.add(addr)
-
-    '''
-    import applications
-    '''
-    SrxApplication.objects.all().delete()
-    for app, values in configdata['applications'].items():
-        port = values.get('port')
-        protocol = values.get('protocol')
-        srxprotocoltype = SrxProtocol.objects.get(ptype=protocol)
-        SrxApplication.objects.update_or_create(
-            name=app,
-            protocol=srxprotocoltype,
-            port=port
-        )
-
-    '''
-    import application sets
-    '''
-    SrxAppSet.objects.all().delete()
-    for appset, values in configdata['applicationsets'].items():
-        obj, created = SrxAppSet.objects.update_or_create(name=appset)
-        if isinstance(values, list):
-            for i in values:
-                app = SrxApplication.objects.get(name=i)
+        '''
+        import application sets
+        '''
+        SrxAppSet.objects.all().delete()
+        for appset, values in configdata['applicationsets'].items():
+            obj, created = SrxAppSet.objects.update_or_create(name=appset)
+            if isinstance(values, list):
+                for i in values:
+                    app = SrxApplication.objects.get(name=i)
+                    obj.applications.add(app)
+            else:
+                app = SrxApplication.objects.get(name=values)
                 obj.applications.add(app)
-        else:
-            app = SrxApplication.objects.get(name=values)
-            obj.applications.add(app)
 
 
     '''
     import policies
     '''
-    SrxPolicy.objects.all().delete()
-    for policy, values in configdata['policies'].items():
+    if policies == 'True':
+        SrxPolicy.objects.all().delete()
+        for policy, values in configdata['policies'].items():
 
-        obj, created = SrxPolicy.objects.update_or_create(name=policy)
+            obj, created = SrxPolicy.objects.update_or_create(name=policy)
 
-        frm = SrxZone.objects.get(name=values['fromzone'])
-        to = SrxZone.objects.get(name=values['tozone'])
-        src = values['source']
-        dest = values['destination']
-        apps = values['applications']
+            frm = SrxZone.objects.get(name=values['fromzone'])
+            to = SrxZone.objects.get(name=values['tozone'])
+            src = values['source']
+            dest = values['destination']
+            apps = values['application']
 
-        # manytomany fields cannot be populated with
-        # update_or_create(), therefore use .add()
-        obj.fromzone.add(frm)
-        obj.tozone.add(to)
+            # manytomany fields cannot be populated with
+            # update_or_create(), therefore use .add()
+            obj.fromzone.add(frm)
+            obj.tozone.add(to)
 
-        # abuse try/except error handling for application logic
-        # in order to keep things simple
-        if isinstance(src, list):
-            for i in src:
-                try: obj.srcaddress.add(SrxAddress.objects.get(name=i))
-                except: obj.srcaddrset.add(SrxAddrSet.objects.get(name=i))
-        else:
-            try: obj.srcaddress.add(SrxAddress.objects.get(name=src))
-            except: obj.srcaddrset.add(SrxAddrSet.objects.get(name=src))
+            # abuse try/except error handling for application logic
+            # in order to keep things simple
+            if isinstance(src, list):
+                for i in src:
+                    try: obj.srcaddress.add(SrxAddress.objects.get(name=i))
+                    except: obj.srcaddrset.add(SrxAddrSet.objects.get(name=i))
+            elif src != 'any':
+                try: obj.srcaddress.add(SrxAddress.objects.get(name=src))
+                except: obj.srcaddrset.add(SrxAddrSet.objects.get(name=src))
+            else:
+                q = SrxAddress.objects.filter(zone=frm).get(name='any')
+                obj.srcaddress.add(q)
 
-        if isinstance(dest, list):
-            for i in dest:
-                try: obj.destaddress.add(SrxAddress.objects.get(name=i))
-                except: obj.destaddrset.add(SrxAddrSet.objects.get(name=i))
-        else:
-            try: obj.destaddress.add(SrxAddress.objects.get(name=dest))
-            except: obj.destaddrset.add(SrxAddrSet.objects.get(name=dest))
+            if isinstance(dest, list):
+                for i in dest:
+                    try: obj.destaddress.add(SrxAddress.objects.get(name=i))
+                    except: obj.destaddrset.add(SrxAddrSet.objects.get(name=i))
+            elif dest != 'any':
+                try: obj.destaddress.add(SrxAddress.objects.get(name=dest))
+                except: obj.destaddrset.add(SrxAddrSet.objects.get(name=dest))
+            else:
+                q = SrxAddress.objects.filter(zone=to).get(name='any')
+                obj.destaddress.add(q)
 
-        if isinstance(apps, list):
-            for i in apps:
-                try: obj.application.add(SrxApplication.objects.get(name=i))
-                except: obj.appset.add(SrxAppSet.objects.get(name=i))
-        else:
-            try: obj.application.add(SrxApplication.objects.get(name=apps))
-            except: obj.appset.add(SrxAppSet.objects.get(name=apps))
+            if isinstance(apps, list):
+                for i in apps:
+                    try: obj.application.add(SrxApplication.objects.get(name=i))
+                    except: obj.appset.add(SrxAppSet.objects.get(name=i))
+            else:
+                try: obj.application.add(SrxApplication.objects.get(name=apps))
+                except: obj.appset.add(SrxAppSet.objects.get(name=apps))
 
 
 
@@ -229,13 +251,15 @@ def buildyaml(objdata, src, objtype, configid, action):
             o = SrxZone.objects.get(name=od_tozone)
             obj.tozone.add(o)
         if od_srcaddress:
-            o = SrxAddress.objects.get(name=od_srcaddress)
+            z = SrxZone.objects.get(name=od_fromzone)
+            o = SrxAddress.objects.filter(zone=z).get(name=od_srcaddress)
             obj.srcaddress.add(o)
         if od_srcaddrset:
             o = SrxAddrSet.objects.get(name=od_srcaddrset)
             obj.srcaddrset.add(o)
         if od_destaddress:
-            o = SrxAddress.objects.get(name=od_destaddress)
+            z = SrxZone.objects.get(name=od_tozone)
+            o = SrxAddress.objects.filter(zone=z).get(name=od_destaddress)
             obj.destaddress.add(o)
         if od_destaddrset:
             o = SrxAddrSet.objects.get(name=od_destaddrset)
@@ -250,13 +274,15 @@ def buildyaml(objdata, src, objtype, configid, action):
         # zones are not removed until last address object is deleted -
         # see database queries + filling yaml_variables below
         if od_srcaddress:
-            o = SrxAddress.objects.get(name=od_srcaddress)
+            z = SrxZone.objects.get(name=od_fromzone)
+            o = SrxAddress.objects.filter(zone=z).get(name=od_srcaddress)
             obj.srcaddress.remove(o)
         if od_srcaddrset:
             o = SrxAddrSet.objects.get(name=od_srcaddrset)
             obj.srcaddrset.remove(o)
         if od_destaddress:
-            o = SrxAddress.objects.get(name=od_destaddress)
+            z = SrxZone.objects.get(name=od_tozone)
+            o = SrxAddress.objects.filter(zone=z).get(name=od_destaddress)
             obj.destaddress.remove(o)
         if od_destaddrset:
             o = SrxAddrSet.objects.get(name=od_destaddrset)

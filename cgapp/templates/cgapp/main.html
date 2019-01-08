@@ -20,127 +20,15 @@
   <body>
 
     <!-- Create-Object Modal -->
-    <div class="modal fade" id="create-object-modal" tabindex="-1" role="dialog" aria-labelledby="create-object-modal-label" aria-hidden="true">
-      <div class="modal-dialog shadow" role="document">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="create-object-modal-label">Create new firewall object</h5>
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close" id="create-object-modal-close">
-              <span aria-hidden="true">&times;</span>
-            </button>
-          </div>
-          <div class="modal-body">
-            <div class="dropdown mb-4" id="create-object-dropdown">
-              <button class="btn btn-secondary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                Object type
-              </button>
-              <div class="dropdown-menu shadow" aria-labelledby="create-object-dropdown">
-                <a class="dropdown-item" href="#">Address</a>
-                <a class="dropdown-item" href="#">Address Set</a>
-                <a class="dropdown-item" href="#">Application</a>
-                <a class="dropdown-item" href="#">Application Set</a>
-                <a class="dropdown-item" href="#">Zone</a>
-              </div>
-            </div>
-            <div id="form-container">
-              <form class="d-none border-top" id="address-form">
-                <div class="form-group mt-4">
-                  <h5>New Address</h5><br>
-                  <div id="address-form-alert"></div>
-                  <select class="custom-select" id="address-form-control-zone" autocomplete="off">
-                    <option selected>Choose Zone...</option>
-                    {% for zone in zones %}
-                    <option value="{{ zone.name }}">{{ zone.name }}</option>
-                    {% endfor %}
-                  </select>
-                </div>
-                <div class="form-group">
-                  <label for="address-form-control-name">Object Name</label>
-                  <input type="text" class="form-control" id="address-form-control-name" autocomplete="off">
-                </div>
-                <div class="form-group">
-                  <label for="address-form-control-name">IP Address/Prefix</label>
-                  <input type="text" class="form-control" id="address-form-control-ip" autocomplete="off">
-                </div>
-              </form>
-              <form class="d-none border-top" id="adrset-form">
-                <div class="form-group mt-4">
-                  <h5>New Address Set</h5><br>
-                  <div id="addrset-form-alert"></div>
-                  <select class="custom-select" id="adrset-form-control-zone" autocomplete="off">
-                    <option selected>Choose Zone...</option>
-                    {% for zone in zones %}
-                    <option value="{{ zone.name }}">{{ zone.name }}</option>
-                    {% endfor %}
-                  </select>
-                </div>
-                <div class="form-group">
-                  <label for="adrset-form-control-name">Object Name</label>
-                  <input type="text" class="form-control" id="adrset-form-control-name" autocomplete="off">
-                </div>
-                <div class="form-group">
-                  <label for="adrset-form-control-objects">Child Objects</label>
-                  <select multiple class="form-control" id="adrset-form-control-objects" autocomplete="off">
-                    {% for adr in addresses %}
-                    <option class="small">{{ adr.name }}</option>
-                    {% endfor %}
-                  </select>
-                </div>
-              </form>
-              <form class="d-none border-top" id="application-form">
-                <div class="form-group mt-4">
-                  <h5>New Application</h5><br>
-                  <div id="application-form-alert"></div>
-                  <label for="application-form-control-name">Application Name</label>
-                  <input type="text" class="form-control" id="application-form-control-name" autocomplete="off">
-                </div>
-                <div class="form-group">
-                  <label for="application-form-control-port">Port Number</label>
-                  <input type="number" class="form-control" id="application-form-control-port" autocomplete="off">
-                </div>
-                <div class="form-group">
-                  <select class="custom-select" id="application-form-control-protocol" autocomplete="off">
-                    <option selected>Protocol</option>
-                    <option value="tcp">TCP</option>
-                    <option value="udp">UDP</option>
-                  </select>
-                </div>
-              </form>
-              <form class="d-none border-top" id="appset-form">
-                <div class="form-group mt-4">
-                  <h5>New Application Set</h5><br>
-                  <div id="appset-form-alert"></div>
-                  <label for="appset-form-control-name">Object Name</label>
-                  <input type="text" class="form-control" id="appset-form-control-name" autocomplete="off">
-                </div>
-                <div class="form-group">
-                  <label for="appset-form-control-objects">Child Objects</label>
-                  <select multiple class="form-control" id="appset-form-control-objects">
-                    {% for app in applications %}
-                    <option class="small">{{ app.name }}</option>
-                    {% endfor %}
-                  </select>
-                </div>
-              </form>
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-primary" id="create-object-save">Save</button>
-          </div>
-        </div>
-      </div>
-    </div>
-    <!-- End of Create-Object Modal -->
-
-    <div id="overlay">
-      <div id="overlaytext">Loading YAML...</div>
+    <div id="modals">
+      {% include "cgapp/create-object-modal.html" %}
     </div>
 
     <nav class="navbar navbar-dark fixed-top bg-dark p-0 shadow">
       <a class="navbar-brand col-sm-3" href="#">SRX Config Generator</a>
       <ul class="navbar-nav px-3">
         <li class="nav-item text-nowrap">
-          <a class="nav-link" href="#">Sign out</a>
+          <a class="nav-link" href="/auth/logout">Log out</a>
         </li>
       </ul>
     </nav>
@@ -156,7 +44,7 @@
                 <div data-toggle="tooltip" data-placement="bottom" title="Create new object">
                   <button class="btn btn-primary" id="create-object" data-toggle="modal" data-target="#create-object-modal"><i class="fas fa-plus"></i></button>
                 </div>
-                <div data-toggle="tooltip" data-placement="bottom" title="Clear config">
+                <div data-toggle="tooltip" data-placement="bottom" title="Clear & Reload">
                   <button class="btn btn-primary ml-1" id="clear-config"><i class="fas fa-times"></i></button>
                 </div>
                 <div data-toggle="tooltip" data-placement="bottom" title="Check config">
@@ -357,16 +245,9 @@
 
     <!-- Other plug ins -->
     <script src="/static/sweetalert.min.js"></script>
-    <script>
-      window.paceOptions = {
-          startOnPageLoad: false,
-          restartOnRequestAfter: false,
-      };
-    </script>
-    <script src="/static/pace.min.js"></script>
 
     <!-- ConfigGen JavaScript -->
     <script src="/static/cgapp/main.js"></script>
 
-</body>
+  </body>
 </html>
