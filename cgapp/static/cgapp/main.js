@@ -210,8 +210,6 @@ function createObject() {
             console.log(errorThrown.toString());
         });
 
-    } else if (selObj === 'Zone') {
-        // New Zone
     }
 }
 
