@@ -13,18 +13,6 @@ yamlfile = 'kami-kaze.yml'
 
 @login_required(redirect_field_name=None)
 def mainView(request):
-    param = request.GET.get('param', None)
-    context = None
-
-    if param == 'clear':
-        print('importyaml start...')
-        try:
-            importyaml(yamlfile, False)
-        except Exception as e:
-            print('YAML import failed because of the following error:')
-            print(traceback.format_exc())
-        print('importyaml done')
-
     try:
         zones = get_list_or_404(SrxZone)
         addresses = get_list_or_404(SrxAddress)

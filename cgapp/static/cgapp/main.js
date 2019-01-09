@@ -220,7 +220,7 @@ function closeModalAndRefresh(response) {
     $('#yamlcard').removeClass('d-none');
 
     // reload specific div of index.html
-    $('#search-forms').load('/?param=load #search-forms');
+    $('#search-forms').load('/ #search-forms');
 
     // close modal
     $('#create-object-modal').modal('toggle');
