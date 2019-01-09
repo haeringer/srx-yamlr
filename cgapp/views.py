@@ -3,7 +3,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 from .models import *
-from .helpers import importyaml, buildyaml, queryset_to_var
+from .helpers import *
 from .process import runansible
 import sys, traceback, json
 
@@ -51,7 +51,16 @@ def loadobjects(request):
     response_data = {}
 
     try:
-        importyaml(yamlfile, loadpolicies)
+        conf = yamlConf(yamlfile)
+        if loadpolicies == 'False':
+            conf.importzones()
+            conf.importaddresses()
+            conf.importaddrsets()
+            conf.importprotocols()
+            conf.importapplications()
+            conf.importappsets()
+        elif loadpolicies == 'True':
+            conf.importpolicies()
     except Exception as e:
         print('YAML import failed because of the following error:')
         print(traceback.format_exc())

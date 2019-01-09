@@ -7,24 +7,20 @@ def makehash():
     return collections.defaultdict(makehash)
 
 
-def importyaml(yamlfile, policies):
+class yamlConf:
 
-    with open(yamlfile, 'r') as infile:
-        configdata = yaml.load(infile)
+    def __init__(self, sourcefile):
+        with open(sourcefile, 'r') as infile:
+            self.data = yaml.load(infile)
 
-    if policies == 'False':
-        '''
-        import zones
-        '''
+    def importzones(self):
         SrxZone.objects.all().delete()
-        for zone in configdata['zones']:
+        for zone in self.data['zones']:
             SrxZone.objects.update_or_create(name=zone)
 
-        '''
-        import addresses
-        '''
+    def importaddresses(self):
         SrxAddress.objects.all().delete()
-        for zone, values in configdata['zones'].items():
+        for zone, values in self.data['zones'].items():
             address = values['addresses'] # {'HostOne': '10.1.1.1/32'}
             for name, ip in address.items():
                 # retrieve zone object from zone model
@@ -36,11 +32,9 @@ def importyaml(yamlfile, policies):
                     ip=ip
                 )
 
-        '''
-        import address sets
-        '''
+    def importaddrsets(self):
         SrxAddrSet.objects.all().delete()
-        for zone, values in configdata['zones'].items():
+        for zone, values in self.data['zones'].items():
             if 'addrsets' in values:
                 if values['addrsets']:
                     addrset = values['addrsets']
@@ -58,18 +52,14 @@ def importyaml(yamlfile, policies):
                             addr = SrxAddress.objects.get(name=addrss)
                             obj.addresses.add(addr)
 
-        '''
-        import protocols
-        '''
+    def importprotocols(self):
         SrxProtocol.objects.all().delete()
-        for p in configdata['protocols']:
+        for p in self.data['protocols']:
             SrxProtocol.objects.update_or_create(ptype=p)
 
-        '''
-        import applications
-        '''
+    def importapplications(self):
         SrxApplication.objects.all().delete()
-        for app, values in configdata['applications'].items():
+        for app, values in self.data['applications'].items():
             port = values.get('port')
             protocol = values.get('protocol')
             srxprotocoltype = SrxProtocol.objects.get(ptype=protocol)
@@ -78,7 +68,7 @@ def importyaml(yamlfile, policies):
                 protocol=srxprotocoltype,
                 port=port
             )
-        for app, values in configdata['default-applications'].items():
+        for app, values in self.data['default-applications'].items():
             protocol = values.get('protocol')
             srxprotocoltype = SrxProtocol.objects.get(ptype=protocol)
             if 'port' in values:
@@ -90,11 +80,9 @@ def importyaml(yamlfile, policies):
                 port=port
             )
 
-        '''
-        import application sets
-        '''
+    def importappsets(self):
         SrxAppSet.objects.all().delete()
-        for appset, values in configdata['applicationsets'].items():
+        for appset, values in self.data['applicationsets'].items():
             obj, created = SrxAppSet.objects.update_or_create(name=appset)
             if isinstance(values, list):
                 for i in values:
@@ -104,13 +92,9 @@ def importyaml(yamlfile, policies):
                 app = SrxApplication.objects.get(name=values)
                 obj.applications.add(app)
 
-
-    '''
-    import policies
-    '''
-    if policies == 'True':
+    def importpolicies(self):
         SrxPolicy.objects.all().delete()
-        for policy, values in configdata['policies'].items():
+        for policy, values in self.data['policies'].items():
 
             obj, created = SrxPolicy.objects.update_or_create(name=policy)
 
