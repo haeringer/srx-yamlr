@@ -1,14 +1,13 @@
-import subprocess
+import subprocess as sp
 
 
 def runansible():
-    # call(['ansible', '--version'])
 
-    # Set up the command and direct the output to a pipe
-    p1 = subprocess.Popen(['ping', '-c 2', 'localhost'],
-                          stdout=subprocess.PIPE)
+    # cmd = ['ansible', '--version']
+    cmd = ['ping', '-c 5', 'localhost']
 
-    # Run the command
-    output = p1.communicate()[0]
+    p1 = sp.Popen(cmd, stdout=sp.PIPE)
 
-    print(output)
+    for line in p1.stdout:
+        output = line.decode("utf-8")
+        print(output.rstrip('\n'))
