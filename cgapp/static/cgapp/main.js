@@ -255,6 +255,8 @@ function deployConfig() {
 retrieve parent zone and add object to card element */
 function addObject(obj) {
 
+    $('.spinner-container').fadeIn()
+
     var objectId_dj = obj.id.split("_", 2).pop();
     var objectId_db = obj.id.split("_", 3).pop();
     var source = obj.id.split("_").shift();
@@ -279,6 +281,9 @@ function addObject(obj) {
             if (Array.isArray(objVal) == true) {
                 objVal = objVal.join(', ');
             }
+
+            $('.spinner-container').fadeOut()
+
             if (source === 'from') {
                 var zoneTo = $('#added-zone-body-to').html()
                 if (zoneTo === response.parentzone) {
@@ -341,6 +346,7 @@ function addObject(obj) {
         })
 
         .fail(function(errorThrown) {
+            $('.spinner-container').fadeOut()
             console.log(errorThrown.toString());
         });
 
@@ -365,6 +371,8 @@ function addObject(obj) {
             } else {
                 objVal = response.obj_apps.join(', ');
             }
+
+            $('.spinner-container').fadeOut()
 
             if (currentObj.app.includes(objectId_db)) {
                 swal("Object already in use!");
@@ -394,6 +402,7 @@ function addObject(obj) {
         })
 
         .fail(function(errorThrown) {
+            $('.spinner-container').fadeOut()
             console.log(errorThrown.toString());
         });
 

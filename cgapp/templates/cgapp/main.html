@@ -9,12 +9,12 @@
 
     <title>SRX Config Generator</title>
 
-    <!-- Bootstrap core CSS, Themify icons -->
+    <!-- Bootstrap core CSS + other libraries -->
     <link rel="stylesheet" href="/static/bootstrap.min.css">
     <link rel="stylesheet" href="/static/fontawesome-all.min.css">
 
     <!-- Custom CSS -->
-    <link rel="stylesheet" type="text/css" href="/static/cgapp/style.css">
+    <link rel="stylesheet" type="text/css" href="/static/cgapp/main.css">
   </head>
 
   <body>
@@ -22,6 +22,14 @@
     <!-- Create-Object Modal -->
     <div id="modals">
       {% include "cgapp/create-object-modal.html" %}
+    </div>
+
+    <div class="spinner-container">
+      <div class="spinner">
+        <div class="bounce1"></div>
+        <div class="bounce2"></div>
+        <div class="bounce3"></div>
+      </div>
     </div>
 
     <nav class="navbar navbar-dark fixed-top bg-dark p-0 shadow">
@@ -33,8 +41,8 @@
       </ul>
     </nav>
 
-    <main role="main" class="container-fluid">
-      <div class="row full-height">
+    <main role="main" class="container-fluid main-container">
+      <div class="row main-row full-height">
         <div class="col-sm pr-0">
 
           <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 pl-3 border-bottom">
@@ -42,7 +50,10 @@
             <div class="btn-toolbar mb-2 mb-md-0 pr-2">
               <div class="btn-group mr-2">
                 <div data-toggle="tooltip" data-placement="bottom" title="Create new object">
-                  <button class="btn btn-primary" id="create-object" data-toggle="modal" data-target="#create-object-modal"><i class="fas fa-plus"></i></button>
+                  <button class="btn btn-primary" id="create-object" data-toggle="modal" data-target="#create-object-modal"><i class="fas fa-plus-square"></i></button>
+                </div>
+                <div data-toggle="tooltip" data-placement="bottom" title="Add another policy">
+                  <button class="btn btn-primary" id="add-policy"><i class="fas fa-plus"></i></button>
                 </div>
                 <div data-toggle="tooltip" data-placement="bottom" title="Clear & Reload">
                   <button class="btn btn-primary ml-1" id="clear-config"><i class="fas fa-times"></i></button>
@@ -58,7 +69,7 @@
             </div>
           </div>
 
-          <div class="row full-height">
+          <div class="row search-row full-height">
             <div class="col mt-3">
 
               <div id="search-forms">
