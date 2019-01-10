@@ -6,7 +6,7 @@
     <meta name="description" content="SRX Firewall Config Generator Login">
     <meta name="author" content="bhaeringer">
 
-    <title>SRX Config Generator - Login</title>
+    <title>SRX ConfigGenerator - Login</title>
 
     <!-- Bootstrap core CSS -->
     <link rel="stylesheet" href="/static/bootstrap.min.css">
@@ -17,6 +17,7 @@
 
   <body class="text-center">
     <form class="form-signin" method="post">
+      <h1 class="h3 mb-3">SRX ConfigGenerator</h1><br>
       {% csrf_token %}
       {{ form.as_p }}
       <button class="btn btn-primary btn-block" type="submit">Login</button>
