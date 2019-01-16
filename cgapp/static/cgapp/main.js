@@ -5,7 +5,7 @@
 $(window).on('load', function() {
     // generate an initial configuration id
     var newID = uuidv4();
-    currentObj['configid'] = newID;
+    currentObj['policyid'] = newID;
 });
 
 
@@ -24,6 +24,7 @@ $(function() {
     $('#create-object-dropdown a').on('click', function () { createInputForm(this) });
     $('#adrset-form-control-zone').on('click', function() { filterObjects(this) });
 
+    $('#add-policy').on('click', function() { addPolicy() });
     $('#clear-config').on('click', function() { window.location.replace('/load') });
     $('#check-config').on('click', function() { checkConfig() });
     $('#deploy-config').on('click', function() { deployConfig() });
@@ -37,7 +38,7 @@ var currentObj = {};
 currentObj['from'] = [];
 currentObj['to'] = [];
 currentObj['app'] = [];
-currentObj['configid'] = [];
+currentObj['policyid'] = [];
 var selObj;
 
 
@@ -98,11 +99,11 @@ function createObject() {
 
     if (selObj === 'Address') {
         var objtype = 'address';
-        var addresszone = $("select#address-form-control-zone").val();
-        var addressname = $("input#address-form-control-name").val();
-        var addressip = $("input#address-form-control-ip").val();
+        var zone = $("select#address-form-control-zone").val();
+        var name = $("input#address-form-control-name").val();
+        var value = $("input#address-form-control-ip").val();
 
-        if (addresszone == '' || addressname == '' || addressip == '') {
+        if (zone == 'Choose Zone...' || name == '' || value == '') {
             $('#address-form-alert').append('<div class="alert alert-info" ' +
               'role="alert" id="field-empty">Please fill all values!</div>')
             return false;
@@ -111,11 +112,10 @@ function createObject() {
         $.post({
             url: '/ajax/newobject/',
             data: {
-                configid: currentObj.configid,
                 objtype: objtype,
-                addresszone: addresszone,
-                addressname: addressname,
-                addressip: addressip,
+                zone: zone,
+                name: name,
+                value: value,
             }
         })
         .done(function(response) {
@@ -127,11 +127,11 @@ function createObject() {
 
     } else if (selObj === 'Address Set') {
         var objtype = 'addrset';
-        var addrsetzone = $("select#adrset-form-control-zone").val();
-        var addrsetname = $("input#adrset-form-control-name").val();
-        var addrsetobjects = $("#adrset-form-control-objects").val();
+        var zone = $("select#adrset-form-control-zone").val();
+        var name = $("input#adrset-form-control-name").val();
+        var valuelist = $("#adrset-form-control-objects").val();
 
-        if (addrsetzone == '' || addrsetname == '' || addrsetobjects == '') {
+        if (zone == 'Choose Zone...' || name == '' || valuelist == '') {
             $('#addrset-form-alert').append('<div class="alert alert-info" ' +
               'role="alert" id="field-empty">Please fill all values!</div>')
             return false;
@@ -140,11 +140,10 @@ function createObject() {
         $.post({
             url: '/ajax/newobject/',
             data: {
-                configid: currentObj.configid,
                 objtype: objtype,
-                addrsetzone: addrsetzone,
-                addrsetname: addrsetname,
-                addrsetobjects: addrsetobjects,
+                zone: zone,
+                name: name,
+                valuelist: valuelist,
             }
         })
         .done(function(response) {
@@ -156,11 +155,11 @@ function createObject() {
 
     } else if (selObj === 'Application') {
         var objtype = 'application';
-        var appname = $("input#application-form-control-name").val();
-        var appport = $("input#application-form-control-port").val();
-        var appprotocol = $("select#application-form-control-protocol").val();
+        var name = $("input#application-form-control-name").val();
+        var port = $("input#application-form-control-port").val();
+        var protocol = $("select#application-form-control-protocol").val();
 
-        if (appprotocol == '' || appname == '' || appport == '') {
+        if (protocol == 'Protocol' || name == '' || port == '') {
             $('#application-form-alert').append('<div class="alert alert-info" ' +
               'role="alert" id="field-empty">Please fill all values!</div>')
             return false;
@@ -169,11 +168,11 @@ function createObject() {
         $.post({
             url: '/ajax/newobject/',
             data: {
-                configid: currentObj.configid,
+                policyid: currentObj.policyid,
                 objtype: objtype,
-                appname: appname,
-                appport: appport,
-                appprotocol: appprotocol,
+                name: name,
+                port: port,
+                protocol: protocol,
             }
         })
         .done(function(response) {
@@ -185,10 +184,10 @@ function createObject() {
 
     } else if (selObj === 'Application Set') {
         var objtype = 'appset';
-        var appsetname = $("input#appset-form-control-name").val();
-        var appsetobjects = $("#appset-form-control-objects").val();
+        var name = $("input#appset-form-control-name").val();
+        var valuelist = $("#appset-form-control-objects").val();
 
-        if (appsetname == '' || appsetobjects == '') {
+        if (name == '' || valuelist == '') {
             $('#appset-form-alert').append('<div class="alert alert-info" ' +
               'role="alert" id="field-empty">Please fill all values!</div>')
             return false;
@@ -197,10 +196,10 @@ function createObject() {
         $.post({
             url: '/ajax/newobject/',
             data: {
-                configid: currentObj.configid,
+                policyid: currentObj.policyid,
                 objtype: objtype,
-                appsetname: appsetname,
-                appsetobjects: appsetobjects,
+                name: name,
+                valuelist: valuelist,
             }
         })
         .done(function(response) {
@@ -209,7 +208,6 @@ function createObject() {
         .fail(function(jqXHR, textStatus, errorThrown) {
             console.log(errorThrown.toString());
         });
-
     }
 }
 
@@ -220,7 +218,7 @@ function closeModalAndRefresh(response) {
     $('#yamlcard').removeClass('d-none');
 
     // reload specific div of index.html
-    $('#search-forms').load('/ #search-forms');
+    $('#search-forms').load('/?param=reloadforms #search-forms');
 
     // close modal
     $('#create-object-modal').modal('toggle');
@@ -231,7 +229,7 @@ function checkConfig() {
     $.post({
         url: '/ajax/checkconfig/',
         data: {
-            configid: currentObj.configid,
+            policyid: currentObj.policyid,
         }
     })
     .done(function(response) {
@@ -244,9 +242,12 @@ function checkConfig() {
 
 
 function deployConfig() {
-    console.log('deploy config')
+    swal('geht noch nich')
 }
 
+function addPolicy() {
+    swal('geht noch nich')
+}
 
 
 /* After click on search result item (see event listener),
@@ -262,8 +263,8 @@ function addObject(obj) {
 
     if (source === 'from' || source === 'to') {
 
-        $.post('/ajax/objectdata/', {
-            configid: currentObj.configid,
+        $.post('/ajax/updatepolicy/', {
+            policyid: currentObj.policyid,
             objectid: objectId_db,
             source: source,
             action: action,
@@ -350,8 +351,8 @@ function addObject(obj) {
 
     } else if (source === 'app') {
 
-        $.post('/ajax/objectdata/', {
-            configid: currentObj.configid,
+        $.post('/ajax/updatepolicy/', {
+            policyid: currentObj.policyid,
             objectid: objectId_db,
             source: source,
             action: action,
@@ -359,7 +360,7 @@ function addObject(obj) {
 
         .done(function(response) {
             if (response.error != null) {
-                alert('YAML build failed because of the following error:\n\n'
+                alert('Updating the policy failed because of the following error:\n\n'
                     + JSON.parse(response.error)
                 )
             }
@@ -440,8 +441,8 @@ function deleteObject(obj) {
         }
     }
 
-    $.post('/ajax/objectdata/', {
-        configid: currentObj.configid,
+    $.post('/ajax/updatepolicy/', {
+        policyid: currentObj.policyid,
         objectid: objectId_db,
         source: source,
         action: action,
