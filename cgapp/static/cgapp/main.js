@@ -365,7 +365,7 @@ function addObject(obj) {
                 )
             }
             var objVal;
-            if (response.hasOwnProperty('obj_protocol')) {
+            if (response.obj_protocol != null) {
                 objVal = response.obj_protocol + ' ' + response.obj_port;
             } else {
                 objVal = response.obj_apps.join(', ');
