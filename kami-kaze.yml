@@ -1,7 +1,6 @@
 zones:
   untrust:
     addresses:
-      any: untrust
       IPB_PI_194.29.224.0/19: 194.29.224.0/19
       IPB_PA_91.102.8.0/21: 91.102.8.0/21
       IPB_UM-MGMT_94.198.61.80/28: 94.198.61.80/28
@@ -26,7 +25,6 @@ zones:
       INTERNAL_CUSTOMER_DEVICES_KNOWN_VIA_OSPF: [as1.ffm.itk-der]
   OfficeLAN:
     addresses:
-      any: OfficeLAN
       IPB_WORK_NET: 192.168.26.0/24
       IPB_WORK_ADMIN: 192.168.26.0/26
       IPB_WORK_SRV_JANE: 192.168.26.1/32
@@ -230,7 +228,6 @@ zones:
       IPB_WORK_SRV_JANES: [IPB_WORK_SRV_JANE,IPB_WORK_SRV_JANE2]
   VoIPLAN:
     addresses:
-      any: VoIPLAN
       IPB_VOIP_NET: 192.168.27.0/24
       IPB_PHONE_920: 192.168.27.20/32
       IPB_PHONE_921: 192.168.27.21/32
@@ -270,7 +267,6 @@ zones:
       IPB_VOIP_ACCESS_TO_SMTP_SERVER_WORK: [IPB_PHONE_970,IPB_PHONE_922,IPB_PHONE_899]
   MgmtLAN:
     addresses:
-      any: MgmtLAN
       IPB_MGMT_224_NET: 10.29.224.0/24
       IPB_MGMT_255_NET: 10.29.255.0/24
       IPB_MGMT_226_NET: 10.29.226.0/24
@@ -319,7 +315,6 @@ zones:
       IPB_Mgmt_SANSWITCH: [IPB_Mgmt_Sanswitch05,IPB_Mgmt_Sanswitch06,IPB_Mgmt_Sanswitch07,IPB_Mgmt_Sanswitch08]
   ServerLAN:
     addresses:
-      any: ServerLAN
       IPB_SERVER_NET: 192.168.226.0/24
       IPB_SERVER_SAFE2: 192.168.226.19/32
       IPB_SERVER_NAGIOS02_AGENT01: 192.168.226.23/32
@@ -502,7 +497,6 @@ zones:
       IPB_SERVER_MAIL: [IPB_SERVER_MAIL01,IPB_SERVER_MAIL02]
   Mgmt-Customer-itk:
     addresses:
-      any: Mgmt-Customer-itk
       IPB_VROUTER_AR22_VL1103_ITK_DER: 172.21.0.5/32
       IPB_ITK_TEST_FFM: 172.21.2.140/32
       IPB_QOS_TEST_CPE_ML: 172.21.2.131/32
@@ -526,18 +520,15 @@ zones:
       IPB_MGMT_ITK_DER: [IPB_VROUTER_AR22_VL1103_ITK_DER,IPB_ITK_TEST_FFM,IPB_QOS_TEST_CPE_ML,itk-der-cpe380048,itk-der-cpe424154,itk-der-cpe424137,itk-der-cpe371310,itk-der-cpe424132,itk-der-cpe424144,itk-der-cpe430685,itk-der-cpe427062,itk-der-cpe424146,itk-der-cpe429031,itk-der-cpe424142,itk-der-cpe424148,itk-der-cpe424096,itk-pva-001,IPB_SERVER_TFTP_ITK_VPN]
   WLAN-IPB-Office:
     addresses:
-      any: WLAN-IPB-Office
       WLAN_NET: 192.168.29.0/25
       WLAN_ROUTER_K15_2OG: 192.168.29.80/32
     addrsets:
   IPB_Mgmt-Customer_intern:
     addresses:
-      any: IPB_Mgmt-Customer_intern
       DENA_MGMT: 10.102.10.0/27
     addrsets:
   IPB_Mgmt-Customer_DENA:
     addresses:
-      any: IPB_Mgmt-Customer_DENA
       DENA03: 10.10.10.1/32
       DENA04: 10.10.10.2/32
       DENA_SRV_INTERN: 10.10.10.0/27
@@ -546,7 +537,6 @@ zones:
     addrsets:
   IPB_Office_f95:
     addresses:
-      any: IPB_Office_f95
       ipb_office_f95_net: 172.17.172.0/25
       ofgw01.f95-loopback: 10.29.228.0/32
       ahotline_notebook: 172.17.172.79/32
@@ -575,33 +565,28 @@ zones:
       IPB_WORK_ADMIN: [ap-charendt,ap-mscheffler_wlan,ap-mscheffler,ap-ptietze,ap-sdavid,ap-sdavid_wlan,ap-tstein,thotline_notebook,ap-011.aspire,ap-asus_laptop,ap-asus_laptop2]
   IPB_WD_ED_HOME:
     addresses:
-      any: IPB_WD_ED_HOME
       LOCAL_LAN_WD_ED: 172.17.172.128/26
     addrsets:
   Kameras-interim:
     addresses:
-      any: Kameras-interim
       B5-3_Kameras-interim_v4: 10.6.3.0/24
       B5-3_Kameras-interim_v6: 2a02:f28:f:603::/64
     addrsets:
       Kameras-interim: [B5-3_Kameras-interim_v4,B5-3_Kameras-interim_v6]
   EnvironmentMonitoring-interim:
     addresses:
-      any: EnvironmentMonitoring-interim
       B5-3_Environment_Monitoring_v4: 10.6.4.0/24
       B5-3_Environment_Monitoring_v6: 2a02:f28:f:604::/64
     addrsets:
       Environment_Monitoring: [B5-3_Environment_Monitoring_v4,B5-3_Environment_Monitoring_v6]
   EnergyMonitoring-interim:
     addresses:
-      any: EnergyMonitoring-interim
       B5-3_EnergyMeters_v4: 10.6.5.0/24
       B5-3_EnergyMeters_v6: 2a02:f28:f:605::/64
     addrsets:
       EnergyMeters: [B5-3_EnergyMeters_v4,B5-3_EnergyMeters_v6]
   Voip:
     addresses:
-      any: Voip
       Voip_network_v4: 10.7.0.0/16
       Voip_network_v6: 2a02:f28:f:700::/56
       IPB_SRV_PBX01: 10.7.0.250/32
@@ -611,7 +596,6 @@ zones:
       Voip_network: [Voip_network_v4,Voip_network_v6]
   SharedResources:
     addresses:
-      any: SharedResources
       SharedResources_network_v4: 10.8.0.0/16
       SharedResources_network_v6: 2a02:f28:f:800::/56
       Drucker-Gruppe-B2-DCM: 10.8.0.5/32
@@ -619,56 +603,48 @@ zones:
       SharedResources_network: [SharedResources_network_v4,SharedResources_network_v6]
   GF_APs:
     addresses:
-      any: GF_APs
       GF_APs_network_v4: 10.11.0.0/16
       GF_APs_network_v6: 2a02:f28:f:1100::/56
     addrsets:
       GF_APs_network: [GF_APs_network_v4,GF_APs_network_v6]
   DCM_APs:
     addresses:
-      any: DCM_APs
       DCM_APs_network_v4: 10.12.0.0/16
       DCM_APs_network_v6: 2a02:f28:f:1200::/56
     addrsets:
       DCM_APs_network: [DCM_APs_network_v4,DCM_APs_network_v6]
   Technik_APs:
     addresses:
-      any: Technik_APs
       Technik_APs_network_v4: 10.13.0.0/16
       Technik_APs_network_v6: 2a02:f28:f:1300::/56
     addrsets:
       Technik_APs_network: [Technik_APs_network_v4,Technik_APs_network_v6]
   Office_APs:
     addresses:
-      any: Office_APs
       Office_APs_network_v4: 10.14.0.0/16
       Office_APs_network_v6: 2a02:f28:f:1400::/56
     addrsets:
       Office_APs_network: [Office_APs_network_v4,Office_APs_network_v6]
   Alarmanlage:
     addresses:
-      any: Alarmanlage
       Alarmanlage_network_v4: 10.20.0.0/16
       Alarmanlage_network_v6: 2a02:f28:f:2000::/56
     addrsets:
       Alarmanlage_network: [Alarmanlage_network_v4,Alarmanlage_network_v6]
   Kameras:
     addresses:
-      any: Kameras
       Kameras_network_v4: 10.22.0.0/16
       Kameras_network_v6: 2a02:f28:f:2200::/56
     addrsets:
       Kameras_network: [Kameras_network_v4,Kameras_network_v6]
   EnvironmentMonitoring:
     addresses:
-      any: EnvironmentMonitoring
       EnvironmentMonitoring_network_v4: 10.24.0.0/16
       EnvironmentMonitoring_network_v6: 2a02:f28:f:2400::/56
     addrsets:
       EnvironmentMonitoring_network: [EnvironmentMonitoring_network_v4,EnvironmentMonitoring_network_v6]
   EnergyMonitoring:
     addresses:
-      any: EnergyMonitoring
       EnergyMonitoring_network_v4: 10.26.0.0/16
       EnergyMonitoring_network_v6: 2a02:f28:f:2600::/56
       EnergyMonitoring_mutiple_v4: 10.24.0.0/16
@@ -676,14 +652,12 @@ zones:
       EnergyMonitoring_network: [EnergyMonitoring_network_v4,EnergyMonitoring_network_v6,EnergyMonitoring_mutiple_v4]
   DMZ:
     addresses:
-      any: DMZ
       DMZ_network_v4: 10.30.0.0/16
       DMZ_network_v6: 2a02:f28:f:3000::/56
     addrsets:
       DMZ_network: [DMZ_network_v4,DMZ_network_v6]
   NetworkDevices:
     addresses:
-      any: NetworkDevices
       NetworkDevices_network_v4: 10.32.0.0/16
       NetworkDevices_network_v6: 2a02:f28:f:3200::/56
       sms-gw01.b2: 10.32.0.15/32
@@ -694,14 +668,12 @@ zones:
       sms-gw: [sms-gw01.b2,sms-gw01.k4]
   OOB:
     addresses:
-      any: OOB
       OOB_network_v4: 10.34.0.0/16
       OOB_network_v6: 2a02:f28:f:3400::/56
     addrsets:
       OOB_network: [OOB_network_v4,OOB_network_v6]
   InternalServer:
     addresses:
-      any: InternalServer
       InternalServer_network_v4: 10.36.0.0/16
       InternalServer_network_v6: 2a02:f28:f:3600::/56
       IPB_WORK_SRV_INVENTORY: 10.36.0.20/32
@@ -752,7 +724,6 @@ zones:
       IPB_SRV_app: [IPB_SRV_app01,IPB_SRV_app02]
   CloudInfrastruktur:
     addresses:
-      any: CloudInfrastruktur
       CloudInfrastruktur_network_v4: 10.38.0.0/16
       CloudInfrastruktur_network_v6: 2a02:f28:f:3800::/56
       IPB_Sanswitch09: 10.38.12.10/32
@@ -777,7 +748,6 @@ zones:
       CloudInfrastruktur_HyperVisor: [CloudInfrastruktur_HyperVisor_v4,CloudInfrastruktur_HyperVisor_v6]
   NetworkDevicesExternal:
     addresses:
-      any: NetworkDevicesExternal
       NetworkDevicesExt_network_v4: 10.32.90.0/24
       NetworkDevicesExt_network_v6: 2a02:f28:f:3290::/64
       F95_Mgmt_Net: 10.29.238.0/24
@@ -788,7 +758,6 @@ zones:
       NetworkDevicesExt_network: [NetworkDevicesExt_network_v4,NetworkDevicesExt_network_v6]
   Mgmt-Customer:
     addresses:
-      any: Mgmt-Customer
       Mgmt-Customer-Network: 172.16.0.0/16
       Cloud_Mgmt_Network1: 10.50.0.0/15
       Cloud_Mgmt_Network2: 10.52.0.0/14
@@ -799,19 +768,16 @@ zones:
       Cloud_Mgmt_Network: [Cloud_Mgmt_Network1,Cloud_Mgmt_Network2,Cloud_Mgmt_Network3]
   MSR:
     addresses:
-      any: MSR
       MSR_network_v4: 10.28.0.0/16
       MSR_network_v6: 2a02:f28:f:2800::/56
     addrsets:
       MSR_network: [MSR_network_v4,MSR_network_v6]
   IPB-Services_Support:
     addresses:
-      any: IPB-Services_Support
       Service_Network: 10.19.0.0/24
     addrsets:
   ESW_Transfernetz:
     addresses:
-      any: ESW_Transfernetz
       ESW_Transfernetz_v6: 2a02:f28:f:40::/64
       ESW_network_v4: 10.40.0.0/24
       ESW_network_v6: 2a02:f28:f:4000::/64
@@ -821,13 +787,11 @@ zones:
       ESW-network: [ESW_network_v4,ESW_network_v6]
   IPB-WLAN-Intern:
     addresses:
-      any: IPB-WLAN-Intern
       WLAN-Network: 10.33.0.0/24
       IPB_WORK_SRV_Unifi01: 10.33.0.2/32
     addrsets:
   IPB_Viewstations:
     addresses:
-      any: IPB_Viewstations
       IPB_Viewstations_v4: 10.9.0.0/24
       IPB_Viewstations_v6: 2a02:f28:f:900::/64
       IPB_Viewstations_SRV: 10.9.0.2/32
@@ -836,7 +800,6 @@ zones:
       IPB_Viewstations: [IPB_Viewstations_v4,IPB_Viewstations_v6]
   Labs:
     addresses:
-      any: Labs
       Labs-network-v4: 10.37.0.0/16
       Labs-network-v6: 2a02:f28:f:3700::/56
       noc-srv: 10.37.0.7/32
@@ -844,7 +807,6 @@ zones:
       Labs-network: [Labs-network-v4,Labs-network-v6]
   Mitarbeitercloud:
     addresses:
-      any: Mitarbeitercloud
       Mitarbeitercloud_network_v4: 10.35.0.0/16
       Mitarbeitercloud_network_v6: 2a02:f28:f:3500::/56
     addrsets:

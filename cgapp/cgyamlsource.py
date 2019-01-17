@@ -24,27 +24,24 @@ class yamlSource:
 
     def import_addresses(self):
         for zone, values in self.data['zones'].items():
-            address = values['addresses'] # {'HostOne': '10.1.1.1/32'}
-            for name, ip in address.items():
+            z = SrxZone.objects.get(name=zone)
+            # add 'any' zone to configuration
+            SrxAddress.objects.update_or_create(zone=z, name='any', ip=z)
+            a = values['addresses'] # {'HostOne': '10.1.1.1/32'}
+            for name, ip in a.items():
                 # retrieve zone object from zone model
                 # to make foreign key connection
-                srxzonename = SrxZone.objects.get(name=zone)
-                SrxAddress.objects.update_or_create(
-                    zone=srxzonename,
-                    name=name,
-                    ip=ip
-                )
+                SrxAddress.objects.update_or_create(zone=z, name=name, ip=ip)
 
     def import_addrsets(self):
         for zone, values in self.data['zones'].items():
+            z = SrxZone.objects.get(name=zone)
             if 'addrsets' in values:
                 if values['addrsets']:
-                    addrset = values['addrsets']
-                    for setname, addrss in addrset.items():
-                        srxzonename = SrxZone.objects.get(name=zone)
+                    a = values['addrsets']
+                    for setname, addrss in a.items():
                         obj, created = SrxAddrSet.objects.update_or_create(
-                            zone=srxzonename,
-                            name=setname
+                            zone=z, name=setname
                         )
                         if isinstance(addrss, list):
                             for i in addrss:
@@ -62,21 +59,17 @@ class yamlSource:
         for app, values in self.data['applications'].items():
             port = values.get('port')
             protocol = values.get('protocol')
-            srxprotocoltype = SrxProtocol.objects.get(ptype=protocol)
-            SrxApplication.objects.update_or_create(
-                name=app,
-                protocol=srxprotocoltype,
+            t = SrxProtocol.objects.get(ptype=protocol)
+            SrxApplication.objects.update_or_create(name=app, protocol=t,
                 port=port
             )
         for app, values in self.data['default-applications'].items():
             protocol = values.get('protocol')
-            srxprotocoltype = SrxProtocol.objects.get(ptype=protocol)
+            t = SrxProtocol.objects.get(ptype=protocol)
             if 'port' in values:
                 port = values.get('port')
             else: port = ''
-            SrxApplication.objects.update_or_create(
-                name=app,
-                protocol=srxprotocoltype,
+            SrxApplication.objects.update_or_create(name=app, protocol=t,
                 port=port
             )
 
