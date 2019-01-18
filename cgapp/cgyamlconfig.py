@@ -102,7 +102,7 @@ class yamlConfig:
                 temp_jsondump = json.dumps(defaultdict_newaddress)
                 yaml_newaddress = json.loads(temp_jsondump)
         else: yaml_newaddress = ''
-        print('yaml_newaddress:', yaml_newaddress)
+        print('Cfgen yaml_newaddress:', yaml_newaddress)
 
         q = SrxAddrSet.objects.filter(configid=c)
         if q:
@@ -122,7 +122,7 @@ class yamlConfig:
                 temp_jsondump = json.dumps(defaultdict_newaddrset)
                 yaml_newaddrset = json.loads(temp_jsondump)
         else: yaml_newaddrset = ''
-        print('yaml_newaddrset:', yaml_newaddrset)
+        print('Cfgen yaml_newaddrset:', yaml_newaddrset)
 
         q = SrxApplication.objects.filter(configid=c)
         if q:
@@ -183,7 +183,7 @@ class yamlConfig:
             self.yamldict['policies'] = {
                 policyname: policy
             }
-            print('policy:', policy)
+            print('Cfgen policy:', policy)
         if yaml_newaddress and not yaml_newaddrset:
             self.yamldict.update({'zones': yaml_newaddress})
         if yaml_newaddrset and not yaml_newaddress:
@@ -211,5 +211,5 @@ class yamlConfig:
         with open('config-new.yml', 'w') as outfile:
             yaml.dump(self.yamldict, outfile, default_flow_style=False)
 
-        print('yamldict (set_yaml_config):', self.yamldict)
+        print('Cfgen yamldict (set_yaml_config):', self.yamldict)
         self.configuration = yaml.dump(self.yamldict, default_flow_style=False)

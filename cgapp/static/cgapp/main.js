@@ -29,6 +29,8 @@ $(function() {
     $('#check-config').on('click', function() { checkConfig() });
     $('#deploy-config').on('click', function() { deployConfig() });
 
+    $('#output-close').on('click', function() { $('#output-modal').modal('toggle')});
+
     $('[data-toggle="tooltip"]').tooltip()
 
 });
@@ -226,18 +228,35 @@ function closeModalAndRefresh(response) {
 
 
 function checkConfig() {
-    $.post({
-        url: '/ajax/checkconfig/',
-        data: {
-            policyid: currentObj.policyid,
-        }
-    })
-    .done(function(response) {
-        console.log(response.output)
-    })
-    .fail(function(jqXHR, textStatus, errorThrown) {
-        console.log(errorThrown.toString());
-    });
+
+    var ws = new WebSocket(
+        'ws://' + window.location.host +
+        '/ws/consoleout/');
+
+    var message = ['ansible', '--version']
+    var message2 = ['ping', '-c 5', '10.13.0.1']
+
+    ws.onopen = function() {
+        ws.send(JSON.stringify({
+            'message': message
+        }));
+        ws.send(JSON.stringify({
+            'message': message2
+        }));
+    }
+
+    ws.onmessage = function(e) {
+        var data = JSON.parse(e.data);
+        var message = data['message'];
+        ol = document.querySelector('#output-log')
+        ol.value += (message);
+        ol.scrollTop = ol.scrollHeight
+    };
+
+    ws.onclose = function() {
+        console.log('Websocket closed')
+    };
+
 }
 
 

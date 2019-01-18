@@ -12,7 +12,6 @@ from .cgsrxobject import *
 from .cgpolicy import *
 from .cgyamlconfig import *
 from .cghelpers import *
-from .cgrun import *
 
 
 
@@ -45,7 +44,7 @@ def mainView(request):
         # Instantiate yamlConfig object with a new configid
         global yamlconfig
         yamlconfig = yamlConfig()
-        print('configid:', yamlconfig.configid)
+        print('Cfgen configid:', yamlconfig.configid)
 
     return render(request, 'cgapp/main.html', context)
 
@@ -58,7 +57,7 @@ def loadobjects(request):
 
     try:
         ys = yamlSource(yamlfile)
-        print('importyaml start;', 'policies ==', loadpolicies)
+        print('Cfgen importyaml start;', 'policies ==', loadpolicies)
         if loadpolicies == 'False':
             ys.reset_db()
             ys.import_zones()
@@ -70,11 +69,11 @@ def loadobjects(request):
         if loadpolicies == 'True':
             ys.import_policies()
     except Exception as e:
-        print('YAML import failed because of the following error:')
+        print('Cfgen YAML import failed because of the following error:')
         print(traceback.format_exc())
         response['error'] = json.dumps(traceback.format_exc())
 
-    print('importyaml done;', 'policies ==', loadpolicies)
+    print('Cfgen importyaml done;', 'policies ==', loadpolicies)
     return JsonResponse(response, safe=False)
 
 
@@ -97,7 +96,7 @@ def updatepolicy(request):
         # Instantiate policy object + create or update policy in db
         p = newPolicy()
         p.update_or_create_policy(i, c)
-        print('policyid:', i)
+        print('Cfgen policyid:', i)
 
         if p.validate_zone_logic(s) == 0:
             response['error'] = 'Zone validation failed'
@@ -121,7 +120,7 @@ def updatepolicy(request):
         response['yamlconfig'] = y.configuration
 
     except Exception as e:
-        print('Updating the policy failed because of the following error:')
+        print('Cfgen Updating the policy failed because of the following error:')
         print(traceback.format_exc())
         response['error'] = json.dumps(traceback.format_exc())
 
@@ -141,7 +140,7 @@ def newobject(request):
         s = srxObject()
         s.set_obj_values_new(request, c)
         s.save_new_obj()
-        print('configid (newobject):', c)
+        print('Cfgen configid (newobject):', c)
 
         # Update yamlConfig object
         y.set_yaml_values()
@@ -150,7 +149,7 @@ def newobject(request):
         response['yamlconfig'] = y.configuration
 
     except Exception as e:
-        print('Adding new object failed because of the following error:')
+        print('Cfgen Adding new object failed because of the following error:')
         print(traceback.format_exc())
         response['error'] = json.dumps(traceback.format_exc())
 
@@ -177,13 +176,5 @@ def filterobjects(request):
 
 
 
-@csrf_exempt
-def checkconfig(request):
-
-
-    runansible()
-
-    response = {}
-    response['output'] = 'bla'
-
-    return JsonResponse(response, safe=False)
+def channelsView(request):
+    return render(request, 'cgapp/modals.html', {})
