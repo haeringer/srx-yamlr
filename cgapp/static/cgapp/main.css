@@ -83,6 +83,10 @@ body {
     box-shadow: inset 9px 0px 13px 0px rgba(0,0,0,0.05);
   }
 
+  #edit-yaml a:link, a:visited {
+    color: rgb(100, 100, 100);
+  }
+
 
   /*
    * Content

@@ -28,6 +28,7 @@ $(function() {
     $('#clear-config').on('click', function() { window.location.replace('/load') });
     $('#check-config').on('click', function() { checkConfig() });
     $('#deploy-config').on('click', function() { deployConfig() });
+    $('#edit-yaml').on('click', function() { editYaml() });
 
     $('#output-close').on('click', function() { $('#output-modal').modal('toggle')});
 
@@ -265,6 +266,10 @@ function deployConfig() {
 }
 
 function addPolicy() {
+    swal('geht noch nich')
+}
+
+function editYaml() {
     swal('geht noch nich')
 }
 
