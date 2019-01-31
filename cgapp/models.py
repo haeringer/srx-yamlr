@@ -2,12 +2,20 @@ import uuid
 from django.db import models
 
 
-class SrxZone(models.Model):
+
+class BaseModel(models.Model):
+
+    class Meta:
+        abstract = True
+        app_label = 'cgapp'
+
+
+class SrxZone(BaseModel):
     name = models.CharField(max_length=255)
     def __str__(self):
         return self.name
 
-class SrxAddress(models.Model):
+class SrxAddress(BaseModel):
     zone = models.ForeignKey(SrxZone, on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
     ip = models.CharField(max_length=255)
@@ -15,7 +23,7 @@ class SrxAddress(models.Model):
     def __str__(self):
         return self.name
 
-class SrxAddrSet(models.Model):
+class SrxAddrSet(BaseModel):
     zone = models.ForeignKey(SrxZone, on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
     configid = models.CharField(max_length=36, default=uuid.uuid4)
@@ -23,12 +31,12 @@ class SrxAddrSet(models.Model):
     def __str__(self):
         return self.name
 
-class SrxProtocol(models.Model):
+class SrxProtocol(BaseModel):
     ptype = models.CharField(max_length=12)
     def __str__(self):
         return self.ptype
 
-class SrxApplication(models.Model):
+class SrxApplication(BaseModel):
     name = models.CharField(max_length=255)
     protocol = models.ForeignKey(SrxProtocol, on_delete=models.CASCADE,
                                  default=0)
@@ -37,7 +45,7 @@ class SrxApplication(models.Model):
     def __str__(self):
         return self.name
 
-class SrxAppSet(models.Model):
+class SrxAppSet(BaseModel):
     name = models.CharField(max_length=255)
     applications = models.ManyToManyField(SrxApplication,
                                           related_name='applications')
@@ -45,7 +53,7 @@ class SrxAppSet(models.Model):
     def __str__(self):
         return self.name
 
-class SrxPolicy(models.Model):
+class SrxPolicy(BaseModel):
     name = models.CharField(max_length=255)
     fromzone = models.ManyToManyField(SrxZone, related_name='fromzone')
     tozone = models.ManyToManyField(SrxZone, related_name='tozone')
