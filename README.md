@@ -56,3 +56,14 @@ When running for the first time with a fresh database:
     python manage.py makemigrations cgapp
     python manage.py sqlmigrate cgapp 00XX
     python manage.py migrate
+
+
+### Run unit tests
+
+Test with production database:
+
+    python manage.py test cgapp
+
+Test with in-memory sqlite database (faster):
+
+    python manage.py test --settings=test_settings cgapp
