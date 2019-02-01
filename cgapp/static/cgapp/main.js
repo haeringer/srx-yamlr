@@ -112,6 +112,9 @@ function createObject() {
             return false;
         }
 
+        $('#create-object-modal').modal('toggle');
+        $('.spinner-container').fadeIn()
+
         $.post({
             url: '/ajax/newobject/',
             data: {
@@ -122,7 +125,7 @@ function createObject() {
             }
         })
         .done(function(response) {
-            closeModalAndRefresh(response)
+            updateYamlAndReload(response)
         })
         .fail(function(jqXHR, textStatus, errorThrown) {
             console.log(errorThrown.toString());
@@ -140,6 +143,9 @@ function createObject() {
             return false;
         }
 
+        $('#create-object-modal').modal('toggle');
+        $('.spinner-container').fadeIn()
+
         $.post({
             url: '/ajax/newobject/',
             data: {
@@ -150,7 +156,7 @@ function createObject() {
             }
         })
         .done(function(response) {
-            closeModalAndRefresh(response)
+            updateYamlAndReload(response)
         })
         .fail(function(jqXHR, textStatus, errorThrown) {
             console.log(errorThrown.toString());
@@ -168,10 +174,12 @@ function createObject() {
             return false;
         }
 
+        $('#create-object-modal').modal('toggle');
+        $('.spinner-container').fadeIn()
+
         $.post({
             url: '/ajax/newobject/',
             data: {
-                policyid: currentObj.policyid,
                 objtype: objtype,
                 name: name,
                 port: port,
@@ -179,7 +187,7 @@ function createObject() {
             }
         })
         .done(function(response) {
-            closeModalAndRefresh(response)
+            updateYamlAndReload(response)
         })
         .fail(function(jqXHR, textStatus, errorThrown) {
             console.log(errorThrown.toString());
@@ -196,17 +204,19 @@ function createObject() {
             return false;
         }
 
+        $('#create-object-modal').modal('toggle');
+        $('.spinner-container').fadeIn()
+
         $.post({
             url: '/ajax/newobject/',
             data: {
-                policyid: currentObj.policyid,
                 objtype: objtype,
                 name: name,
                 valuelist: valuelist,
             }
         })
         .done(function(response) {
-            closeModalAndRefresh(response)
+            updateYamlAndReload(response)
         })
         .fail(function(jqXHR, textStatus, errorThrown) {
             console.log(errorThrown.toString());
@@ -215,16 +225,17 @@ function createObject() {
 }
 
 
-function closeModalAndRefresh(response) {
-    // update yaml config
-    $('#yamlcontainer').html(response.yamlconfig);
-    $('#yamlcard').removeClass('d-none');
+function updateYamlAndReload(response) {
 
     // reload specific div of index.html
     $('#search-forms').load('/?param=reloadforms #search-forms');
 
-    // close modal
-    $('#create-object-modal').modal('toggle');
+    $('.spinner-container').fadeOut()
+
+    // update yaml config
+    $('#yamlcontainer').html(response.yamlconfig);
+    $('#yamlcard').removeClass('d-none');
+
 }
 
 
