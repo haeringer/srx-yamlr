@@ -291,8 +291,8 @@ function addObject(obj) {
 
     $('.spinner-container').fadeIn()
 
-    var objectId_dj = obj.id.split("_", 2).pop();
-    var objectId_db = obj.id.split("_", 3).pop();
+    var objectId_db = obj.id.split("_", 2).pop();
+    var objtype = obj.id.split("_", 3).pop();
     var source = obj.id.split("_").shift();
     var action = 'add';
 
@@ -301,6 +301,7 @@ function addObject(obj) {
         $.post('/ajax/updatepolicy/', {
             policyid: currentObj.policyid,
             objectid: objectId_db,
+            objtype: objtype,
             source: source,
             action: action,
             })
@@ -354,7 +355,7 @@ function addObject(obj) {
 
             $('#added-obj-'+source).removeClass('d-none');
             $('#added-list-'+source).append(
-                `<li class="list-group-item" id="${source}_${objectId_dj}_${objectId_db}_added">
+                `<li class="list-group-item" id="${source}_${objectId_db}_${objtype}_added">
                   <div class="row">
                     <div class="col-auto mr-auto lgi-name">${response.obj_name}</div>
                     <div class="lgi-icon-close pr-2">
@@ -389,6 +390,7 @@ function addObject(obj) {
         $.post('/ajax/updatepolicy/', {
             policyid: currentObj.policyid,
             objectid: objectId_db,
+            objtype: objtype,
             source: source,
             action: action,
         })
@@ -415,7 +417,7 @@ function addObject(obj) {
 
             $('#added-obj-app').removeClass('d-none');
             $('#added-list-app').append(
-                `<li class="list-group-item" id="app_${objectId_dj}_${objectId_db}_added">
+                `<li class="list-group-item" id="app_${objectId_db}_${objtype}_added">
                   <div class="row">
                     <div class="col-auto mr-auto lgi-name">${response.obj_name}</div>
                     <div class="lgi-icon-close pr-2">
@@ -450,7 +452,8 @@ function deleteObject(obj) {
     var listitem = $(obj).parents('.list-group-item').remove();
     var listitemId = $(listitem).attr('id');
     var source = listitemId.split('_').shift();
-    var objectId_db = listitemId.split('_', 3).pop();
+    var objectId_db = listitemId.split('_', 2).pop();
+    var objtype = listitemId.split('_', 3).pop();
     var action = 'delete';
 
     if (!$('#added-list-'+source).has('li').length) {
@@ -476,9 +479,12 @@ function deleteObject(obj) {
         }
     }
 
+    console.log(objtype)
+
     $.post('/ajax/updatepolicy/', {
         policyid: currentObj.policyid,
         objectid: objectId_db,
+        objtype: objtype,
         source: source,
         action: action,
     })
