@@ -101,8 +101,8 @@ class yamlConfig:
                 # convert it to standard dict via json library
                 temp_jsondump = json.dumps(defaultdict_newaddress)
                 yaml_newaddress = json.loads(temp_jsondump)
+            print('Cfgen yaml_newaddress:', yaml_newaddress)
         else: yaml_newaddress = ''
-        print('Cfgen yaml_newaddress:', yaml_newaddress)
 
         q = SrxAddrSet.objects.filter(configid=c)
         if q:
@@ -121,8 +121,8 @@ class yamlConfig:
                                        addrsetname] = addrsetobjects
                 temp_jsondump = json.dumps(defaultdict_newaddrset)
                 yaml_newaddrset = json.loads(temp_jsondump)
+            print('Cfgen yaml_newaddrset:', yaml_newaddrset)
         else: yaml_newaddrset = ''
-        print('Cfgen yaml_newaddrset:', yaml_newaddrset)
 
         q = SrxApplication.objects.filter(configid=c)
         if q:
@@ -167,17 +167,18 @@ class yamlConfig:
         '''
         build policy name and put prepared dict into parent
         '''
-        if isinstance(yaml_source, list):
-            source = yaml_source[0]+'-etc'
-        else: source = yaml_source
-        if isinstance(yaml_destination, list):
-            destination = yaml_destination[0]+'-etc'
-        else: destination = yaml_destination
+        if policy:
+            if isinstance(yaml_source, list):
+                source = yaml_source[0]+'-etc'
+            else: source = yaml_source
+            if isinstance(yaml_destination, list):
+                destination = yaml_destination[0]+'-etc'
+            else: destination = yaml_destination
 
-        policyname = 'allow-' + source + '-to-' + destination
+            policyname = 'allow-' + source + '-to-' + destination
 
-        SrxPolicy.objects.update_or_create(configid=c,
-                                           defaults={'name': policyname})
+            SrxPolicy.objects.update_or_create(configid=c,
+                                            defaults={'name': policyname})
 
         if policy:
             self.yamldict['policies'] = {
