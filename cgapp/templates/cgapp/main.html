@@ -83,7 +83,7 @@
 
                     <ul class="list-inline d-none search-results-list" id="search-from-ul">
                     {% for adr in addresses %}
-                      <li class="search-results-item" id="from_{{ adr.configid }}_{{ adr.id }}">
+                      <li class="search-results-item" id="from_{{ adr.id }}_address">
                         <div class="row">
                           <div class="col-auto mr-auto lgi-name"><a href="#">{{ adr.name }}</a></div>
                           <div class="w-100"></div>
@@ -92,7 +92,7 @@
                       </li>
                     {% endfor %}
                     {% for adrset in addrsets %}
-                      <li class="search-results-item" id="from_{{ adrset.configid }}_{{ adrset.id }}">
+                      <li class="search-results-item" id="from_{{ adrset.id }}_addrset">
                         <div class="row">
                           <div class="col-auto mr-auto lgi-name"><a href="#">{{ adrset.name }}</a></div>
                           <div class="w-100"></div>
@@ -118,7 +118,7 @@
 
                     <ul class="list-inline d-none search-results-list" id="search-to-ul">
                     {% for adr in addresses %}
-                      <li class="search-results-item" id="to_{{ adr.configid }}_{{ adr.id }}">
+                      <li class="search-results-item" id="to_{{ adr.id }}_address">
                         <div class="row">
                           <div class="col-auto mr-auto lgi-name"><a href="#">{{ adr.name }}</a></div>
                           <div class="w-100"></div>
@@ -127,7 +127,7 @@
                       </li>
                     {% endfor %}
                     {% for adrset in addrsets %}
-                      <li class="search-results-item" id="to_{{ adrset.configid }}_{{ adrset.id }}">
+                      <li class="search-results-item" id="to_{{ adrset.id }}_addrset">
                         <div class="row">
                           <div class="col-auto mr-auto lgi-name"><a href="#">{{ adrset.name }}</a></div>
                           <div class="w-100"></div>
@@ -153,7 +153,7 @@
 
                     <ul class="list-inline d-none search-results-list" id="search-app-ul">
                     {% for app in applications %}
-                      <li class="search-results-item" id="app_{{ app.configid }}_{{ app.id }}">
+                      <li class="search-results-item" id="app_{{ app.id }}_application">
                         <div class="row">
                           <div class="col-auto mr-auto lgi-name"><a href="#">{{ app.name }}</a></div>
                           <div class="w-100"></div>
@@ -162,7 +162,7 @@
                       </li>
                     {% endfor %}
                     {% for appset in appsets %}
-                      <li class="search-results-item" id="app_{{ appset.configid }}_{{ appset.id }}">
+                      <li class="search-results-item" id="app_{{ appset.id }}_appset">
                         <div class="row">
                           <div class="col-auto mr-auto lgi-name"><a href="#">{{ appset.name }}</a></div>
                           <div class="w-100"></div>
