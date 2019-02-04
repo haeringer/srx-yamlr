@@ -24,39 +24,34 @@ class srxObject:
         '''Set object values that are included in http request'''
 
         self.objectid = r.POST.get('objectid', None)
+        self.srx_type = r.POST.get('objtype', None)
         self.src = r.POST.get('source', None)
 
 
     def set_obj_values_db(self):
         '''Set additional object values by retrieving data from db'''
 
-        # Search database for delivered object + determine srx object type
+        # Retrieve model data from database
         #
         i = self.objectid
         s = self.src
-        if s == 'from' or s == 'to':
+        t = self.srx_type
+
+        if t == 'address':
             m = SrxAddress.objects.filter(id=i).first()
-            if m:
-                t = 'address'
-                a = 'srcaddress' if s == 'from' else 'destaddress'
-            else:
-                m = SrxAddrSet.objects.filter(id=i).first()
-                if m:
-                    t = 'addrset'
-                    a = 'srcaddrset' if s == 'from' else 'destaddrset'
+            a = 'srcaddress' if s == 'from' else 'destaddress'
             self.address_type = a
-        elif s == 'app':
+        elif t == 'addrset':
+            m = SrxAddrSet.objects.filter(id=i).first()
+            a = 'srcaddrset' if s == 'from' else 'destaddrset'
+            self.address_type = a
+        elif t == 'application':
             m = SrxApplication.objects.filter(id=i).first()
-            if m:
-                t = 'application'
-            else:
-                m = SrxAppSet.objects.filter(id=i).first()
-                if m:
-                    t = 'appset'
+        elif t == 'appset':
+            m = SrxAppSet.objects.filter(id=i).first()
 
         self.model = m
         self.name = m.name
-        self.srx_type = t
 
         # Retrieve data correlating to object (e.g. zone) from db
         #
