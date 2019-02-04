@@ -1,4 +1,3 @@
-import uuid
 from django.db import models
 
 
@@ -19,14 +18,14 @@ class SrxAddress(BaseModel):
     zone = models.ForeignKey(SrxZone, on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
     ip = models.CharField(max_length=255)
-    configid = models.CharField(max_length=36, default=uuid.uuid4)
+    configid = models.CharField(max_length=36, default=0)
     def __str__(self):
         return self.name
 
 class SrxAddrSet(BaseModel):
     zone = models.ForeignKey(SrxZone, on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
-    configid = models.CharField(max_length=36, default=uuid.uuid4)
+    configid = models.CharField(max_length=36, default=0)
     addresses = models.ManyToManyField(SrxAddress, related_name='addresses')
     def __str__(self):
         return self.name
@@ -40,7 +39,7 @@ class SrxApplication(BaseModel):
     name = models.CharField(max_length=255)
     protocol = models.ForeignKey(SrxProtocol, on_delete=models.CASCADE,
                                  default=0)
-    configid = models.CharField(max_length=36, default=uuid.uuid4)
+    configid = models.CharField(max_length=36, default=0)
     port = models.CharField(max_length=64)
     def __str__(self):
         return self.name
@@ -49,7 +48,7 @@ class SrxAppSet(BaseModel):
     name = models.CharField(max_length=255)
     applications = models.ManyToManyField(SrxApplication,
                                           related_name='applications')
-    configid = models.CharField(max_length=36, default=uuid.uuid4)
+    configid = models.CharField(max_length=36, default=0)
     def __str__(self):
         return self.name
 
@@ -66,7 +65,7 @@ class SrxPolicy(BaseModel):
     application = models.ManyToManyField(SrxApplication,
                                          related_name='application')
     appset = models.ManyToManyField(SrxAppSet, related_name='appset')
-    policyid = models.CharField(max_length=36, default=uuid.uuid4)
-    configid = models.CharField(max_length=36, default=uuid.uuid4)
+    policyid = models.CharField(max_length=36, default=0)
+    configid = models.CharField(max_length=36, default=0)
     def __str__(self):
         return self.name
