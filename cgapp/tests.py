@@ -1,9 +1,9 @@
 import uuid
 from django.test import TestCase, Client
 from django.contrib.auth.models import User
-from .views import *
-from .cghelpers import *
-
+from .cghelpers import queryset_to_var
+from .models import SrxAddress, SrxAddrSet, SrxApplication, \
+    SrxAppSet, SrxZone, SrxPolicy
 
 
 username = 'testuser'
@@ -43,7 +43,7 @@ class viewTests(TestCase):
             'objtype': 'addrset',
             'zone': zone_a,
             'name': 'TEST_ADDRSET',
-            'valuelist[]': ['TEST_ADDRESS_0','TEST_ADDRESS_1'],
+            'valuelist[]': ['TEST_ADDRESS_0', 'TEST_ADDRESS_1'],
             },
         )
         c.post('/ajax/newobject/', {
@@ -64,7 +64,7 @@ class viewTests(TestCase):
         c.post('/ajax/newobject/', {
             'objtype': 'appset',
             'name': 'TEST_APPSET',
-            'valuelist[]': ['TEST_APPLICATION_0','TEST_APPLICATION_1'],
+            'valuelist[]': ['TEST_APPLICATION_0', 'TEST_APPLICATION_1'],
             },
         )
 
@@ -109,7 +109,6 @@ class viewTests(TestCase):
             },
         )
 
-
     def test_for_created_test_objects(self):
 
         o = SrxAddress.objects.filter().get(name='TEST_ADDRESS_0')
@@ -124,7 +123,6 @@ class viewTests(TestCase):
         o = SrxAppSet.objects.filter().get(name='TEST_APPSET')
         self.assertEqual(o.name, 'TEST_APPSET')
 
-
     def test_login_page_plus_redirect(self):
 
         response = self.client.post('/auth/login/', {
@@ -132,20 +130,17 @@ class viewTests(TestCase):
         )
         self.assertEqual(response.status_code, 302)
 
-
     def test_generated_policy_name(self):
 
         p = SrxPolicy.objects.filter(policyid=self.policyid)
         pname = queryset_to_var(p)
         self.assertEqual(pname, 'allow-TEST_ADDRSET-to-TEST_ADDRESS_3')
 
-
     def test_object_presence_in_new_policy(self):
 
         o = SrxApplication.objects.filter(application__policyid=self.policyid)
         oname = queryset_to_var(o)
         self.assertEqual(oname, 'TEST_APPLICATION_0')
-
 
     def test_delete_object_from_policy(self):
 

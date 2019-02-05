@@ -1,18 +1,16 @@
 from django.shortcuts import render, get_list_or_404
-from django.http import JsonResponse
+from django.http import JsonResponse, Http404
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
-from .models import *
-import sys
+from .models import SrxZone, SrxAddress, SrxAddrSet, SrxApplication, SrxAppSet
 import traceback
 import json
 
-from .cgyamlsource import *
-from .cgsrxobject import *
-from .cgpolicy import *
-from .cgyamlconfig import *
-from .cghelpers import *
-
+from .cgyamlsource import yamlSource
+from .cgsrxobject import srxObject
+from .cgpolicy import newPolicy
+from .cgyamlconfig import yamlConfig
+from .cghelpers import queryset_to_var
 
 
 yamlfile = 'kami-kaze.yml'
@@ -37,7 +35,7 @@ def mainView(request):
             'applications': applications,
             'appsets': appsets,
         }
-    except:
+    except Exception:
         raise Http404("HTTP 404 Error")
 
     if param != 'reloadforms':
@@ -49,7 +47,6 @@ def mainView(request):
     return render(request, 'cgapp/main.html', context)
 
 
-
 def loadobjects(request):
 
     loadpolicies = request.GET.get('loadpolicies', None)
@@ -57,7 +54,7 @@ def loadobjects(request):
 
     try:
         ys = yamlSource(yamlfile)
-        print('Cfgen importyaml start;', 'policies ==', loadpolicies)
+        print('Cfgen importyaml (policies == {}) start'.format(loadpolicies))
         if loadpolicies == 'False':
             ys.reset_db()
             ys.import_zones()
@@ -68,14 +65,13 @@ def loadobjects(request):
             ys.import_appsets()
         if loadpolicies == 'True':
             ys.import_policies()
-    except Exception as e:
+    except Exception:
         print('Cfgen YAML import failed because of the following error:')
         print(traceback.format_exc())
         response['error'] = json.dumps(traceback.format_exc())
 
-    print('Cfgen importyaml done;', 'policies ==', loadpolicies)
+    print('Cfgen importyaml (policies == {}) done'.format(loadpolicies))
     return JsonResponse(response, safe=False)
-
 
 
 @csrf_exempt
@@ -102,8 +98,10 @@ def updatepolicy(request):
             response['error'] = 'Zone validation failed'
 
         # Add or delete srx object to/from policy
-        if a == 'add': p.add_object(s)
-        if a == 'delete': p.delete_object(s)
+        if a == 'add':
+            p.add_object(s)
+        if a == 'delete':
+            p.delete_object(s)
 
         # Update yamlConfig object
         y.set_yaml_values()
@@ -119,13 +117,12 @@ def updatepolicy(request):
 
         response['yamlconfig'] = y.configuration
 
-    except Exception as e:
-        print('Cfgen Updating the policy failed because of the following error:')
+    except Exception:
+        print('Cfgen Updating the policy failed because of following error:')
         print(traceback.format_exc())
         response['error'] = json.dumps(traceback.format_exc())
 
     return JsonResponse(response, safe=False)
-
 
 
 @csrf_exempt
@@ -140,7 +137,6 @@ def newobject(request):
         s = srxObject()
         s.set_obj_values_new(request, c)
         s.save_new_obj()
-        print('Cfgen configid (newobject):', c)
 
         # Update yamlConfig object
         y.set_yaml_values()
@@ -148,13 +144,12 @@ def newobject(request):
 
         response['yamlconfig'] = y.configuration
 
-    except Exception as e:
+    except Exception:
         print('Cfgen Adding new object failed because of the following error:')
         print(traceback.format_exc())
         response['error'] = json.dumps(traceback.format_exc())
 
     return JsonResponse(response, safe=False)
-
 
 
 def filterobjects(request):
@@ -173,7 +168,6 @@ def filterobjects(request):
     response['addresses'] = addresses
 
     return JsonResponse(response, safe=False)
-
 
 
 def channelsView(request):

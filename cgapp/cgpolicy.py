@@ -1,5 +1,5 @@
-from .models import *
-
+from .models import SrxAddress, SrxAddrSet, SrxApplication, \
+    SrxAppSet, SrxZone, SrxPolicy
 
 
 class newPolicy:
@@ -8,7 +8,6 @@ class newPolicy:
         self.policymodel_obj = None
         self.policyid = None
 
-
     def update_or_create_policy(self, policyid, configid):
         '''Update or create new policy in database with configid & policyid'''
 
@@ -16,7 +15,6 @@ class newPolicy:
                                                           configid=configid)
         self.policymodel_obj = obj
         self.policyid = policyid
-
 
     def validate_zone_logic(self, srxobj):
 
@@ -48,7 +46,6 @@ class newPolicy:
                     return 1
         return 1
 
-
     def add_object(self, s):
         '''add delivered SrxObject (s) to new policy'''
 
@@ -73,7 +70,6 @@ class newPolicy:
         if s.srx_type == 'appset':
             o = SrxAppSet.objects.get(name=s.name)
             p.appset.add(o)
-
 
     def delete_object(self, s):
         '''delete delivered SrxObject (s) from new policy (p)'''

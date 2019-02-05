@@ -5,7 +5,8 @@ def queryset_to_var(queryset):
             rval = []
             for q in queryset:
                 rval.append(q.name)
-        else: rval = queryset[0].name
+        else:
+            rval = queryset[0].name
     else:
         rval = ''
     return rval

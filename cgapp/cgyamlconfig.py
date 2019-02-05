@@ -1,13 +1,14 @@
-from .models import *
 import uuid
 import json
 import oyaml as yaml
+from .models import SrxAddress, SrxAddrSet, SrxApplication, \
+    SrxAppSet, SrxZone, SrxPolicy, SrxProtocol
+from .cghelpers import queryset_to_var
 import collections
+
+
 def makehash():
     return collections.defaultdict(makehash)
-
-from .cghelpers import *
-
 
 
 class yamlConfig:
@@ -17,26 +18,29 @@ class yamlConfig:
         self.yamldict = {}
         self.configuration = None
 
-
     def set_yaml_values(self):
         '''query database for objects (existing and newly created ones) and
         assign values to yamldict'''
 
         c = self.configid
 
-        ### SourceClass.objects.filter(m2mfield__m2mfield=value)
+        # SourceClass.objects.filter(m2mfield__m2mfield=value)
         # - first field = manytomanyfield of referencing class (SrxPolicy in
         #   this case) from which to get a value
         # - second field = manytomanyfield of referencing class of which the
         #   value is known, so it can be used as filter
         # - fields must have 'related_name'
         q = SrxZone.objects.filter(fromzone__configid=c)
-        if q: yaml_fromzone = q[0].name
-        else: yaml_fromzone = ''
+        if q:
+            yaml_fromzone = q[0].name
+        else:
+            yaml_fromzone = ''
 
         q = SrxZone.objects.filter(tozone__configid=c)
-        if q: yaml_tozone = q[0].name
-        else: yaml_tozone = ''
+        if q:
+            yaml_tozone = q[0].name
+        else:
+            yaml_tozone = ''
 
         q = SrxAddress.objects.filter(srcaddress__configid=c)
         srcaddress = queryset_to_var(q)
@@ -45,13 +49,17 @@ class yamlConfig:
         srcaddrset = queryset_to_var(q)
 
         if srcaddress and srcaddrset:
-            if not isinstance(srcaddress, list): srcaddress = [srcaddress]
-            if not isinstance(srcaddrset, list): srcaddrset = [srcaddrset]
+            if not isinstance(srcaddress, list):
+                srcaddress = [srcaddress]
+            if not isinstance(srcaddrset, list):
+                srcaddrset = [srcaddrset]
             yaml_source = srcaddress + srcaddrset
-        if srcaddress and not srcaddrset: yaml_source = srcaddress
-        if srcaddrset and not srcaddress: yaml_source = srcaddrset
-        if not srcaddress and not srcaddrset: yaml_source = ''
-
+        if srcaddress and not srcaddrset:
+            yaml_source = srcaddress
+        if srcaddrset and not srcaddress:
+            yaml_source = srcaddrset
+        if not srcaddress and not srcaddrset:
+            yaml_source = ''
 
         q = SrxAddress.objects.filter(destaddress__configid=c)
         destaddress = queryset_to_var(q)
@@ -60,13 +68,17 @@ class yamlConfig:
         destaddrset = queryset_to_var(q)
 
         if destaddress and destaddrset:
-            if not isinstance(destaddress, list): destaddress = [destaddress]
-            if not isinstance(destaddrset, list): destaddrset = [destaddrset]
+            if not isinstance(destaddress, list):
+                destaddress = [destaddress]
+            if not isinstance(destaddrset, list):
+                destaddrset = [destaddrset]
             yaml_destination = destaddress + destaddrset
-        if destaddress and not destaddrset: yaml_destination = destaddress
-        if destaddrset and not destaddress: yaml_destination = destaddrset
-        if not destaddress and not destaddrset: yaml_destination = ''
-
+        if destaddress and not destaddrset:
+            yaml_destination = destaddress
+        if destaddrset and not destaddress:
+            yaml_destination = destaddrset
+        if not destaddress and not destaddrset:
+            yaml_destination = ''
 
         q = SrxApplication.objects.filter(application__configid=c)
         application = queryset_to_var(q)
@@ -75,13 +87,17 @@ class yamlConfig:
         appset = queryset_to_var(q)
 
         if application and appset:
-            if not isinstance(application, list): application = [application]
-            if not isinstance(appset, list): appset = [appset]
+            if not isinstance(application, list):
+                application = [application]
+            if not isinstance(appset, list):
+                appset = [appset]
             yaml_applications = application + appset
-        if application and not appset: yaml_applications = application
-        if appset and not application: yaml_applications = appset
-        if not application and not appset: yaml_applications = ''
-
+        if application and not appset:
+            yaml_applications = application
+        if appset and not application:
+            yaml_applications = appset
+        if not application and not appset:
+            yaml_applications = ''
 
         # query for newly created objects
         q = SrxAddress.objects.filter(configid=c)
@@ -102,7 +118,8 @@ class yamlConfig:
                 temp_jsondump = json.dumps(defaultdict_newaddress)
                 yaml_newaddress = json.loads(temp_jsondump)
             print('Cfgen yaml_newaddress:', yaml_newaddress)
-        else: yaml_newaddress = ''
+        else:
+            yaml_newaddress = ''
 
         q = SrxAddrSet.objects.filter(configid=c)
         if q:
@@ -115,14 +132,16 @@ class yamlConfig:
                     addrsetobjects = []
                     for a in q_adr:
                         addrsetobjects.append(a.name)
-                else: addrsetobjects = q_adr[0].name
+                else:
+                    addrsetobjects = q_adr[0].name
 
                 defaultdict_newaddrset[addrsetzone]['addrsets'][
                                        addrsetname] = addrsetobjects
                 temp_jsondump = json.dumps(defaultdict_newaddrset)
                 yaml_newaddrset = json.loads(temp_jsondump)
             print('Cfgen yaml_newaddrset:', yaml_newaddrset)
-        else: yaml_newaddrset = ''
+        else:
+            yaml_newaddrset = ''
 
         q = SrxApplication.objects.filter(configid=c)
         if q:
@@ -135,19 +154,21 @@ class yamlConfig:
                 yaml_newapp.update({
                     appname: {'protocol': appprotocol, 'port': appport}
                 })
-        else: yaml_newapp = ''
+        else:
+            yaml_newapp = ''
 
         q = SrxAppSet.objects.filter(configid=c)
         if q:
             yaml_newappset = {}
             for i in q:
                 appsetname = i.name
-                q_app = SrxApplication.objects.filter(applications__name=i.name)
+                q_app = SrxApplication.objects.filter(
+                    applications__name=i.name)
                 appsetobjects = queryset_to_var(q_app)
 
                 yaml_newappset.update({appsetname: appsetobjects})
-        else: yaml_newappset = ''
-
+        else:
+            yaml_newappset = ''
 
         '''
         prepare dictionary with values from current policy
@@ -170,15 +191,17 @@ class yamlConfig:
         if policy:
             if isinstance(yaml_source, list):
                 source = yaml_source[0]+'-etc'
-            else: source = yaml_source
+            else:
+                source = yaml_source
             if isinstance(yaml_destination, list):
                 destination = yaml_destination[0]+'-etc'
-            else: destination = yaml_destination
+            else:
+                destination = yaml_destination
 
             policyname = 'allow-' + source + '-to-' + destination
 
             SrxPolicy.objects.update_or_create(configid=c,
-                                            defaults={'name': policyname})
+                                               defaults={'name': policyname})
 
         if policy:
             self.yamldict['policies'] = {
@@ -204,7 +227,6 @@ class yamlConfig:
             self.yamldict.update({'applications': yaml_newapp})
         if yaml_newappset:
             self.yamldict.update({'applicationsets': yaml_newappset})
-
 
     def set_yaml_config(self):
         '''dump dict into yaml file and into variable'''

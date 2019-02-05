@@ -1,6 +1,6 @@
-from .models import *
 import oyaml as yaml
-
+from .models import SrxAddress, SrxAddrSet, SrxApplication, \
+    SrxAppSet, SrxZone, SrxPolicy, SrxProtocol
 
 
 class yamlSource:
@@ -27,7 +27,7 @@ class yamlSource:
             z = SrxZone.objects.get(name=zone)
             # add 'any' zone to configuration
             SrxAddress.objects.update_or_create(zone=z, name='any', ip=z)
-            a = values['addresses'] # {'HostOne': '10.1.1.1/32'}
+            a = values['addresses']  # {'HostOne': '10.1.1.1/32'}
             for name, ip in a.items():
                 # retrieve zone object from zone model
                 # to make foreign key connection
@@ -61,17 +61,16 @@ class yamlSource:
             protocol = values.get('protocol')
             t = SrxProtocol.objects.get(ptype=protocol)
             SrxApplication.objects.update_or_create(name=app, protocol=t,
-                port=port
-            )
+                                                    port=port)
         for app, values in self.data['default-applications'].items():
             protocol = values.get('protocol')
             t = SrxProtocol.objects.get(ptype=protocol)
             if 'port' in values:
                 port = values.get('port')
-            else: port = ''
+            else:
+                port = ''
             SrxApplication.objects.update_or_create(name=app, protocol=t,
-                port=port
-            )
+                                                    port=port)
 
     def import_appsets(self):
         for appset, values in self.data['applicationsets'].items():
@@ -95,39 +94,53 @@ class yamlSource:
             dest = values['destination']
             apps = values['application']
 
-            # manytomany fields cannot be populated with
-            # update_or_create(), therefore use .add()
             obj.fromzone.add(frm)
             obj.tozone.add(to)
 
-            # abuse try/except error handling for application logic
-            # in order to keep things simple
             if isinstance(src, list):
                 for i in src:
-                    try: obj.srcaddress.add(SrxAddress.objects.get(name=i))
-                    except: obj.srcaddrset.add(SrxAddrSet.objects.get(name=i))
+                    in_address = SrxAddress.objects.filter(name=i)
+                    if in_address:
+                        obj.srcaddress.add(SrxAddress.objects.get(name=i))
+                    else:
+                        obj.srcaddrset.add(SrxAddrSet.objects.get(name=i))
             elif src != 'any':
-                try: obj.srcaddress.add(SrxAddress.objects.get(name=src))
-                except: obj.srcaddrset.add(SrxAddrSet.objects.get(name=src))
+                in_address = SrxAddress.objects.filter(name=src)
+                if in_address:
+                    obj.srcaddress.add(SrxAddress.objects.get(name=src))
+                else:
+                    obj.srcaddrset.add(SrxAddrSet.objects.get(name=src))
             else:
                 q = SrxAddress.objects.filter(zone=frm).get(name='any')
                 obj.srcaddress.add(q)
 
             if isinstance(dest, list):
                 for i in dest:
-                    try: obj.destaddress.add(SrxAddress.objects.get(name=i))
-                    except: obj.destaddrset.add(SrxAddrSet.objects.get(name=i))
+                    in_address = SrxAddress.objects.filter(name=i)
+                    if in_address:
+                        obj.destaddress.add(SrxAddress.objects.get(name=i))
+                    else:
+                        obj.destaddrset.add(SrxAddrSet.objects.get(name=i))
             elif dest != 'any':
-                try: obj.destaddress.add(SrxAddress.objects.get(name=dest))
-                except: obj.destaddrset.add(SrxAddrSet.objects.get(name=dest))
+                in_address = SrxAddress.objects.filter(name=dest)
+                if in_address:
+                    obj.destaddress.add(SrxAddress.objects.get(name=dest))
+                else:
+                    obj.destaddrset.add(SrxAddrSet.objects.get(name=dest))
             else:
                 q = SrxAddress.objects.filter(zone=to).get(name='any')
                 obj.destaddress.add(q)
 
             if isinstance(apps, list):
                 for i in apps:
-                    try: obj.application.add(SrxApplication.objects.get(name=i))
-                    except: obj.appset.add(SrxAppSet.objects.get(name=i))
+                    in_application = SrxApplication.objects.filter(name=i)
+                    if in_application:
+                        obj.application.add(SrxApplication.objects.get(name=i))
+                    else:
+                        obj.appset.add(SrxAppSet.objects.get(name=i))
             else:
-                try: obj.application.add(SrxApplication.objects.get(name=apps))
-                except: obj.appset.add(SrxAppSet.objects.get(name=apps))
+                in_application = SrxApplication.objects.filter(name=apps)
+                if in_application:
+                    obj.application.add(SrxApplication.objects.get(name=apps))
+                else:
+                    obj.appset.add(SrxAppSet.objects.get(name=apps))

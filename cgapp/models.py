@@ -1,7 +1,6 @@
 from django.db import models
 
 
-
 class BaseModel(models.Model):
 
     class Meta:
@@ -11,29 +10,37 @@ class BaseModel(models.Model):
 
 class SrxZone(BaseModel):
     name = models.CharField(max_length=255)
+
     def __str__(self):
         return self.name
+
 
 class SrxAddress(BaseModel):
     zone = models.ForeignKey(SrxZone, on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
     ip = models.CharField(max_length=255)
     configid = models.CharField(max_length=36, default=0)
+
     def __str__(self):
         return self.name
+
 
 class SrxAddrSet(BaseModel):
     zone = models.ForeignKey(SrxZone, on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
     configid = models.CharField(max_length=36, default=0)
     addresses = models.ManyToManyField(SrxAddress, related_name='addresses')
+
     def __str__(self):
         return self.name
 
+
 class SrxProtocol(BaseModel):
     ptype = models.CharField(max_length=12)
+
     def __str__(self):
         return self.ptype
+
 
 class SrxApplication(BaseModel):
     name = models.CharField(max_length=255)
@@ -41,16 +48,20 @@ class SrxApplication(BaseModel):
                                  default=0)
     configid = models.CharField(max_length=36, default=0)
     port = models.CharField(max_length=64)
+
     def __str__(self):
         return self.name
+
 
 class SrxAppSet(BaseModel):
     name = models.CharField(max_length=255)
     applications = models.ManyToManyField(SrxApplication,
                                           related_name='applications')
     configid = models.CharField(max_length=36, default=0)
+
     def __str__(self):
         return self.name
+
 
 class SrxPolicy(BaseModel):
     name = models.CharField(max_length=255)
@@ -67,5 +78,6 @@ class SrxPolicy(BaseModel):
     appset = models.ManyToManyField(SrxAppSet, related_name='appset')
     policyid = models.CharField(max_length=36, default=0)
     configid = models.CharField(max_length=36, default=0)
+
     def __str__(self):
         return self.name

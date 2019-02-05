@@ -1,5 +1,5 @@
-from .models import *
-
+from .models import SrxAddress, SrxAddrSet, SrxApplication, \
+    SrxAppSet, SrxZone, SrxProtocol
 
 
 class srxObject:
@@ -19,14 +19,12 @@ class srxObject:
         self.port = None
         self.apps = None
 
-
     def set_obj_values_http(self, r):
         '''Set object values that are included in http request'''
 
         self.objectid = r.POST.get('objectid', None)
         self.srx_type = r.POST.get('objtype', None)
         self.src = r.POST.get('source', None)
-
 
     def set_obj_values_db(self):
         '''Set additional object values by retrieving data from db'''
@@ -77,7 +75,6 @@ class srxObject:
             for app in m.applications.all():
                 self.apps.append(str(app))
 
-
     def set_obj_values_new(self, r, c):
         self.configid = c
         self.srx_type = r.POST.get('objtype', None)
@@ -88,7 +85,6 @@ class srxObject:
         self.protocol = r.POST.get('protocol', None)
         self.port = r.POST.get('port', None)
 
-
     def save_new_obj(self):
         '''add newly created object to db'''
 
@@ -96,7 +92,7 @@ class srxObject:
         n = self.name
         c = self.configid
         v = self.value
-        l = self.valuelist
+        vl = self.valuelist
         p = self.port
 
         if o == 'address':
@@ -106,7 +102,7 @@ class srxObject:
         if o == 'addrset':
             z = SrxZone.objects.get(name=self.parentzone)
             obj = SrxAddrSet.objects.create(zone=z, name=n, configid=c)
-            for i in l:
+            for i in vl:
                 a = SrxAddress.objects.get(name=i)
                 obj.addresses.add(a)
 
@@ -117,6 +113,6 @@ class srxObject:
 
         if o == 'appset':
             obj = SrxAppSet.objects.create(name=n, configid=c)
-            for i in l:
+            for i in vl:
                 a = SrxApplication.objects.get(name=i)
                 obj.applications.add(a)
