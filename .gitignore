@@ -7,3 +7,4 @@ db.sqlite3
 media
 .DS_Store
 config-new.yml
+.vscode/settings.json
