@@ -3,6 +3,7 @@ from django.http import JsonResponse, Http404
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 from .models import SrxZone, SrxAddress, SrxAddrSet, SrxApplication, SrxAppSet
+import os
 import traceback
 import json
 
@@ -13,7 +14,6 @@ from .cgyamlconfig import yamlConfig
 from .cghelpers import queryset_to_var
 
 
-yamlfile = 'kami-kaze.yml'
 yamlconfig = None
 
 
@@ -53,7 +53,7 @@ def loadobjects(request):
     response = {}
 
     try:
-        ys = yamlSource(yamlfile)
+        ys = yamlSource(os.environ.get('CFGEN_YAMLFILE', ''))
         print('Cfgen importyaml (policies == {}) start'.format(loadpolicies))
         if loadpolicies == 'False':
             ys.reset_db()

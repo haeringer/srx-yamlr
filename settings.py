@@ -20,7 +20,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/2.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '!7_k=@u=0fh$rxd#8e@w##eqed63fn%4ph!19+3e+se=-69x7%'
+SECRET_KEY = os.environ.get('CFGEN_DJANGOSECRET')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -85,11 +85,11 @@ DATABASES = {
     # }
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'cfgen_db',
-        'USER': 'cfgen',
-        'PASSWORD': 'rjBvtl2VinRA6QZKNPA46ZQwuR2jmz',
-        'HOST': '',
-        'PORT': '',
+        'NAME': os.environ.get('CFGEN_DB_NAME', ''),
+        'USER': os.environ.get('CFGEN_DB_USER', ''),
+        'PASSWORD': os.environ.get('CFGEN_DB_PASSWORD', ''),
+        'HOST': os.environ.get('CFGEN_DB_HOST', ''),
+        'PORT': os.environ.get('CFGEN_DB_PORT', ''),
     }
 }
 

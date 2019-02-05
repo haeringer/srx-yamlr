@@ -13,13 +13,26 @@ Install pyenv, virtualenv + desired python version and create the virtualenv:
 Configure working directory to automatically use the desired python version when switching into the directory:
 
     vi ~/.bash_profile
+
         eval "$(pyenv init -)"
         eval "$(pyenv virtualenv-init -)"
+
     mkdir django
     cd django
     pyenv local 3.7.0
 
-Install pip packages
+Set the environment variables for the application:
+
+    vi ~/.bash_profile
+
+    # CfGen Environment variables
+    CFGEN_YAMLFILE="kami-kaze.yml"; export CFGEN_YAMLFILE
+    CFGEN_DJANGOSECRET="!7_k=@u=0fh$rxd#8e@w##eqed63fn%4ph!19+3e+se=-69x7%"; export CFGEN_DJANGOSECRET
+    CFGEN_DB_NAME="cfgen_db"; export CFGEN_DB_NAME
+    CFGEN_DB_USER="cfgen"; export CFGEN_DB_USER
+    CFGEN_DB_PASSWORD="rjBvtl2VinRA6QZKNPA46ZQwuR2jmz"; export CFGEN_DB_PASSWORD
+
+Install pip packages:
 
     cd cfgen/
     pip install -r requirements.txt
