@@ -4,6 +4,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 from .models import SrxZone, SrxAddress, SrxAddrSet, SrxApplication, SrxAppSet
 import os
+import git
 import traceback
 import json
 
@@ -13,6 +14,9 @@ from .cgpolicy import newPolicy
 from .cgyamlconfig import yamlConfig
 from .cghelpers import queryset_to_var
 
+
+git_url = 'https://git.intern.example.com/noc/ansible-junos'
+repo_dir = 'workspace'
 
 yamlconfig = None
 
@@ -51,6 +55,22 @@ def loadobjects(request):
 
     loadpolicies = request.GET.get('loadpolicies', None)
     response = {}
+
+    if loadpolicies == 'False':
+        # abuse try/except for logic because git.Repo does not
+        # provide proper return values if it doesn't succeed
+        try:
+            repo = git.Repo('workspace')
+        except Exception:
+            repo = None
+
+        if repo:
+            print('Cfgen Updating repo...')
+            remote_repo = repo.remotes.origin
+            remote_repo.pull()
+        else:
+            print('Cfgen Cloning repo...')
+            git.Repo.clone_from(git_url, repo_dir)
 
     try:
         ys = yamlSource(os.environ.get('CFGEN_YAMLFILE', ''))
