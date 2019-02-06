@@ -16,9 +16,6 @@ from .cgyamlconfig import yamlConfig
 from .cghelpers import queryset_to_var
 
 
-git_url = 'https://git.intern.example.com/noc/ansible-junos'
-repo_dir = 'workspace'
-
 yamlconfig = None
 logger = logging.getLogger(__name__)
 
@@ -56,6 +53,7 @@ def mainView(request):
 def loadobjects(request):
 
     loadpolicies = request.GET.get('loadpolicies', None)
+    git_url = os.environ.get('CFGEN_GIT_URL', '')
     response = {}
 
     if loadpolicies == 'False':
@@ -72,7 +70,7 @@ def loadobjects(request):
             remote_repo.pull()
         else:
             logger.info('Cloning repo...')
-            git.Repo.clone_from(git_url, repo_dir)
+            git.Repo.clone_from(git_url, 'workspace')
 
     try:
         ys = yamlSource(os.environ.get('CFGEN_YAMLFILE', ''))

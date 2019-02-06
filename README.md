@@ -26,6 +26,7 @@ Set the environment variables for the application:
     vi ~/.bash_profile
 
     # CfGen Environment variables
+    CFGEN_GIT_URL="https://git.intern.example.com/noc/ansible-junos"; export CFGEN_GIT_URL
     CFGEN_YAMLFILE="workspace/host_vars/kami-kaze.yml"; export CFGEN_YAMLFILE
     CFGEN_DJANGOSECRET="!7_k=@u=0fh$rxd#8e@w##eqed63fn%4ph!19+3e+se=-69x7%"; export CFGEN_DJANGOSECRET
     CFGEN_DB_NAME="cfgen_db"; export CFGEN_DB_NAME
