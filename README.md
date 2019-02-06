@@ -26,11 +26,12 @@ Set the environment variables for the application:
     vi ~/.bash_profile
 
     # CfGen Environment variables
-    CFGEN_YAMLFILE="kami-kaze.yml"; export CFGEN_YAMLFILE
+    CFGEN_YAMLFILE="workspace/host_vars/kami-kaze.yml"; export CFGEN_YAMLFILE
     CFGEN_DJANGOSECRET="!7_k=@u=0fh$rxd#8e@w##eqed63fn%4ph!19+3e+se=-69x7%"; export CFGEN_DJANGOSECRET
     CFGEN_DB_NAME="cfgen_db"; export CFGEN_DB_NAME
     CFGEN_DB_USER="cfgen"; export CFGEN_DB_USER
     CFGEN_DB_PASSWORD="rjBvtl2VinRA6QZKNPA46ZQwuR2jmz"; export CFGEN_DB_PASSWORD
+    CFGEN_DEBUG='True'; export CFGEN_DEBUG
 
 Install pip packages:
 
