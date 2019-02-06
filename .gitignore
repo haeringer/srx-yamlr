@@ -5,6 +5,7 @@ __pycache__/
 local_settings.py
 db.sqlite3
 media
+workspace
 .DS_Store
 config-new.yml
 .vscode/settings.json
