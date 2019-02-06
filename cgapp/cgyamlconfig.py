@@ -5,6 +5,9 @@ from .models import SrxAddress, SrxAddrSet, SrxApplication, \
     SrxAppSet, SrxZone, SrxPolicy, SrxProtocol
 from .cghelpers import queryset_to_var
 import collections
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def makehash():
@@ -117,7 +120,7 @@ class yamlConfig:
                 # convert it to standard dict via json library
                 temp_jsondump = json.dumps(defaultdict_newaddress)
                 yaml_newaddress = json.loads(temp_jsondump)
-            print('Cfgen yaml_newaddress:', yaml_newaddress)
+            logger.info('yaml_newaddress: {}'.format(yaml_newaddress))
         else:
             yaml_newaddress = ''
 
@@ -139,7 +142,7 @@ class yamlConfig:
                                        addrsetname] = addrsetobjects
                 temp_jsondump = json.dumps(defaultdict_newaddrset)
                 yaml_newaddrset = json.loads(temp_jsondump)
-            print('Cfgen yaml_newaddrset:', yaml_newaddrset)
+            logger.info('yaml_newaddrset: {}'.format(yaml_newaddrset))
         else:
             yaml_newaddrset = ''
 
@@ -207,7 +210,7 @@ class yamlConfig:
             self.yamldict['policies'] = {
                 policyname: policy
             }
-            print('Cfgen policy:', policy)
+            logger.info('policy: {}'.format(policy))
         if yaml_newaddress and not yaml_newaddrset:
             self.yamldict.update({'zones': yaml_newaddress})
         if yaml_newaddrset and not yaml_newaddress:
@@ -234,5 +237,5 @@ class yamlConfig:
         with open('config-new.yml', 'w') as outfile:
             yaml.dump(self.yamldict, outfile, default_flow_style=False)
 
-        print('Cfgen yamldict (set_yaml_config):', self.yamldict)
+        logger.info('yamldict: {}'.format(self.yamldict))
         self.configuration = yaml.dump(self.yamldict, default_flow_style=False)

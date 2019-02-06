@@ -7,6 +7,7 @@ import os
 import git
 import traceback
 import json
+import logging
 
 from .cgyamlsource import yamlSource
 from .cgsrxobject import srxObject
@@ -19,6 +20,7 @@ git_url = 'https://git.intern.example.com/noc/ansible-junos'
 repo_dir = 'workspace'
 
 yamlconfig = None
+logger = logging.getLogger(__name__)
 
 
 @login_required(redirect_field_name=None)
@@ -46,7 +48,7 @@ def mainView(request):
         # Instantiate yamlConfig object with a new configid
         global yamlconfig
         yamlconfig = yamlConfig()
-        print('Cfgen configid:', yamlconfig.configid)
+        logger.info('Cfgen configid: {}'.format(yamlconfig.configid))
 
     return render(request, 'cgapp/main.html', context)
 
@@ -65,16 +67,16 @@ def loadobjects(request):
             repo = None
 
         if repo:
-            print('Cfgen Updating repo...')
+            logger.info('Updating repo...')
             remote_repo = repo.remotes.origin
             remote_repo.pull()
         else:
-            print('Cfgen Cloning repo...')
+            logger.info('Cloning repo...')
             git.Repo.clone_from(git_url, repo_dir)
 
     try:
         ys = yamlSource(os.environ.get('CFGEN_YAMLFILE', ''))
-        print('Cfgen importyaml (policies == {}) start'.format(loadpolicies))
+        logger.info('Importyaml (policies == {}) start'.format(loadpolicies))
         if loadpolicies == 'False':
             ys.reset_db()
             ys.import_zones()
@@ -86,11 +88,11 @@ def loadobjects(request):
         if loadpolicies == 'True':
             ys.import_policies()
     except Exception:
-        print('Cfgen YAML import failed because of the following error:')
-        print(traceback.format_exc())
+        logger.error('YAML import failed because of the following error:')
+        logger.error(traceback.format_exc())
         response['error'] = json.dumps(traceback.format_exc())
 
-    print('Cfgen importyaml (policies == {}) done'.format(loadpolicies))
+    logger.info('Importyaml (policies == {}) done'.format(loadpolicies))
     return JsonResponse(response, safe=False)
 
 
@@ -112,7 +114,7 @@ def updatepolicy(request):
         # Instantiate policy object + create or update policy in db
         p = newPolicy()
         p.update_or_create_policy(i, c)
-        print('Cfgen policyid:', i)
+        logger.info('Cfgen policyid: {}'.format(i))
 
         if p.validate_zone_logic(s) == 0:
             response['error'] = 'Zone validation failed'
@@ -138,8 +140,8 @@ def updatepolicy(request):
         response['yamlconfig'] = y.configuration
 
     except Exception:
-        print('Cfgen Updating the policy failed because of following error:')
-        print(traceback.format_exc())
+        logger.error('Updating the policy failed because of following error:')
+        logger.error(traceback.format_exc())
         response['error'] = json.dumps(traceback.format_exc())
 
     return JsonResponse(response, safe=False)
@@ -165,8 +167,8 @@ def newobject(request):
         response['yamlconfig'] = y.configuration
 
     except Exception:
-        print('Cfgen Adding new object failed because of the following error:')
-        print(traceback.format_exc())
+        logger.error('Creating object failed because of the following error:')
+        logger.error(traceback.format_exc())
         response['error'] = json.dumps(traceback.format_exc())
 
     return JsonResponse(response, safe=False)
