@@ -1,23 +1,20 @@
-from django.shortcuts import render, get_list_or_404
-from django.http import JsonResponse, Http404
-from django.views.decorators.csrf import csrf_exempt
-from django.contrib.auth.decorators import login_required
-from .models import SrxZone, SrxAddress, SrxAddrSet, SrxApplication, SrxAppSet
 import os
 import git
 import traceback
 import json
 import logging
+from django.shortcuts import render, get_list_or_404
+from django.http import JsonResponse, Http404
+from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.decorators import login_required
 
-from .cgyamlsource import yamlSource
-from .cgsrxobject import srxObject
-from .cgpolicy import newPolicy
-from .cgyamlconfig import yamlConfig
-from .cghelpers import queryset_to_var
+from cgapp import cgsource, cgobject, cgpolicy, cgyaml, cghelpers
+from cgapp.models import SrxZone, SrxAddress, SrxAddrSet, SrxApplication, \
+    SrxAppSet
 
 
-yamlconfig = None
 logger = logging.getLogger(__name__)
+yamlconfig = None
 
 
 @login_required(redirect_field_name=None)
@@ -44,7 +41,7 @@ def mainView(request):
     if param != 'reloadforms':
         # Instantiate yamlConfig object with a new configid
         global yamlconfig
-        yamlconfig = yamlConfig()
+        yamlconfig = cgyaml.config()
         logger.info('Cfgen configid: {}'.format(yamlconfig.configid))
 
     return render(request, 'cgapp/main.html', context)
@@ -73,18 +70,18 @@ def loadobjects(request):
             git.Repo.clone_from(git_url, 'workspace')
 
     try:
-        ys = yamlSource(os.environ.get('CFGEN_YAMLFILE', ''))
+        y = cgsource.data(os.environ.get('CFGEN_YAMLFILE', ''))
         logger.info('Importyaml (policies == {}) start'.format(loadpolicies))
         if loadpolicies == 'False':
-            ys.reset_db()
-            ys.import_zones()
-            ys.import_addresses()
-            ys.import_addrsets()
-            ys.import_protocols()
-            ys.import_applications()
-            ys.import_appsets()
+            y.reset_db()
+            y.import_zones()
+            y.import_addresses()
+            y.import_addrsets()
+            y.import_protocols()
+            y.import_applications()
+            y.import_appsets()
         if loadpolicies == 'True':
-            ys.import_policies()
+            y.import_policies()
     except Exception:
         logger.error('YAML import failed because of the following error:')
         logger.error(traceback.format_exc())
@@ -105,12 +102,12 @@ def updatepolicy(request):
 
     try:
         # Instantiate object for srx object + set object values
-        s = srxObject()
+        s = cgobject.srx()
         s.set_obj_values_http(request)
         s.set_obj_values_db()
 
         # Instantiate policy object + create or update policy in db
-        p = newPolicy()
+        p = cgpolicy.policy()
         p.update_or_create_policy(i, c)
         logger.info('Cfgen policyid: {}'.format(i))
 
@@ -154,7 +151,7 @@ def newobject(request):
 
     try:
         # Instantiate object for srx object + set object values
-        s = srxObject()
+        s = cgobject.srx()
         s.set_obj_values_new(request, c)
         s.save_new_obj()
 
@@ -173,6 +170,7 @@ def newobject(request):
 
 
 def filterobjects(request):
+
     selectedzone = request.GET.get('selectedzone', None)
 
     if selectedzone != 'Choose Zone...':
@@ -182,13 +180,9 @@ def filterobjects(request):
         return JsonResponse(None, safe=False)
 
     q = SrxAddress.objects.filter(zone_id=zone_id)
-    addresses = queryset_to_var(q)
+    addresses = cghelpers.queryset_to_var(q)
 
     response = {}
     response['addresses'] = addresses
 
     return JsonResponse(response, safe=False)
-
-
-def channelsView(request):
-    return render(request, 'cgapp/modals.html', {})

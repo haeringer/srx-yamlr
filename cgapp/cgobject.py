@@ -1,8 +1,8 @@
-from .models import SrxAddress, SrxAddrSet, SrxApplication, \
+from cgapp.models import SrxAddress, SrxAddrSet, SrxApplication, \
     SrxAppSet, SrxZone, SrxProtocol
 
 
-class srxObject:
+class srx:
 
     def __init__(self):
         self.objectid = None

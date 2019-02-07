@@ -1,8 +1,8 @@
-from .models import SrxAddress, SrxAddrSet, SrxApplication, \
+from cgapp.models import SrxAddress, SrxAddrSet, SrxApplication, \
     SrxAppSet, SrxZone, SrxPolicy
 
 
-class newPolicy:
+class policy:
 
     def __init__(self):
         self.policymodel_obj = None

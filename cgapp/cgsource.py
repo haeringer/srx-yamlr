@@ -1,9 +1,10 @@
 import oyaml as yaml
-from .models import SrxAddress, SrxAddrSet, SrxApplication, \
+
+from cgapp.models import SrxAddress, SrxAddrSet, SrxApplication, \
     SrxAppSet, SrxZone, SrxPolicy, SrxProtocol
 
 
-class yamlSource:
+class data:
 
     def __init__(self, sourcefile):
         with open(sourcefile, 'r') as infile:

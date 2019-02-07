@@ -1,11 +1,12 @@
 import uuid
 import json
 import oyaml as yaml
-from .models import SrxAddress, SrxAddrSet, SrxApplication, \
-    SrxAppSet, SrxZone, SrxPolicy, SrxProtocol
-from .cghelpers import queryset_to_var
 import collections
 import logging
+
+from cgapp import cghelpers
+from cgapp.models import SrxAddress, SrxAddrSet, SrxApplication, \
+    SrxAppSet, SrxZone, SrxPolicy, SrxProtocol
 
 logger = logging.getLogger(__name__)
 
@@ -14,7 +15,7 @@ def makehash():
     return collections.defaultdict(makehash)
 
 
-class yamlConfig:
+class config:
 
     def __init__(self):
         self.configid = str(uuid.uuid4())
@@ -46,10 +47,10 @@ class yamlConfig:
             yaml_tozone = ''
 
         q = SrxAddress.objects.filter(srcaddress__configid=c)
-        srcaddress = queryset_to_var(q)
+        srcaddress = cghelpers.queryset_to_var(q)
 
         q = SrxAddrSet.objects.filter(srcaddrset__configid=c)
-        srcaddrset = queryset_to_var(q)
+        srcaddrset = cghelpers.queryset_to_var(q)
 
         if srcaddress and srcaddrset:
             if not isinstance(srcaddress, list):
@@ -65,10 +66,10 @@ class yamlConfig:
             yaml_source = ''
 
         q = SrxAddress.objects.filter(destaddress__configid=c)
-        destaddress = queryset_to_var(q)
+        destaddress = cghelpers.queryset_to_var(q)
 
         q = SrxAddrSet.objects.filter(destaddrset__configid=c)
-        destaddrset = queryset_to_var(q)
+        destaddrset = cghelpers.queryset_to_var(q)
 
         if destaddress and destaddrset:
             if not isinstance(destaddress, list):
@@ -84,10 +85,10 @@ class yamlConfig:
             yaml_destination = ''
 
         q = SrxApplication.objects.filter(application__configid=c)
-        application = queryset_to_var(q)
+        application = cghelpers.queryset_to_var(q)
 
         q = SrxAppSet.objects.filter(appset__configid=c)
-        appset = queryset_to_var(q)
+        appset = cghelpers.queryset_to_var(q)
 
         if application and appset:
             if not isinstance(application, list):
@@ -167,7 +168,7 @@ class yamlConfig:
                 appsetname = i.name
                 q_app = SrxApplication.objects.filter(
                     applications__name=i.name)
-                appsetobjects = queryset_to_var(q_app)
+                appsetobjects = cghelpers.queryset_to_var(q_app)
 
                 yaml_newappset.update({appsetname: appsetobjects})
         else:
