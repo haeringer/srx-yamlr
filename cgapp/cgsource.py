@@ -8,7 +8,7 @@ class data:
 
     def __init__(self, sourcefile):
         with open(sourcefile, 'r') as infile:
-            self.data = yaml.load(infile)
+            self.dataset = yaml.load(infile)
 
     def reset_db(self):
         SrxPolicy.objects.all().delete()
@@ -20,11 +20,11 @@ class data:
         SrxZone.objects.all().delete()
 
     def import_zones(self):
-        for zone in self.data['zones']:
+        for zone in self.dataset['zones']:
             SrxZone.objects.update_or_create(name=zone)
 
     def import_addresses(self):
-        for zone, values in self.data['zones'].items():
+        for zone, values in self.dataset['zones'].items():
             z = SrxZone.objects.get(name=zone)
             # add 'any' zone to configuration
             SrxAddress.objects.update_or_create(zone=z, name='any', ip=z)
@@ -35,7 +35,7 @@ class data:
                 SrxAddress.objects.update_or_create(zone=z, name=name, ip=ip)
 
     def import_addrsets(self):
-        for zone, values in self.data['zones'].items():
+        for zone, values in self.dataset['zones'].items():
             z = SrxZone.objects.get(name=zone)
             if 'addrsets' in values:
                 if values['addrsets']:
@@ -53,17 +53,17 @@ class data:
                             obj.addresses.add(addr)
 
     def import_protocols(self):
-        for p in self.data['protocols']:
+        for p in self.dataset['protocols']:
             SrxProtocol.objects.update_or_create(ptype=p)
 
     def import_applications(self):
-        for app, values in self.data['applications'].items():
+        for app, values in self.dataset['applications'].items():
             port = values.get('port')
             protocol = values.get('protocol')
             t = SrxProtocol.objects.get(ptype=protocol)
             SrxApplication.objects.update_or_create(name=app, protocol=t,
                                                     port=port)
-        for app, values in self.data['default-applications'].items():
+        for app, values in self.dataset['default-applications'].items():
             protocol = values.get('protocol')
             t = SrxProtocol.objects.get(ptype=protocol)
             if 'port' in values:
@@ -74,7 +74,7 @@ class data:
                                                     port=port)
 
     def import_appsets(self):
-        for appset, values in self.data['applicationsets'].items():
+        for appset, values in self.dataset['applicationsets'].items():
             obj, created = SrxAppSet.objects.update_or_create(name=appset)
             if isinstance(values, list):
                 for i in values:
@@ -85,7 +85,7 @@ class data:
                 obj.applications.add(app)
 
     def import_policies(self):
-        for policy, values in self.data['policies'].items():
+        for policy, values in self.dataset['policies'].items():
 
             obj, created = SrxPolicy.objects.update_or_create(name=policy)
 
