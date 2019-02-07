@@ -14,7 +14,7 @@ from cgapp.models import SrxZone, SrxAddress, SrxAddrSet, SrxApplication, \
 
 
 logger = logging.getLogger(__name__)
-yamlconfig = None
+yamldata = None
 
 
 @login_required(redirect_field_name=None)
@@ -40,9 +40,9 @@ def mainView(request):
 
     if param != 'reloadforms':
         # Instantiate yamlConfig object with a new configid
-        global yamlconfig
-        yamlconfig = cgyaml.config()
-        logger.info('Cfgen configid: {}'.format(yamlconfig.configid))
+        global yamldata
+        yamldata = cgyaml.config()
+        logger.info('Cfgen configid: {}'.format(yamldata.configid))
 
     return render(request, 'cgapp/main.html', context)
 
@@ -96,7 +96,7 @@ def updatepolicy(request):
 
     a = request.POST.get('action', None)
     i = request.POST.get('policyid', None)
-    y = yamlconfig
+    y = yamldata
     c = y.configid
     response = {}
 
@@ -121,8 +121,8 @@ def updatepolicy(request):
             p.delete_object(s)
 
         # Update yamlConfig object
-        y.set_yaml_values()
-        y.set_yaml_config()
+        y.build_configdict()
+        y.convert_to_yaml()
 
         # Set values for http response
         response['obj_name'] = s.name
@@ -132,7 +132,7 @@ def updatepolicy(request):
         response['obj_protocol'] = s.protocol
         response['obj_apps'] = s.apps
 
-        response['yamlconfig'] = y.configuration
+        response['yamlconfig'] = y.yamlconfig
 
     except Exception:
         logger.error('Updating the policy failed because of following error:')
@@ -145,7 +145,7 @@ def updatepolicy(request):
 @csrf_exempt
 def newobject(request):
 
-    y = yamlconfig
+    y = yamldata
     c = y.configid
     response = {}
 
@@ -156,10 +156,10 @@ def newobject(request):
         s.save_new_obj()
 
         # Update yamlConfig object
-        y.set_yaml_values()
-        y.set_yaml_config()
+        y.build_configdict()
+        y.convert_to_yaml()
 
-        response['yamlconfig'] = y.configuration
+        response['yamlconfig'] = y.yamlconfig
 
     except Exception:
         logger.error('Creating object failed because of the following error:')

@@ -19,12 +19,12 @@ class config:
 
     def __init__(self):
         self.configid = str(uuid.uuid4())
-        self.yamldict = {}
-        self.configuration = None
+        self.configdict = {}
+        self.yamlconfig = None
 
-    def set_yaml_values(self):
+    def build_configdict(self):
         '''query database for objects (existing and newly created ones) and
-        assign values to yamldict'''
+        assign values to configdict'''
 
         c = self.configid
 
@@ -208,14 +208,14 @@ class config:
                                                defaults={'name': policyname})
 
         if policy:
-            self.yamldict['policies'] = {
+            self.configdict['policies'] = {
                 policyname: policy
             }
             logger.info('policy: {}'.format(policy))
         if yaml_newaddress and not yaml_newaddrset:
-            self.yamldict.update({'zones': yaml_newaddress})
+            self.configdict.update({'zones': yaml_newaddress})
         if yaml_newaddrset and not yaml_newaddress:
-            self.yamldict.update({'zones': yaml_newaddrset})
+            self.configdict.update({'zones': yaml_newaddrset})
         if yaml_newaddress and yaml_newaddrset:
             # TODO: Bug: keys are overwritten in some combinations; use
             # defaultdict ?
@@ -223,20 +223,21 @@ class config:
             zone2 = next(iter(yaml_newaddrset))
             if zone == zone2:
                 adr_merged = {**yaml_newaddress[zone], **yaml_newaddrset[zone]}
-                self.yamldict.update({'zones': {zone: adr_merged}})
+                self.configdict.update({'zones': {zone: adr_merged}})
             else:
                 adr_merged = {**yaml_newaddress, **yaml_newaddrset}
-                self.yamldict.update({'zones': adr_merged})
+                self.configdict.update({'zones': adr_merged})
         if yaml_newapp:
-            self.yamldict.update({'applications': yaml_newapp})
+            self.configdict.update({'applications': yaml_newapp})
         if yaml_newappset:
-            self.yamldict.update({'applicationsets': yaml_newappset})
+            self.configdict.update({'applicationsets': yaml_newappset})
 
-    def set_yaml_config(self):
+    def convert_to_yaml(self):
         '''dump dict into yaml file and into variable'''
 
         with open('config-new.yml', 'w') as outfile:
-            yaml.dump(self.yamldict, outfile, default_flow_style=False)
+            yaml.dump(self.configdict, outfile, default_flow_style=False)
 
-        logger.info('yamldict: {}'.format(self.yamldict))
-        self.configuration = yaml.dump(self.yamldict, default_flow_style=False)
+        logger.info('configdict: {}'.format(self.configdict))
+        self.yamlconfig = yaml.dump(self.configdict, default_flow_style=False)
+        print(self.yamlconfig)
