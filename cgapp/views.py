@@ -8,9 +8,9 @@ from django.http import JsonResponse, Http404
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 
-from cgapp import cgsource, cgobject, cgpolicy, cgyaml, cghelpers
+from cgapp import cgsource, cgyaml, cghelpers
 from cgapp.models import SrxZone, SrxAddress, SrxAddrSet, SrxApplication, \
-    SrxAppSet
+    SrxAppSet, SrxPolicy, SrxProtocol
 
 
 logger = logging.getLogger(__name__)
@@ -39,6 +39,9 @@ def mainView(request):
         raise Http404("HTTP 404 Error")
 
     if param != 'reloadforms':
+
+        print(request.session.items())
+
         # Instantiate yamlConfig object with a new configid
         global yamldata
         yamldata = cgyaml.config()
@@ -70,18 +73,18 @@ def loadobjects(request):
             git.Repo.clone_from(git_url, 'workspace')
 
     try:
-        y = cgsource.data(os.environ.get('CFGEN_YAMLFILE', ''))
+        s = cgsource.data()
         logger.info('Importyaml (policies == {}) start'.format(loadpolicies))
         if loadpolicies == 'False':
-            y.reset_db()
-            y.import_zones()
-            y.import_addresses()
-            y.import_addrsets()
-            y.import_protocols()
-            y.import_applications()
-            y.import_appsets()
+            s.reset_db()
+            s.import_zones()
+            s.import_addresses()
+            s.import_addrsets()
+            s.import_protocols()
+            s.import_applications()
+            s.import_appsets()
         if loadpolicies == 'True':
-            y.import_policies()
+            s.import_policies()
     except Exception:
         logger.error('YAML import failed because of the following error:')
         logger.error(traceback.format_exc())
@@ -94,43 +97,52 @@ def loadobjects(request):
 @csrf_exempt
 def updatepolicy(request):
 
-    a = request.POST.get('action', None)
-    i = request.POST.get('policyid', None)
+    action = request.POST.get('action', None)
+    policyid = request.POST.get('policyid', None)
+    objectid = request.POST.get('objectid', None)
+    objtype = request.POST.get('objtype', None)
+    source = request.POST.get('source', None)
+
     y = yamldata
-    c = y.configid
+    configid = y.configid
     response = {}
 
     try:
-        # Instantiate object for srx object + set object values
-        s = cgobject.srx()
-        s.set_obj_values_http(request)
-        s.set_obj_values_db()
+        policy, created = SrxPolicy.objects.update_or_create(policyid=policyid,
+                                                             configid=configid)
+        logger.info('Cfgen policyid: {}'.format(policyid))
 
-        # Instantiate policy object + create or update policy in db
-        p = cgpolicy.policy()
-        p.update_or_create_policy(i, c)
-        logger.info('Cfgen policyid: {}'.format(i))
+        if objtype == 'address' or objtype == 'addrset':
 
-        if p.validate_zone_logic(s) == 0:
-            response['error'] = 'Zone validation failed'
+            if objtype == 'address':
+                model = policy.update_address(objectid, source, action)
+                response['obj_val'] = model.ip
 
-        # Add or delete srx object to/from policy
-        if a == 'add':
-            p.add_object(s)
-        if a == 'delete':
-            p.delete_object(s)
+            elif objtype == 'addrset':
+                model = policy.update_addrset(objectid, source, action)
+                response['obj_val'] = []
+                for adr in model.addresses.all():
+                    response['obj_val'].append(str(adr))
+
+            policy.update_zone(model, source, action)
+            response['parentzone'] = str(model.zone)
+
+        elif objtype == 'application':
+            model = policy.update_application(objectid, action)
+            response['obj_port'] = model.port
+            response['obj_protocol'] = str(model.protocol)
+
+        elif objtype == 'appset':
+            model = policy.update_appset(objectid, action)
+            response['obj_apps'] = []
+            for app in model.applications.all():
+                response['obj_apps'].append(str(app))
+
+        response['obj_name'] = str(model)
 
         # Update yamlConfig object
         y.build_configdict()
         y.convert_to_yaml()
-
-        # Set values for http response
-        response['obj_name'] = s.name
-        response['parentzone'] = s.parentzone
-        response['obj_val'] = s.value
-        response['obj_port'] = s.port
-        response['obj_protocol'] = s.protocol
-        response['obj_apps'] = s.apps
 
         response['yamlconfig'] = y.yamlconfig
 
@@ -149,11 +161,36 @@ def newobject(request):
     c = y.configid
     response = {}
 
+    objtype = request.POST.get('objtype', None)
+    valuelist = request.POST.getlist('valuelist[]', None)
+    protocol = request.POST.get('protocol', None)
+    zone = request.POST.get('zone', None)
+    n = request.POST.get('name', None)
+    v = request.POST.get('value', None)
+    p = request.POST.get('port', None)
+
     try:
-        # Instantiate object for srx object + set object values
-        s = cgobject.srx()
-        s.set_obj_values_new(request, c)
-        s.save_new_obj()
+        if objtype == 'address':
+            z = SrxZone.objects.get(name=zone)
+            SrxAddress.objects.create(zone=z, name=n, ip=v, configid=c)
+
+        elif objtype == 'addrset':
+            z = SrxZone.objects.get(name=zone)
+            obj = SrxAddrSet.objects.create(zone=z, name=n, configid=c)
+            for i in valuelist:
+                a = SrxAddress.objects.get(name=i)
+                obj.addresses.add(a)
+
+        elif objtype == 'application':
+            pr = SrxProtocol.objects.get(ptype=protocol)
+            SrxApplication.objects.create(name=n, protocol=pr,
+                                          port=p, configid=c)
+
+        elif objtype == 'appset':
+            obj = SrxAppSet.objects.create(name=n, configid=c)
+            for i in valuelist:
+                a = SrxApplication.objects.get(name=i)
+                obj.applications.add(a)
 
         # Update yamlConfig object
         y.build_configdict()
