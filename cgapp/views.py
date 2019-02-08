@@ -1,4 +1,5 @@
 import os
+import uuid
 import git
 import traceback
 import json
@@ -8,13 +9,12 @@ from django.http import JsonResponse, Http404
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 
-from cgapp import cgsource, cgyaml, cghelpers
+from cgapp import cgsource, cghelpers
 from cgapp.models import SrxZone, SrxAddress, SrxAddrSet, SrxApplication, \
     SrxAppSet, SrxPolicy, SrxProtocol
 
 
 logger = logging.getLogger(__name__)
-yamldata = None
 
 
 @login_required(redirect_field_name=None)
@@ -40,12 +40,8 @@ def mainView(request):
 
     if param != 'reloadforms':
 
-        print(request.session.items())
-
-        # Instantiate yamlConfig object with a new configid
-        global yamldata
-        yamldata = cgyaml.config()
-        logger.info('Cfgen configid: {}'.format(yamldata.configid))
+        request.session['configid'] = str(uuid.uuid4())
+        logger.info('Configuration ID: {}'.format(request.session['configid']))
 
     return render(request, 'cgapp/main.html', context)
 
@@ -103,8 +99,7 @@ def updatepolicy(request):
     objtype = request.POST.get('objtype', None)
     source = request.POST.get('source', None)
 
-    y = yamldata
-    configid = y.configid
+    configid = request.session['configid']
     response = {}
 
     try:
@@ -140,11 +135,12 @@ def updatepolicy(request):
 
         response['obj_name'] = str(model)
 
-        # Update yamlConfig object
-        y.build_configdict()
-        y.convert_to_yaml()
+        # Call helper functions to build config and convert to yaml
+        configdict = cghelpers.build_configdict(configid)
+        yamlconfig = cghelpers.convert_to_yaml(configdict)
 
-        response['yamlconfig'] = y.yamlconfig
+        request.session['yamlconfig'] = yamlconfig
+        response['yamlconfig'] = yamlconfig
 
     except Exception:
         logger.error('Updating the policy failed because of following error:')
@@ -157,10 +153,6 @@ def updatepolicy(request):
 @csrf_exempt
 def newobject(request):
 
-    y = yamldata
-    c = y.configid
-    response = {}
-
     objtype = request.POST.get('objtype', None)
     valuelist = request.POST.getlist('valuelist[]', None)
     protocol = request.POST.get('protocol', None)
@@ -168,6 +160,9 @@ def newobject(request):
     n = request.POST.get('name', None)
     v = request.POST.get('value', None)
     p = request.POST.get('port', None)
+
+    c = request.session['configid']
+    response = {}
 
     try:
         if objtype == 'address':
@@ -192,11 +187,12 @@ def newobject(request):
                 a = SrxApplication.objects.get(name=i)
                 obj.applications.add(a)
 
-        # Update yamlConfig object
-        y.build_configdict()
-        y.convert_to_yaml()
+        # Call helper functions to build config and convert to yaml
+        configdict = cghelpers.build_configdict(c)
+        yamlconfig = cghelpers.convert_to_yaml(configdict)
 
-        response['yamlconfig'] = y.yamlconfig
+        request.session['yamlconfig'] = yamlconfig
+        response['yamlconfig'] = yamlconfig
 
     except Exception:
         logger.error('Creating object failed because of the following error:')
