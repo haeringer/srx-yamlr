@@ -8,7 +8,6 @@ $(window).on('load', function() {
     currentObj['policyid'] = newID;
 });
 
-
 /*
 * Event listeners etc. - run once DOM is ready
 */
@@ -244,7 +243,7 @@ function filterObjects(zoneselector) {
         }
         addresses = response.addresses
 
-        if (Array.isArray(addresses) == true) {
+        if (Array.isArray(addresses) === true) {
             $('#adrset-form-control-objects').html('')
             $.each(addresses, function(key, value) {
                 $('#adrset-form-control-objects')
@@ -289,7 +288,7 @@ function createObject() {
         var name = $("input#address-form-control-name").val();
         var value = $("input#address-form-control-ip").val();
 
-        if (zone == 'Choose Zone...' || name == '' || value == '') {
+        if (zone === 'Choose Zone...' || name === '' || value === '') {
             $('#address-form-alert').append('<div class="alert alert-info" ' +
               'role="alert" id="field-empty">Please fill all values!</div>')
             return false;
@@ -320,7 +319,7 @@ function createObject() {
         var name = $("input#adrset-form-control-name").val();
         var valuelist = $("#adrset-form-control-objects").val();
 
-        if (zone == 'Choose Zone...' || name == '' || valuelist == '') {
+        if (zone === 'Choose Zone...' || name === '' || valuelist === '') {
             $('#addrset-form-alert').append('<div class="alert alert-info" ' +
               'role="alert" id="field-empty">Please fill all values!</div>')
             return false;
@@ -351,7 +350,7 @@ function createObject() {
         var port = $("input#application-form-control-port").val();
         var protocol = $("select#application-form-control-protocol").val();
 
-        if (protocol == 'Protocol' || name == '' || port == '') {
+        if (protocol === 'Protocol' || name === '' || port === '') {
             $('#application-form-alert').append('<div class="alert alert-info" ' +
               'role="alert" id="field-empty">Please fill all values!</div>')
             return false;
@@ -381,7 +380,7 @@ function createObject() {
         var name = $("input#appset-form-control-name").val();
         var valuelist = $("#appset-form-control-objects").val();
 
-        if (name == '' || valuelist == '') {
+        if (name === '' || valuelist === '') {
             $('#appset-form-alert').append('<div class="alert alert-info" ' +
               'role="alert" id="field-empty">Please fill all values!</div>')
             return false;
@@ -569,7 +568,7 @@ function uuidv4() {
 /* Check if arrays inside object are empty helper function */
 function currentObjIsEmpty(obj) {
     var i = obj['from'].length + obj['to'].length + obj['app'].length
-    if (i == 0) {
+    if (i === 0) {
         return true;
     } else {
         return false;
