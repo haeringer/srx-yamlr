@@ -16,8 +16,34 @@ $(function() {
 
     $("button#create-object-save").click(function() { createObject() });
 
-    // use .on 'click' with parent selected to recognize events also on newly added items
-    $('#search-forms').on('click', '.search-results-item', function() { addObject(this) });
+    // use .on 'click' with parent selected to recognize events also on
+    // dynamically added items
+    $('#search-forms').on('click', '.search-results-item', function() {
+        var objtype = this.id.split("_", 3).pop()
+
+        resetSearch(this)
+
+        if (objtype === 'address' || objtype === 'addrset') {
+            const policyAddrObject = new PolicyAddrObject(this)
+            var valid = policyAddrObject.validate_policy_logic()
+            if (valid === true) {
+                policyAddrObject.ajax_add_address_to_policy_yaml()
+                policyAddrObject.blend_in_zone()
+                policyAddrObject.add_object_to_list()
+            } else {
+                return;
+            }
+        } else if (objtype === 'application' || objtype === 'appset') {
+            const policyAppObject = new PolicyAppObject(this)
+            var valid = policyAppObject.validate_application_use()
+            if (valid === true) {
+                policyAppObject.ajax_add_application_to_policy_yaml()
+                policyAppObject.add_object_to_list()
+            } else {
+                return;
+            }
+        }
+    })
 
     $('.list-group').on('click', '.lgi-icon-close', function() { deleteObject(this) });
 
@@ -37,13 +63,170 @@ $(function() {
 });
 
 
-var currentObj = {};
-currentObj['from'] = [];
-currentObj['to'] = [];
-currentObj['app'] = [];
-currentObj['policyid'] = [];
-var selObj;
+class PolicyAddrObject {
+    constructor(search_result_item) {
+        this.objtype = search_result_item.id.split("_", 3).pop()
+        this.objectid = search_result_item.id.split("_", 2).pop()
+        this.direction = search_result_item.id.split("_").shift()
+        this.name = $(search_result_item).find('.obj-name').html()
+        this.val = $(search_result_item).find('.obj-val').html()
+        this.zone = $(search_result_item).find('.obj-zone').html()
+    }
 
+    validate_policy_logic() {
+        var errorDifferent = "Can't use objects from different zones!"
+        var errorZone = "Can't use the same zone for source and destination!"
+        var errorUsed = "Object already in use!"
+
+        var presentZone = $('#added-zone-body-'+this.direction).html()
+        var thisZoneContainerCard = $('#added-zone-'+this.direction)
+
+        if (this.direction === 'from') {
+            var otherZone = $('#added-zone-body-to').html()
+            var currentObjStack = currentObj.from
+        } else if (this.direction === 'to') {
+            var otherZone = $('#added-zone-body-from').html()
+            var currentObjStack = currentObj.to
+        }
+
+        if (this.zone === otherZone) {
+            swal(errorZone)
+        } else if (!thisZoneContainerCard.hasClass('d-none') &&
+                  (this.zone != presentZone)) {
+            swal(errorDifferent)
+        } else if (currentObjStack.includes(this.objectid)) {
+            swal(errorUsed)
+        } else {
+            return true;
+        }
+    }
+
+    blend_in_zone() {
+        var thisZoneContainerCard = $('#added-zone-'+this.direction)
+        var thisZoneBody = $('#added-zone-body-'+this.direction)
+
+        if (thisZoneContainerCard.hasClass('d-none')) {
+            thisZoneContainerCard.removeClass('d-none')
+            thisZoneBody.html(this.zone)
+        } else {
+            return;
+        }
+    }
+
+    ajax_add_address_to_policy_yaml() {
+        $.post('/ajax/add-address-to-policy/', {
+            policyid: currentObj.policyid,
+            objectid: this.objectid,
+            direction: this.direction,
+        })
+        .done(function(response) {
+            if (response.error != null) {
+                alert('Policy update failed because of the following error:\n\n'
+                    + JSON.parse(response.error)
+                )
+            }
+            updateYaml(response.yamlconfig)
+        })
+
+        .fail(function(errorThrown) {
+            console.log(errorThrown.toString())
+        })
+    }
+
+    add_object_to_list() {
+        console.log(this)
+
+        var addedObj = {
+            obj: this,
+            container: $('#added-obj-'+this.direction),
+            list: $('#added-list-'+this.direction),
+            id: this.direction+'_'+this.objectid+'_'+this.objtype+'_'+'_added',
+        }
+
+        objectlist_append_html(addedObj)
+
+        if (this.direction === 'from') {
+            currentObj.from.push(this.objectid)
+        } else if (this.direction === 'to') {
+            currentObj.to.push(this.objectid)
+        }
+    }
+}
+
+class PolicyAppObject {
+    constructor(search_result_item) {
+        this.objectid = search_result_item.id.split("_", 2).pop()
+        this.name = $(search_result_item).find('.obj-name').html()
+        this.val = $(search_result_item).find('.obj-val').html()
+    }
+
+    validate_application_use() {
+        if (currentObj.app.includes(this.objectid)) {
+            swal("Object already in use!")
+        } else {
+            return true;
+        }
+    }
+
+    ajax_add_application_to_policy_yaml() {
+        $.post('/ajax/add-application-to-policy/', {
+            policyid: currentObj.policyid,
+            objectid: this.objectid,
+        })
+        .done(function(response) {
+            if (response.error != null) {
+                alert('Policy update failed because of the following error:\n\n'
+                    + JSON.parse(response.error)
+                )
+            }
+            updateYaml(response.yamlconfig)
+        })
+        .fail(function(errorThrown) {
+            console.log(errorThrown.toString())
+        })
+    }
+
+    add_object_to_list() {
+        console.log(this)
+
+        var addedObj = {
+            obj: this,
+            container: $('#added-obj-app'),
+            list: $('#added-list-app'),
+            id: 'app_'+this.objectid+'_'+this.objtype+'_'+'_added',
+        }
+
+        objectlist_append_html(addedObj)
+        currentObj.app.push(this.objectid)
+    }
+}
+
+
+function objectlist_append_html(addedObj) {
+    addedObj.container.removeClass('d-none')
+    addedObj.list.append(
+        `<li class="list-group-item" id="${addedObj.id}">
+          <div class="row">
+            <div class="col-auto mr-auto lgi-name">${addedObj.obj.name}</div>
+            <div class="lgi-icon-close pr-2">
+              <button type="button" class="close" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="w-100"></div>
+            <div class="col-auto mr-auto lgi-name text-black-50">
+              <small>${addedObj.obj.val}</small>
+            </div>
+          </div>
+        </li>`
+    )
+}
+
+
+function updateYaml(yamlconfig) {
+    $('#yamlcontainer').html(yamlconfig)
+    $('#yamlcard').removeClass('d-none')
+}
 
 
 function filterObjects(zoneselector) {
@@ -284,170 +467,6 @@ function editYaml() {
     swal('geht noch nich')
 }
 
-
-/* After click on search result item (see event listener),
-retrieve parent zone and add object to card element */
-function addObject(obj) {
-
-    $('.spinner-container').fadeIn()
-
-    var objectId_db = obj.id.split("_", 2).pop();
-    var objtype = obj.id.split("_", 3).pop();
-    var source = obj.id.split("_").shift();
-    var action = 'add';
-
-    if (source === 'from' || source === 'to') {
-
-        $.post('/ajax/updatepolicy/', {
-            policyid: currentObj.policyid,
-            objectid: objectId_db,
-            objtype: objtype,
-            source: source,
-            action: action,
-            })
-
-        .done(function(response) {
-            if (response.error != null) {
-                alert('YAML build failed because of the following error:\n\n'
-                    + JSON.parse(response.error)
-                )
-            }
-            var objVal = response.obj_val
-            if (Array.isArray(objVal) == true) {
-                objVal = objVal.join(', ');
-            }
-
-            $('.spinner-container').fadeOut()
-
-            if (source === 'from') {
-                var zoneTo = $('#added-zone-body-to').html()
-                if (zoneTo === response.parentzone) {
-                    swal("Can't use the same zone for source and destination!")
-                    return;
-                }
-                if (currentObj.from.includes(objectId_db)) {
-                    swal("Object already in use!");
-                    return;
-                }
-            } else if (source === 'to') {
-                var zoneFrom = $('#added-zone-body-from').html()
-                if (zoneFrom === response.parentzone) {
-                    swal("Can't use the same zone for source and destination!")
-                    return;
-                }
-                if (currentObj.to.includes(objectId_db)) {
-                    swal("Object already in use!");
-                    return;
-                }
-            }
-
-            // blend in card element
-            if ($('#added-zone-'+source).hasClass('d-none')) {
-                $('#added-zone-'+source).removeClass('d-none');
-                $('#added-zone-body-'+source).html(response.parentzone);
-            } else {
-                var zonePresent = $('#added-zone-body-'+source).html();
-                if (zonePresent !== response.parentzone) {
-                    swal("Can't use objects from different zones!");
-                    return;
-                }
-            }
-
-            $('#added-obj-'+source).removeClass('d-none');
-            $('#added-list-'+source).append(
-                `<li class="list-group-item" id="${source}_${objectId_db}_${objtype}_added">
-                  <div class="row">
-                    <div class="col-auto mr-auto lgi-name">${response.obj_name}</div>
-                    <div class="lgi-icon-close pr-2">
-                      <button type="button" class="close" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                      </button>
-                    </div>
-                    <div class="w-100"></div>
-                    <div class="col-auto mr-auto lgi-name text-black-50"><small>${objVal}</small></div>
-                  </div>
-                </li>`
-            );
-
-            if (source === 'from') {
-                currentObj.from.push(objectId_db);
-            } else if (source === 'to') {
-                currentObj.to.push(objectId_db);
-            }
-
-            $('#yamlcontainer').html(response.yamlconfig);
-            $('#yamlcard').removeClass('d-none');
-
-        })
-
-        .fail(function(errorThrown) {
-            $('.spinner-container').fadeOut()
-            console.log(errorThrown.toString());
-        });
-
-    } else if (source === 'app') {
-
-        $.post('/ajax/updatepolicy/', {
-            policyid: currentObj.policyid,
-            objectid: objectId_db,
-            objtype: objtype,
-            source: source,
-            action: action,
-        })
-
-        .done(function(response) {
-            if (response.error != null) {
-                alert('Updating the policy failed because of the following error:\n\n'
-                    + JSON.parse(response.error)
-                )
-            }
-            var objVal;
-            if (response.obj_protocol != null) {
-                objVal = response.obj_protocol + ' ' + response.obj_port;
-            } else {
-                objVal = response.obj_apps.join(', ');
-            }
-
-            $('.spinner-container').fadeOut()
-
-            if (currentObj.app.includes(objectId_db)) {
-                swal("Object already in use!");
-                return;
-            }
-
-            $('#added-obj-app').removeClass('d-none');
-            $('#added-list-app').append(
-                `<li class="list-group-item" id="app_${objectId_db}_${objtype}_added">
-                  <div class="row">
-                    <div class="col-auto mr-auto lgi-name">${response.obj_name}</div>
-                    <div class="lgi-icon-close pr-2">
-                      <button type="button" class="close" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                      </button>
-                    </div>
-                  <div class="w-100"></div>
-                  <div class="col-auto mr-auto lgi-name text-black-50"><small>${objVal}</small></div>
-                  </div>
-                </li>`
-            );
-
-            currentObj.app.push(objectId_db);
-
-            $('#yamlcontainer').html(response.yamlconfig);
-            $('#yamlcard').removeClass('d-none');
-        })
-
-        .fail(function(errorThrown) {
-            $('.spinner-container').fadeOut()
-            console.log(errorThrown.toString());
-        });
-
-    }
-    $(obj).closest('.list-inline').addClass('d-none');
-    $('#search-'+source).val('');
-}
-
-
 function deleteObject(obj) {
     var listitem = $(obj).parents('.list-group-item').remove();
     var listitemId = $(listitem).attr('id');
@@ -528,6 +547,15 @@ function objectSearch(e) {
             li[i].style.display = 'none';
         }
     }
+}
+
+
+function resetSearch(item) {
+    var searchForm = item.closest('.col-sm').querySelector('.searchform')
+    var resultList = item.closest('.list-inline')
+
+    resultList.classList.add('d-none')
+    searchForm.value = ''
 }
 
 
