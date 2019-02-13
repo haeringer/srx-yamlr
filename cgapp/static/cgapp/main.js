@@ -527,9 +527,8 @@ function deleteObject(obj) {
 }
 
 
-/* Filter elements in provided object list and blend in result list element */
 function objectSearch(e) {
-    var input, filter, ul, li, a, i;
+    var input, filter, ul, li, a, a0, a1, i;
     input = document.getElementById(e.id);
     filter = input.value.toUpperCase();
     ul = document.getElementById(e.id + '-ul');
