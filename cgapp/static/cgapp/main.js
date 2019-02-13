@@ -1,5 +1,4 @@
 
-var selObj
 var currentObj = {
     policyid: [],
     from: [],
@@ -56,7 +55,7 @@ $(function() {
 
     // Create Object Modal related functions
     $('#create-object-dropdown a').on('click', function () {
-        createInputForm(this)
+        showCreateObjectForm(this)
     })
     $('#adrset-form-control-zone').on('click', function() {
         filterObjects(this)
@@ -288,60 +287,63 @@ function updateYaml(yamlconfig) {
 
 
 function filterObjects(zoneselector) {
-    var selectedzone = $(zoneselector).val();
+    var selectedzone = $(zoneselector).val()
 
     $.get({
         url: '/ajax/filterobjects/',
-        data: {
-            selectedzone: selectedzone,
-        }
+        data: { selectedzone: selectedzone },
     })
     .done(function(response) {
         if (response === null) {
             return;
         }
-        addresses = response.addresses
-
-        if (Array.isArray(addresses) === true) {
+        if (Array.isArray(response.addresses) === true) {
             $('#adrset-form-control-objects').html('')
-            $.each(addresses, function(key, value) {
+            $.each(response.addresses, function(key, value) {
                 $('#adrset-form-control-objects')
                     .append($('<option class="small">', { value : key })
-                    .text(value));
-            });
+                    .text(value))
+            })
         } else {
             $('#adrset-form-control-objects').html(
-                `<option class="small">${ addresses }</option>`
+                `<option class="small">${ response.addresses }</option>`
             )
         }
-
     })
-    .fail(function(jqXHR, textStatus, errorThrown) {
-        console.log(errorThrown.toString());
-    });
+    .fail(function(errorThrown) {
+        console.log(errorThrown.toString())
+    })
 }
 
 
-function createInputForm(obj) {
-    selObj = $(obj).text();
+function showCreateObjectForm(dropdown) {
+    var selectedObj = $(dropdown).text();
 
     $('#form-container').find('form').addClass('d-none')
 
-    if (selObj === 'Address') {
+    if (selectedObj === 'Address') {
         $('#address-form').removeClass('d-none')
-    } else if (selObj === 'Address Set') {
+    } else if (selectedObj === 'Address Set') {
         $('#adrset-form').removeClass('d-none')
-    } else if (selObj === 'Application') {
+    } else if (selectedObj === 'Application') {
         $('#application-form').removeClass('d-none')
-    } else if (selObj === 'Application Set') {
+    } else if (selectedObj === 'Application Set') {
         $('#appset-form').removeClass('d-none')
     }
 }
 
 
 function createObject() {
+    var formContainer = document.getElementById('form-container')
+    var forms = formContainer.querySelectorAll('.form-class')
+    var formType
+    forms.forEach(function(element) {
+        if (element.classList.contains('d-none') == false) {
+            formType = element.id
+        }
+    })
 
-    if (selObj === 'Address') {
+    if (formType === 'address-form') {
         var objtype = 'address';
         var zone = $("select#address-form-control-zone").val();
         var name = $("input#address-form-control-name").val();
@@ -372,7 +374,7 @@ function createObject() {
             console.log(errorThrown.toString());
         });
 
-    } else if (selObj === 'Address Set') {
+    } else if (formType === 'adrset-form') {
         var objtype = 'addrset';
         var zone = $("select#adrset-form-control-zone").val();
         var name = $("input#adrset-form-control-name").val();
@@ -403,7 +405,7 @@ function createObject() {
             console.log(errorThrown.toString());
         });
 
-    } else if (selObj === 'Application') {
+    } else if (formType === 'application-form') {
         var objtype = 'application';
         var name = $("input#application-form-control-name").val();
         var port = $("input#application-form-control-port").val();
@@ -434,7 +436,7 @@ function createObject() {
             console.log(errorThrown.toString());
         });
 
-    } else if (selObj === 'Application Set') {
+    } else if (formType === 'appset-form') {
         var objtype = 'appset';
         var name = $("input#appset-form-control-name").val();
         var valuelist = $("#appset-form-control-objects").val();
