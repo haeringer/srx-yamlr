@@ -1,89 +1,120 @@
 
+var selObj
+var currentObj = {
+    policyid: [],
+    from: [],
+    to: [],
+    app: [],
+}
+
 /*
 * Run on page load
 */
 $(window).on('load', function() {
-    var newID = generateId();
-    currentObj['policyid'] = newID;
-});
+    var newID = generateId()
+    currentObj.policyid = newID
+})
 
 // Make ajax POST requests work with Django's CSRF protection
 $.ajaxSetup({
     beforeSend: function(xhr, settings) {
         function getCookie(name) {
-            var cookieValue = null;
+            var cookieValue = null
             if (document.cookie && document.cookie != '') {
-                var cookies = document.cookie.split(';');
+                var cookies = document.cookie.split(';')
                 for (var i = 0; i < cookies.length; i++) {
-                    var cookie = jQuery.trim(cookies[i]);
-                    // Does this cookie string begin with the name we want?
+                    var cookie = jQuery.trim(cookies[i])
                     if (cookie.substring(0, name.length + 1) == (name + '=')) {
-                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        cookieValue = decodeURIComponent(cookie.substring(
+                                                         name.length + 1))
                         break;
                     }
                 }
             }
             return cookieValue;
         }
-        if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
-            // Only send the token to relative URLs i.e. locally.
-            xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
+        if (!(/^http:.*/.test(settings.url) ||
+              /^https:.*/.test(settings.url))) {
+            xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'))
         }
     }
-});
+})
 
 /*
 * Event listeners etc. - run once DOM is ready
 */
 $(function() {
 
-    $("button#create-object-save").click(function() { createObject() });
-
-    // use .on 'click' with parent selected to recognize events also on
-    // dynamically added items
+    // Search Forms - use .on 'click' with parent selected to recognize
+    // events also on dynamically added items
     $('#search-forms').on('click', '.search-results-item', function() {
-        var objtype = this.id.split("_", 3).pop()
-
-        resetSearch(this)
-
-        if (objtype === 'address' || objtype === 'addrset') {
-            const policyAddrObject = new PolicyAddrObject(this)
-            var valid = policyAddrObject.validate_policy_logic()
-            if (valid === true) {
-                policyAddrObject.ajax_add_address_to_policy_yaml()
-                policyAddrObject.blend_in_zone()
-                policyAddrObject.add_object_to_list()
-            } else {
-                return;
-            }
-        } else if (objtype === 'application' || objtype === 'appset') {
-            const policyAppObject = new PolicyAppObject(this)
-            var valid = policyAppObject.validate_application_use()
-            if (valid === true) {
-                policyAppObject.ajax_add_application_to_policy_yaml()
-                policyAppObject.add_object_to_list()
-            } else {
-                return;
-            }
-        }
+        policyObjectHandler(this)
+    })
+    $('.list-group').on('click', '.lgi-icon-close', function() {
+        deleteObject(this)
     })
 
-    $('.list-group').on('click', '.lgi-icon-close', function() { deleteObject(this) });
+    // Create Object Modal related functions
+    $('#create-object-dropdown a').on('click', function () {
+        createInputForm(this)
+    })
+    $('#adrset-form-control-zone').on('click', function() {
+        filterObjects(this)
+    })
+    $("button#create-object-save").click(function() {
+        createObject()
+    })
 
-    $('#create-object-dropdown a').on('click', function () { createInputForm(this) });
-    $('#adrset-form-control-zone').on('click', function() { filterObjects(this) });
+    // Buttons
+    $('#add-policy').on('click', function() {
+        addPolicy()
+    })
+    $('#clear-config').on('click', function() {
+        window.location.replace('/load')
+    })
+    $('#check-config').on('click', function() {
+        checkConfig()
+    })
+    $('#deploy-config').on('click', function() {
+        deployConfig()
+    })
+    $('#edit-yaml').on('click', function() {
+        editYaml()
+    })
 
-    $('#add-policy').on('click', function() { addPolicy() });
-    $('#clear-config').on('click', function() { window.location.replace('/load') });
-    $('#check-config').on('click', function() { checkConfig() });
-    $('#deploy-config').on('click', function() { deployConfig() });
-    $('#edit-yaml').on('click', function() { editYaml() });
-
-    $('#output-close').on('click', function() { $('#output-modal').modal('toggle')});
+    $('#output-close').on('click', function() {
+        $('#output-modal').modal('toggle')
+    })
 
     $('[data-toggle="tooltip"]').tooltip()
 
-});
+})
+
+
+function policyObjectHandler(htmlObj) {
+    var objtype = htmlObj.id.split("_", 3).pop()
+
+    resetSearch(htmlObj)
+
+    if (objtype === 'address' || objtype === 'addrset') {
+        const policyAddrObject = new PolicyAddrObject(htmlObj)
+        if (policyAddrObject.validate_policy_logic() === true) {
+            policyAddrObject.ajax_add_address_to_policy_yaml()
+            policyAddrObject.blend_in_zone()
+            policyAddrObject.add_object_to_list()
+        } else {
+            return;
+        }
+    } else if (objtype === 'application' || objtype === 'appset') {
+        const policyAppObject = new PolicyAppObject(htmlObj)
+        if (policyAppObject.validate_application_use() === true) {
+            policyAppObject.ajax_add_application_to_policy_yaml()
+            policyAppObject.add_object_to_list()
+        } else {
+            return;
+        }
+    }
+}
 
 
 class PolicyAddrObject {
@@ -106,10 +137,14 @@ class PolicyAddrObject {
 
         if (this.direction === 'from') {
             var otherZone = $('#added-zone-body-to').html()
-            var currentObjStack = currentObj.from
+            var objUsed = currentObj.from.some(function (obj) {
+                return obj.from === this;
+            })
         } else if (this.direction === 'to') {
             var otherZone = $('#added-zone-body-from').html()
-            var currentObjStack = currentObj.to
+            var objUsed = currentObj.to.some(function (obj) {
+                return obj.to === this;
+            })
         }
 
         if (this.zone === otherZone) {
@@ -117,7 +152,7 @@ class PolicyAddrObject {
         } else if (!thisZoneContainerCard.hasClass('d-none') &&
                   (this.zone != presentZone)) {
             swal(errorDifferent)
-        } else if (currentObjStack.includes(this.objectid)) {
+        } else if (objUsed === true) {
             swal(errorUsed)
         } else {
             return true;
@@ -169,9 +204,9 @@ class PolicyAddrObject {
         objectlist_append_html(addedObj)
 
         if (this.direction === 'from') {
-            currentObj.from.push(this.objectid)
+            currentObj.from.push(this)
         } else if (this.direction === 'to') {
-            currentObj.to.push(this.objectid)
+            currentObj.to.push(this)
         }
     }
 }
@@ -184,7 +219,7 @@ class PolicyAppObject {
     }
 
     validate_application_use() {
-        if (currentObj.app.includes(this.objectid)) {
+        if (currentObj.app.includes(this)) {
             swal("Object already in use!")
         } else {
             return true;
@@ -220,7 +255,7 @@ class PolicyAppObject {
         }
 
         objectlist_append_html(addedObj)
-        currentObj.app.push(this.objectid)
+        currentObj.app.push(this)
     }
 }
 
@@ -505,17 +540,17 @@ function deleteObject(obj) {
     }
 
     if (source === 'from') {
-        var index = currentObj.from.indexOf(objectId_db);
+        var index = currentObj.from.indexOf(obj);
         if (index > -1) {
             currentObj.from.splice(index, 1);
         }
     } else if (source === 'to') {
-        var index = currentObj.to.indexOf(objectId_db);
+        var index = currentObj.to.indexOf(obj);
         if (index > -1) {
             currentObj.to.splice(index, 1);
         }
     } else if (source === 'app') {
-        var index = currentObj.app.indexOf(objectId_db);
+        var index = currentObj.app.indexOf(obj);
         if (index > -1) {
             currentObj.app.splice(index, 1);
         }
@@ -587,7 +622,7 @@ function generateId() {
 
 /* Check if arrays inside object are empty helper function */
 function currentObjIsEmpty(obj) {
-    var i = obj['from'].length + obj['to'].length + obj['app'].length
+    var i = obj.from.length + obj.to.length + obj.app.length
     if (i === 0) {
         return true;
     } else {
