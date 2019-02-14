@@ -136,14 +136,10 @@ class PolicyAddrObject {
 
         if (this.direction === 'from') {
             var otherZone = $('#added-zone-body-to').html()
-            var objUsed = currentObj.from.some(function (obj) {
-                return obj.from === this;
-            })
+            var objUsed = currentObj.from.includes(this.name)
         } else if (this.direction === 'to') {
             var otherZone = $('#added-zone-body-from').html()
-            var objUsed = currentObj.to.some(function (obj) {
-                return obj.to === this;
-            })
+            var objUsed = currentObj.to.includes(this.name)
         }
 
         if (this.zone === otherZone) {
@@ -203,9 +199,9 @@ class PolicyAddrObject {
         objectlist_append_html(addedObj)
 
         if (this.direction === 'from') {
-            currentObj.from.push(this)
+            currentObj.from.push(this.name)
         } else if (this.direction === 'to') {
-            currentObj.to.push(this)
+            currentObj.to.push(this.name)
         }
     }
 }
@@ -218,7 +214,7 @@ class PolicyAppObject {
     }
 
     validate_application_use() {
-        if (currentObj.app.includes(this)) {
+        if (currentObj.app.includes(this.name)) {
             swal("Object already in use!")
         } else {
             return true;
@@ -254,7 +250,7 @@ class PolicyAppObject {
         }
 
         objectlist_append_html(addedObj)
-        currentObj.app.push(this)
+        currentObj.app.push(this.name)
     }
 }
 
@@ -542,17 +538,17 @@ function deleteObject(obj) {
     }
 
     if (source === 'from') {
-        var index = currentObj.from.indexOf(obj);
+        var index = currentObj.from.indexOf(obj.name);
         if (index > -1) {
             currentObj.from.splice(index, 1);
         }
     } else if (source === 'to') {
-        var index = currentObj.to.indexOf(obj);
+        var index = currentObj.to.indexOf(obj.name);
         if (index > -1) {
             currentObj.to.splice(index, 1);
         }
     } else if (source === 'app') {
-        var index = currentObj.app.indexOf(obj);
+        var index = currentObj.app.indexOf(obj.name);
         if (index > -1) {
             currentObj.app.splice(index, 1);
         }
