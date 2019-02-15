@@ -5,11 +5,14 @@ from . import views
 
 app_name = 'cgapp'
 urlpatterns = [
-    path('consoleout/', views.channelsView, name='channelsView'),
     path('auth/', include('django.contrib.auth.urls')),
     path('load/', TemplateView.as_view(template_name='cgapp/load.html'),
          name='load'),
     path('', views.mainView, name='mainView'),
+    path('ajax/add-address-to-policy/', views.add_address_to_policy,
+         name='add_address_to_policy'),
+    path('ajax/add-application-to-policy/', views.add_application_to_policy,
+         name='add_application_to_policy'),
     path('ajax/loadobjects/', views.loadobjects, name='loadobjects'),
     path('ajax/updatepolicy/', views.updatepolicy, name='updatepolicy'),
     path('ajax/newobject/', views.newobject, name='newobject'),

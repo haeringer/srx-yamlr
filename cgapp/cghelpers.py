@@ -15,8 +15,9 @@ def makehash():
 
 
 def queryset_to_var(queryset):
-    '''Convert django queryset to string or list, depending on queryset
-    content'''
+    '''
+    Convert django queryset to string or list, depending on queryset content
+    '''
 
     if queryset:
         if len(queryset) > 1:
@@ -28,6 +29,80 @@ def queryset_to_var(queryset):
     else:
         rval = ''
     return rval
+
+
+class srxPolicy:
+
+    def __init__(self, request):
+        self.configdict = request.session['configdict']
+        self.objectid = request.POST.get('objectid', None)
+        self.direction = request.POST.get('direction', None)
+        self.policyid = request.POST.get('policyid', None)
+        self.policyname = 'allow-{0}-to-{0}'.format(self.policyid)
+
+    def add_address(self):
+        cd = self.configdict
+
+        obj = SrxAddress.objects.filter(id=self.objectid).first()
+        if not obj:
+            obj = SrxAddrSet.objects.filter(id=self.objectid).first()
+
+        d = extract_from_nested_dict(cd, {})
+
+        if self.direction == 'from':
+            zone = 'fromzone'
+            direction = 'source'
+        elif self.direction == 'to':
+            zone = 'tozone'
+            direction = 'destination'
+
+        d[zone] = str(obj.zone)
+        if direction not in d:
+            d[direction] = obj.name
+        elif isinstance(d[direction], list):
+            d[direction].append(obj.name)
+        else:
+            valuelist = [d[direction]]
+            valuelist.append(obj.name)
+            d[direction] = valuelist
+
+        cd.setdefault('policies', {}).setdefault(self.policyname, {}).update(d)
+
+        return cd
+
+    def add_application(self):
+        cd = self.configdict
+
+        obj = SrxApplication.objects.filter(id=self.objectid).first()
+        if not obj:
+            obj = SrxAppSet.objects.filter(id=self.objectid).first()
+
+        d = extract_from_nested_dict(self.configdict, {})
+
+        if 'application' not in d:
+            d['application'] = obj.name
+        elif isinstance(d['application'], list):
+            d['application'].append(obj.name)
+        else:
+            valuelist = [d['application']]
+            valuelist.append(obj.name)
+            d['application'] = valuelist
+
+        cd.setdefault('policies', {}).setdefault(self.policyname, {}).update(d)
+
+        return cd
+
+
+def extract_from_nested_dict(nested_sourcedict, unnested_newdict):
+    '''
+    Extract a standard dict with only key/value pairs from a nested dict
+    '''
+    for key, value in nested_sourcedict.items():
+        if isinstance(value, dict):
+            extract_from_nested_dict(value, unnested_newdict)
+        else:
+            unnested_newdict[key] = value
+    return unnested_newdict
 
 
 def build_configdict(configid):

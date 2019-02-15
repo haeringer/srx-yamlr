@@ -4,15 +4,14 @@ import git
 import traceback
 import json
 import logging
+import oyaml as yaml
 from django.shortcuts import render, get_list_or_404
 from django.http import JsonResponse, Http404
-from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 
 from cgapp import cgsource, cghelpers
 from cgapp.models import SrxZone, SrxAddress, SrxAddrSet, SrxApplication, \
     SrxAppSet, SrxPolicy, SrxProtocol
-
 
 logger = logging.getLogger(__name__)
 
@@ -40,6 +39,7 @@ def mainView(request):
 
     if param != 'reloadforms':
 
+        request.session['configdict'] = {}
         request.session['configid'] = str(uuid.uuid4())
         logger.info('Configuration ID: {}'.format(request.session['configid']))
 
@@ -90,7 +90,22 @@ def loadobjects(request):
     return JsonResponse(response, safe=False)
 
 
-@csrf_exempt
+def add_address_to_policy(request):
+    policy = cghelpers.srxPolicy(request)
+    configdict = policy.add_address()
+    request.session['configdict'] = configdict
+    response = dict(yamlconfig=yaml.dump(configdict, default_flow_style=False))
+    return JsonResponse(response, safe=False)
+
+
+def add_application_to_policy(request):
+    policy = cghelpers.srxPolicy(request)
+    configdict = policy.add_application()
+    request.session['configdict'] = configdict
+    response = dict(yamlconfig=yaml.dump(configdict, default_flow_style=False))
+    return JsonResponse(response, safe=False)
+
+
 def updatepolicy(request):
 
     action = request.POST.get('action', None)
@@ -150,7 +165,6 @@ def updatepolicy(request):
     return JsonResponse(response, safe=False)
 
 
-@csrf_exempt
 def newobject(request):
 
     objtype = request.POST.get('objtype', None)
