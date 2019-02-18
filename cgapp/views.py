@@ -4,14 +4,13 @@ import git
 import traceback
 import json
 import logging
-import oyaml as yaml
 from django.shortcuts import render, get_list_or_404
 from django.http import JsonResponse, Http404
 from django.contrib.auth.decorators import login_required
 
 from cgapp import cgsource, cghelpers
 from cgapp.models import SrxZone, SrxAddress, SrxAddrSet, SrxApplication, \
-    SrxAppSet, SrxPolicy, SrxProtocol
+    SrxAppSet, SrxProtocol
 
 logger = logging.getLogger(__name__)
 
@@ -90,78 +89,47 @@ def loadobjects(request):
     return JsonResponse(response, safe=False)
 
 
-def add_address_to_policy(request):
-    policy = cghelpers.srxPolicy(request)
-    configdict = policy.add_address()
-    request.session['configdict'] = configdict
-    response = dict(yamlconfig=yaml.dump(configdict, default_flow_style=False))
-    return JsonResponse(response, safe=False)
-
-
-def add_application_to_policy(request):
-    policy = cghelpers.srxPolicy(request)
-    configdict = policy.add_application()
-    request.session['configdict'] = configdict
-    response = dict(yamlconfig=yaml.dump(configdict, default_flow_style=False))
-    return JsonResponse(response, safe=False)
-
-
-def updatepolicy(request):
-
-    action = request.POST.get('action', None)
-    policyid = request.POST.get('policyid', None)
-    objectid = request.POST.get('objectid', None)
-    objtype = request.POST.get('objtype', None)
-    source = request.POST.get('source', None)
-
-    configid = request.session['configid']
-    response = {}
-
+def policy_add_address(request):
     try:
-        policy, created = SrxPolicy.objects.update_or_create(policyid=policyid,
-                                                             configid=configid)
-        logger.info('Cfgen policyid: {}'.format(policyid))
-
-        if objtype == 'address' or objtype == 'addrset':
-
-            if objtype == 'address':
-                model = policy.update_address(objectid, source, action)
-                response['obj_val'] = model.ip
-
-            elif objtype == 'addrset':
-                model = policy.update_addrset(objectid, source, action)
-                response['obj_val'] = []
-                for adr in model.addresses.all():
-                    response['obj_val'].append(str(adr))
-
-            policy.update_zone(model, source, action)
-            response['parentzone'] = str(model.zone)
-
-        elif objtype == 'application':
-            model = policy.update_application(objectid, action)
-            response['obj_port'] = model.port
-            response['obj_protocol'] = str(model.protocol)
-
-        elif objtype == 'appset':
-            model = policy.update_appset(objectid, action)
-            response['obj_apps'] = []
-            for app in model.applications.all():
-                response['obj_apps'].append(str(app))
-
-        response['obj_name'] = str(model)
-
-        # Call helper functions to build config and convert to yaml
-        configdict = cghelpers.build_configdict(configid)
-        yamlconfig = cghelpers.convert_to_yaml(configdict)
-
-        request.session['yamlconfig'] = yamlconfig
-        response['yamlconfig'] = yamlconfig
-
+        policy = cghelpers.srxPolicy(request)
+        configdict = policy.add_address()
+        request.session['configdict'] = configdict
+        response = cghelpers.convert_dict_to_yaml(configdict)
     except Exception:
-        logger.error('Updating the policy failed because of following error:')
-        logger.error(traceback.format_exc())
-        response['error'] = json.dumps(traceback.format_exc())
+        response = cghelpers.view_exception(Exception)
+    return JsonResponse(response, safe=False)
 
+
+def policy_delete_address(request):
+    try:
+        policy = cghelpers.srxPolicy(request)
+        configdict = policy.delete_address()
+        request.session['configdict'] = configdict
+        response = cghelpers.convert_dict_to_yaml(configdict)
+    except Exception:
+        response = cghelpers.view_exception(Exception)
+    return JsonResponse(response, safe=False)
+
+
+def policy_add_application(request):
+    try:
+        policy = cghelpers.srxPolicy(request)
+        configdict = policy.add_application()
+        request.session['configdict'] = configdict
+        response = cghelpers.convert_dict_to_yaml(configdict)
+    except Exception:
+        response = cghelpers.view_exception(Exception)
+    return JsonResponse(response, safe=False)
+
+
+def policy_delete_application(request):
+    try:
+        policy = cghelpers.srxPolicy(request)
+        configdict = policy.delete_application()
+        request.session['configdict'] = configdict
+        response = cghelpers.convert_dict_to_yaml(configdict)
+    except Exception:
+        response = cghelpers.view_exception(Exception)
     return JsonResponse(response, safe=False)
 
 

@@ -47,10 +47,11 @@ $(function() {
     // Search Forms - use .on 'click' with parent selected to recognize
     // events also on dynamically added items
     $('#search-forms').on('click', '.search-results-item', function() {
-        policyObjectHandler(this)
+        objectSearchHandler(this)
     })
     $('.list-group').on('click', '.lgi-icon-close', function() {
-        deleteObject(this)
+	    var list_item = this.parentNode.parentNode
+        listObjectHandler(list_item)
     })
 
     // Create Object Modal related functions
@@ -90,25 +91,25 @@ $(function() {
 })
 
 
-function policyObjectHandler(htmlObj) {
+function objectSearchHandler(htmlObj) {
     var objtype = htmlObj.id.split("_", 3).pop()
 
     resetSearch(htmlObj)
 
     if (objtype === 'address' || objtype === 'addrset') {
-        const policyAddrObject = new PolicyAddrObject(htmlObj)
-        if (policyAddrObject.validate_policy_logic() === true) {
-            policyAddrObject.ajax_add_address_to_policy_yaml()
-            policyAddrObject.blend_in_zone()
-            policyAddrObject.add_object_to_list()
+        const objectSearchAddrObj = new ObjectSearchAddrObj(htmlObj)
+        if (objectSearchAddrObj.validate_policy_logic() === true) {
+            objectSearchAddrObj.ajax_add_address_to_policy_yaml()
+            objectSearchAddrObj.blend_in_zone()
+            objectSearchAddrObj.add_object_to_list()
         } else {
             return;
         }
     } else if (objtype === 'application' || objtype === 'appset') {
-        const policyAppObject = new PolicyAppObject(htmlObj)
-        if (policyAppObject.validate_application_use() === true) {
-            policyAppObject.ajax_add_application_to_policy_yaml()
-            policyAppObject.add_object_to_list()
+        const objectSearchAppObj = new ObjectSearchAppObj(htmlObj)
+        if (objectSearchAppObj.validate_application_use() === true) {
+            objectSearchAppObj.ajax_add_application_to_policy_yaml()
+            objectSearchAppObj.add_object_to_list()
         } else {
             return;
         }
@@ -116,7 +117,7 @@ function policyObjectHandler(htmlObj) {
 }
 
 
-class PolicyAddrObject {
+class ObjectSearchAddrObj {
     constructor(search_result_item) {
         this.objtype = search_result_item.id.split("_", 3).pop()
         this.objectid = search_result_item.id.split("_", 2).pop()
@@ -155,45 +156,40 @@ class PolicyAddrObject {
     }
 
     blend_in_zone() {
-        var thisZoneContainerCard = $('#added-zone-'+this.direction)
-        var thisZoneBody = $('#added-zone-body-'+this.direction)
+        var zoneContainerCard = $('#added-zone-'+this.direction)
+        var zoneBody = $('#added-zone-body-'+this.direction)
 
-        if (thisZoneContainerCard.hasClass('d-none')) {
-            thisZoneContainerCard.removeClass('d-none')
-            thisZoneBody.html(this.zone)
+        if (zoneContainerCard.hasClass('d-none')) {
+            zoneContainerCard.removeClass('d-none').show()
+            zoneBody.html(this.zone)
         } else {
             return;
         }
     }
 
     ajax_add_address_to_policy_yaml() {
-        $.post('/ajax/add-address-to-policy/', {
+        $.post('/ajax/policy-add-address/', {
             policyid: currentObj.policyid,
-            objectid: this.objectid,
             direction: this.direction,
+            objname: this.name,
+            zone: this.zone,
         })
         .done(function(response) {
-            if (response.error != null) {
-                alert('Policy update failed because of the following error:\n\n'
-                    + JSON.parse(response.error)
-                )
-            }
+            check_response_backend_error(response)
             updateYaml(response.yamlconfig)
         })
-
         .fail(function(errorThrown) {
             console.log(errorThrown.toString())
         })
     }
 
     add_object_to_list() {
-        console.log(this)
-
         var addedObj = {
             obj: this,
             container: $('#added-obj-'+this.direction),
             list: $('#added-list-'+this.direction),
-            id: this.direction+'_'+this.objectid+'_'+this.objtype+'_'+'_added',
+            id: this.direction+'_'+this.objectid+'_'+this.objtype+'_added',
+            zone: this.zone,
         }
 
         objectlist_append_html(addedObj)
@@ -206,8 +202,9 @@ class PolicyAddrObject {
     }
 }
 
-class PolicyAppObject {
+class ObjectSearchAppObj {
     constructor(search_result_item) {
+        this.objtype = search_result_item.id.split("_", 3).pop()
         this.objectid = search_result_item.id.split("_", 2).pop()
         this.name = $(search_result_item).find('.obj-name').html()
         this.val = $(search_result_item).find('.obj-val').html()
@@ -222,16 +219,12 @@ class PolicyAppObject {
     }
 
     ajax_add_application_to_policy_yaml() {
-        $.post('/ajax/add-application-to-policy/', {
+        $.post('/ajax/policy-add-application/', {
             policyid: currentObj.policyid,
-            objectid: this.objectid,
+            objname: this.name,
         })
         .done(function(response) {
-            if (response.error != null) {
-                alert('Policy update failed because of the following error:\n\n'
-                    + JSON.parse(response.error)
-                )
-            }
+            check_response_backend_error(response)
             updateYaml(response.yamlconfig)
         })
         .fail(function(errorThrown) {
@@ -240,17 +233,121 @@ class PolicyAppObject {
     }
 
     add_object_to_list() {
-        console.log(this)
-
         var addedObj = {
             obj: this,
             container: $('#added-obj-app'),
             list: $('#added-list-app'),
-            id: 'app_'+this.objectid+'_'+this.objtype+'_'+'_added',
+            id: 'app_'+this.objectid+'_'+this.objtype+'_added',
         }
 
         objectlist_append_html(addedObj)
         currentObj.app.push(this.name)
+    }
+}
+
+
+function listObjectHandler(htmlObj) {
+    var objtype = htmlObj.id.split('_', 3).pop()
+
+    if (objtype === 'address' || objtype === 'addrset') {
+        const listAddrObj = new ListAddrObj(htmlObj)
+        listAddrObj.ajax_delete_address_from_policy_yaml()
+        listAddrObj.delete_object_from_list()
+    } else if (objtype === 'application' || objtype === 'appset') {
+        const listAppObj = new ListAppObj(htmlObj)
+        listAppObj.ajax_delete_application_from_policy_yaml()
+        listAppObj.delete_object_from_list()
+    }
+}
+
+
+class ListAddrObj {
+    constructor(list_item) {
+        this.obj = list_item
+        this.direction = list_item.id.split('_').shift()
+        this.name = $(list_item).find('.lgi-name').html()
+        this.zone = $(list_item).find('.lgi-zone').html()
+    }
+
+    ajax_delete_address_from_policy_yaml() {
+        $.post('/ajax/policy-delete-address/', {
+            policyid: currentObj.policyid,
+            direction: this.direction,
+            objname: this.name,
+            zone: this.zone,
+        })
+        .done(function(response) {
+            check_response_backend_error(response)
+            updateYaml(response.yamlconfig)
+        })
+        .fail(function(errorThrown) {
+            console.log(errorThrown.toString())
+        })
+    }
+
+    delete_object_from_list() {
+        var zoneContainerCard = $('#added-zone-'+this.direction)
+        var objectContainer = $('#added-obj-'+this.direction)
+        var objectList = $('#added-list-'+this.direction)
+
+        $('#'+this.obj.id).remove()
+
+        if (!objectList.has('li').length) {
+            objectContainer.addClass('d-none')
+            zoneContainerCard.fadeOut('fast')
+            setTimeout(function(){
+                zoneContainerCard.addClass('d-none')
+            }, 200)
+        }
+
+        if (this.direction === 'from') {
+            var index = currentObj.from.indexOf(this.name)
+            if (index > -1) {
+                currentObj.from.splice(index, 1)
+            }
+        } else if (this.direction === 'to') {
+            var index = currentObj.to.indexOf(this.name)
+            if (index > -1) {
+                currentObj.to.splice(index, 1)
+            }
+        }
+    }
+}
+
+
+class ListAppObj {
+    constructor(list_item) {
+        this.obj = list_item
+        this.objectid = list_item.id.split('_', 2).pop()
+        this.name = $(list_item).find('.lgi-name').html()
+    }
+
+    ajax_delete_application_from_policy_yaml() {
+        $.post('/ajax/policy-delete-application/', {
+            policyid: currentObj.policyid,
+            direction: this.direction,
+            objname: this.name,
+            zone: this.zone,
+        })
+        .done(function(response) {
+            check_response_backend_error(response)
+            updateYaml(response.yamlconfig)
+        })
+        .fail(function(errorThrown) {
+            console.log(errorThrown.toString())
+        })
+    }
+
+    delete_object_from_list() {
+        $('#'+this.obj.id).remove()
+        if (!$('#added-list-app').has('li').length) {
+            $('#added-obj-app').addClass('d-none')
+        }
+
+        var index = currentObj.app.indexOf(this.name);
+        if (index > -1) {
+            currentObj.app.splice(index, 1);
+        }
     }
 }
 
@@ -273,12 +370,30 @@ function objectlist_append_html(addedObj) {
           </div>
         </li>`
     )
+    if (addedObj.zone !== null) {
+        $('#'+addedObj.id).find('.lgi-icon-close').after(
+            `<div class="d-none lgi-zone">${addedObj.zone}</div>`
+        )
+    }
+    $('#'+addedObj.id).hide().fadeIn('fast')
+}
+
+
+function check_response_backend_error(response) {
+    if (response.error != null) {
+        alert('Policy update failed because of the following error:\n\n'
+            + JSON.parse(response.error)
+        )
+    }
 }
 
 
 function updateYaml(yamlconfig) {
     $('#yamlcontainer').html(yamlconfig)
     $('#yamlcard').removeClass('d-none')
+    if (currentObjIsEmpty(currentObj)) {
+        $('#yamlcard').addClass('d-none');
+    }
 }
 
 
@@ -523,66 +638,6 @@ function editYaml() {
     swal('geht noch nich')
 }
 
-function deleteObject(obj) {
-    var listitem = $(obj).parents('.list-group-item').remove();
-    var listitemId = $(listitem).attr('id');
-    var source = listitemId.split('_').shift();
-    var objectId_db = listitemId.split('_', 2).pop();
-    var objtype = listitemId.split('_', 3).pop();
-    var action = 'delete';
-
-    if (!$('#added-list-'+source).has('li').length) {
-        $('#added-obj-'+source).addClass('d-none');
-        $('#added-zone-'+source).addClass('d-none');
-        $('#added-zone-body-'+source).html('');
-    }
-
-    if (source === 'from') {
-        var index = currentObj.from.indexOf(obj.name);
-        if (index > -1) {
-            currentObj.from.splice(index, 1);
-        }
-    } else if (source === 'to') {
-        var index = currentObj.to.indexOf(obj.name);
-        if (index > -1) {
-            currentObj.to.splice(index, 1);
-        }
-    } else if (source === 'app') {
-        var index = currentObj.app.indexOf(obj.name);
-        if (index > -1) {
-            currentObj.app.splice(index, 1);
-        }
-    }
-
-    console.log(objtype)
-
-    $.post('/ajax/updatepolicy/', {
-        policyid: currentObj.policyid,
-        objectid: objectId_db,
-        objtype: objtype,
-        source: source,
-        action: action,
-    })
-
-    .done(function(response) {
-        if (response.error != null) {
-            alert('YAML build failed because of the following error:\n\n'
-                + JSON.parse(response.error)
-            )
-        }
-        $('#yamlcontainer').html(response.yamlconfig);
-        if (currentObjIsEmpty(currentObj)) {
-            $('#yamlcard').addClass('d-none');
-        }
-
-    })
-
-    .fail(function(errorThrown) {
-        console.log(errorThrown.toString());
-    });
-
-}
-
 
 function objectSearch(e) {
     var input, filter, ul, li, a, a0, a1, i;
@@ -615,7 +670,7 @@ function resetSearch(item) {
 
 
 function generateId() {
-    return Math.random().toString(36).substr(2, 9)
+    return Math.random().toString(36).substr(2, 9).toUpperCase()
 }
 
 /* Check if arrays inside object are empty helper function */

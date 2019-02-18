@@ -2,6 +2,7 @@ import json
 import oyaml as yaml
 import collections
 import logging
+import traceback
 
 from cgapp import cghelpers
 from cgapp.models import SrxAddress, SrxAddrSet, SrxApplication, \
@@ -31,78 +32,113 @@ def queryset_to_var(queryset):
     return rval
 
 
+def view_exception(Exception):
+    logger.error(traceback.format_exc())
+    response = dict(error=json.dumps(traceback.format_exc()))
+    return response
+
+
+def convert_dict_to_yaml(dictionary):
+    result = dict(yamlconfig=yaml.dump(dictionary, default_flow_style=False))
+    return result
+
+
+def extract_from_nested_dict(sourcedict):
+    '''
+    Extract a standard dict with only key/value pairs from a nested dict
+    '''
+    if len(sourcedict) == 0:
+        return {}
+    else:
+        newdict = {}
+        for key, value in sourcedict.items():
+            if isinstance(value, dict):
+                return extract_from_nested_dict(value)
+            else:
+                newdict[key] = value
+        return newdict
+
+
 class srxPolicy:
 
     def __init__(self, request):
         self.configdict = request.session['configdict']
-        self.objectid = request.POST.get('objectid', None)
         self.direction = request.POST.get('direction', None)
+        self.objname = request.POST.get('objname', None)
+        self.zone = request.POST.get('zone', None)
         self.policyid = request.POST.get('policyid', None)
         self.policyname = 'allow-{0}-to-{0}'.format(self.policyid)
 
+    def update_configdict_with_workingdict(self, cd, d):
+        cd.setdefault('policies', {}).setdefault(self.policyname, {}).update(d)
+        return cd
+
     def add_address(self):
         cd = self.configdict
-
-        obj = SrxAddress.objects.filter(id=self.objectid).first()
-        if not obj:
-            obj = SrxAddrSet.objects.filter(id=self.objectid).first()
-
-        d = extract_from_nested_dict(cd, {})
-
+        d = extract_from_nested_dict(cd)
         if self.direction == 'from':
-            zone = 'fromzone'
-            direction = 'source'
+            zone, direction = 'fromzone', 'source'
         elif self.direction == 'to':
-            zone = 'tozone'
-            direction = 'destination'
+            zone, direction = 'tozone', 'destination'
 
-        d[zone] = str(obj.zone)
+        d[zone] = self.zone
         if direction not in d:
-            d[direction] = obj.name
+            d[direction] = self.objname
         elif isinstance(d[direction], list):
-            d[direction].append(obj.name)
+            d[direction].append(self.objname)
         else:
             valuelist = [d[direction]]
-            valuelist.append(obj.name)
+            valuelist.append(self.objname)
             d[direction] = valuelist
+        return self.update_configdict_with_workingdict(cd, d)
 
-        cd.setdefault('policies', {}).setdefault(self.policyname, {}).update(d)
+    def delete_address(self):
+        cd = self.configdict
+        d = extract_from_nested_dict(cd)
+        if self.direction == 'from':
+            zone, direction = 'fromzone', 'source'
+        elif self.direction == 'to':
+            zone, direction = 'tozone', 'destination'
 
-        return cd
+        if isinstance(d[direction], list):
+            d[direction].remove(self.objname)
+            if len(d[direction]) == 1:
+                d[direction] = d[direction][0]
+        else:
+            d.pop(direction)
+            d.pop(zone)
+
+        cd['policies'].pop(self.policyname)
+        return self.update_configdict_with_workingdict(cd, d)
 
     def add_application(self):
         cd = self.configdict
-
-        obj = SrxApplication.objects.filter(id=self.objectid).first()
-        if not obj:
-            obj = SrxAppSet.objects.filter(id=self.objectid).first()
-
-        d = extract_from_nested_dict(self.configdict, {})
+        d = extract_from_nested_dict(cd)
 
         if 'application' not in d:
-            d['application'] = obj.name
+            d['application'] = self.objname
         elif isinstance(d['application'], list):
-            d['application'].append(obj.name)
+            d['application'].append(self.objname)
         else:
             valuelist = [d['application']]
-            valuelist.append(obj.name)
+            valuelist.append(self.objname)
             d['application'] = valuelist
 
-        cd.setdefault('policies', {}).setdefault(self.policyname, {}).update(d)
+        return self.update_configdict_with_workingdict(cd, d)
 
-        return cd
+    def delete_application(self):
+        cd = self.configdict
+        d = extract_from_nested_dict(cd)
 
-
-def extract_from_nested_dict(nested_sourcedict, unnested_newdict):
-    '''
-    Extract a standard dict with only key/value pairs from a nested dict
-    '''
-    for key, value in nested_sourcedict.items():
-        if isinstance(value, dict):
-            extract_from_nested_dict(value, unnested_newdict)
+        if isinstance(d['application'], list):
+            d['application'].remove(self.objname)
+            if len(d['application']) == 1:
+                d['application'] = d['application'][0]
         else:
-            unnested_newdict[key] = value
-    return unnested_newdict
+            d.pop('application')
+
+        cd['policies'].pop(self.policyname)
+        return self.update_configdict_with_workingdict(cd, d)
 
 
 def build_configdict(configid):
