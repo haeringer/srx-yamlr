@@ -1,3 +1,4 @@
+import os
 import oyaml as yaml
 
 from cgapp.models import SrxAddress, SrxAddrSet, SrxApplication, \
@@ -6,7 +7,9 @@ from cgapp.models import SrxAddress, SrxAddrSet, SrxApplication, \
 
 class data:
 
-    def __init__(self, sourcefile):
+    def __init__(self):
+        sourcefile = os.environ.get('CFGEN_YAMLFILE', '')
+
         with open(sourcefile, 'r') as infile:
             self.dataset = yaml.load(infile)
 
