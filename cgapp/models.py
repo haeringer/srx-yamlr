@@ -19,7 +19,6 @@ class SrxAddress(BaseModel):
     zone = models.ForeignKey(SrxZone, on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
     ip = models.CharField(max_length=255)
-    configid = models.CharField(max_length=36, default=0)
 
     def __str__(self):
         return self.name
@@ -28,7 +27,6 @@ class SrxAddress(BaseModel):
 class SrxAddrSet(BaseModel):
     zone = models.ForeignKey(SrxZone, on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
-    configid = models.CharField(max_length=36, default=0)
     addresses = models.ManyToManyField(SrxAddress, related_name='addresses')
 
     def __str__(self):
@@ -44,9 +42,7 @@ class SrxProtocol(BaseModel):
 
 class SrxApplication(BaseModel):
     name = models.CharField(max_length=255)
-    protocol = models.ForeignKey(SrxProtocol, on_delete=models.CASCADE,
-                                 default=0)
-    configid = models.CharField(max_length=36, default=0)
+    protocol = models.ForeignKey(SrxProtocol, on_delete=models.CASCADE, default=0)
     port = models.CharField(max_length=64)
 
     def __str__(self):
@@ -55,9 +51,7 @@ class SrxApplication(BaseModel):
 
 class SrxAppSet(BaseModel):
     name = models.CharField(max_length=255)
-    applications = models.ManyToManyField(SrxApplication,
-                                          related_name='applications')
-    configid = models.CharField(max_length=36, default=0)
+    applications = models.ManyToManyField(SrxApplication, related_name='applications')
 
     def __str__(self):
         return self.name
@@ -70,15 +64,10 @@ class SrxPolicy(BaseModel):
     tozone = models.ManyToManyField(SrxZone, related_name='tozone')
     srcaddress = models.ManyToManyField(SrxAddress, related_name='srcaddress')
     srcaddrset = models.ManyToManyField(SrxAddrSet, related_name='srcaddrset')
-    destaddress = models.ManyToManyField(SrxAddress,
-                                         related_name='destaddress')
-    destaddrset = models.ManyToManyField(SrxAddrSet,
-                                         related_name='destaddrset')
-    application = models.ManyToManyField(SrxApplication,
-                                         related_name='application')
+    destaddress = models.ManyToManyField(SrxAddress, related_name='destaddress')
+    destaddrset = models.ManyToManyField(SrxAddrSet, related_name='destaddrset')
+    application = models.ManyToManyField(SrxApplication, related_name='application')
     appset = models.ManyToManyField(SrxAppSet, related_name='appset')
-    policyid = models.CharField(max_length=36, default=0)
-    configid = models.CharField(max_length=36, default=0)
 
     def __str__(self):
         return self.name
