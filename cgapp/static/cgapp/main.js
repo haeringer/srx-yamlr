@@ -10,9 +10,20 @@ var currentObj = {
 * Run on page load
 */
 $(window).on('load', function() {
-    var newID = generateId()
-    currentObj.policyid = newID
+    currentObj.policyid = generateId()
+    getYamlConfig()
 })
+
+function getYamlConfig() {
+    $.post('/ajax/getyamlconfig/')
+    .done(function(response) {
+        check_response_backend_error(response)
+        updateYaml(response.yamlconfig)
+    })
+    .fail(function(errorThrown) {
+        console.log(errorThrown.toString())
+    })
+}
 
 // Make ajax POST requests work with Django's CSRF protection
 $.ajaxSetup({
@@ -391,8 +402,8 @@ function check_response_backend_error(response) {
 function updateYaml(yamlconfig) {
     $('#yamlcontainer').html(yamlconfig)
     $('#yamlcard').removeClass('d-none')
-    if (currentObjIsEmpty(currentObj)) {
-        $('#yamlcard').addClass('d-none');
+    if (yamlconfig === '{}\n') {
+        $('#yamlcard').addClass('d-none')
     }
 }
 
@@ -631,7 +642,7 @@ function deployConfig() {
 }
 
 function addPolicy() {
-    swal('geht noch nich')
+    window.location.replace('/')
 }
 
 function editYaml() {
