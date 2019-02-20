@@ -62,7 +62,7 @@ $(function() {
         filterObjects(this)
     })
     $("button#create-object-save").click(function() {
-        createObject()
+        createObjectHandler()
     })
 
     // Buttons
@@ -444,7 +444,7 @@ function showCreateObjectForm(dropdown) {
 }
 
 
-function createObject() {
+function createObjectHandler() {
     var formContainer = document.getElementById('form-container')
     var forms = formContainer.querySelectorAll('.form-class')
     var formType
@@ -453,143 +453,143 @@ function createObject() {
             formType = element.id
         }
     })
-
     if (formType === 'address-form') {
-        var objtype = 'address';
-        var zone = $("select#address-form-control-zone").val();
-        var name = $("input#address-form-control-name").val();
-        var value = $("input#address-form-control-ip").val();
-
-        if (zone === 'Choose Zone...' || name === '' || value === '') {
-            $('#address-form-alert').append('<div class="alert alert-info" ' +
-              'role="alert" id="field-empty">Please fill all values!</div>')
-            return false;
-        }
-
-        $('#create-object-modal').modal('toggle');
-        $('.spinner-container').fadeIn()
-
-        $.post({
-            url: '/ajax/newobject/',
-            data: {
-                objtype: objtype,
-                zone: zone,
-                name: name,
-                value: value,
-            }
-        })
-        .done(function(response) {
-            updateYamlAndReload(response)
-        })
-        .fail(function(jqXHR, textStatus, errorThrown) {
-            console.log(errorThrown.toString());
-        });
-
+        createAddress()
     } else if (formType === 'adrset-form') {
-        var objtype = 'addrset';
-        var zone = $("select#adrset-form-control-zone").val();
-        var name = $("input#adrset-form-control-name").val();
-        var valuelist = $("#adrset-form-control-objects").val();
-
-        if (zone === 'Choose Zone...' || name === '' || valuelist === '') {
-            $('#addrset-form-alert').append('<div class="alert alert-info" ' +
-              'role="alert" id="field-empty">Please fill all values!</div>')
-            return false;
-        }
-
-        $('#create-object-modal').modal('toggle');
-        $('.spinner-container').fadeIn()
-
-        $.post({
-            url: '/ajax/newobject/',
-            data: {
-                objtype: objtype,
-                zone: zone,
-                name: name,
-                valuelist: valuelist,
-            }
-        })
-        .done(function(response) {
-            updateYamlAndReload(response)
-        })
-        .fail(function(jqXHR, textStatus, errorThrown) {
-            console.log(errorThrown.toString());
-        });
-
+        createAddrset()
     } else if (formType === 'application-form') {
-        var objtype = 'application';
-        var name = $("input#application-form-control-name").val();
-        var port = $("input#application-form-control-port").val();
-        var protocol = $("select#application-form-control-protocol").val();
-
-        if (protocol === 'Protocol' || name === '' || port === '') {
-            $('#application-form-alert').append('<div class="alert alert-info" ' +
-              'role="alert" id="field-empty">Please fill all values!</div>')
-            return false;
-        }
-
-        $('#create-object-modal').modal('toggle');
-        $('.spinner-container').fadeIn()
-
-        $.post({
-            url: '/ajax/newobject/',
-            data: {
-                objtype: objtype,
-                name: name,
-                port: port,
-                protocol: protocol,
-            }
-        })
-        .done(function(response) {
-            updateYamlAndReload(response)
-        })
-        .fail(function(jqXHR, textStatus, errorThrown) {
-            console.log(errorThrown.toString());
-        });
-
+        createApplication()
     } else if (formType === 'appset-form') {
-        var objtype = 'appset';
-        var name = $("input#appset-form-control-name").val();
-        var valuelist = $("#appset-form-control-objects").val();
-
-        if (name === '' || valuelist === '') {
-            $('#appset-form-alert').append('<div class="alert alert-info" ' +
-              'role="alert" id="field-empty">Please fill all values!</div>')
-            return false;
-        }
-
-        $('#create-object-modal').modal('toggle');
-        $('.spinner-container').fadeIn()
-
-        $.post({
-            url: '/ajax/newobject/',
-            data: {
-                objtype: objtype,
-                name: name,
-                valuelist: valuelist,
-            }
-        })
-        .done(function(response) {
-            updateYamlAndReload(response)
-        })
-        .fail(function(jqXHR, textStatus, errorThrown) {
-            console.log(errorThrown.toString());
-        });
+        createAppset()
     }
 }
 
 
-function updateYamlAndReload(response) {
+function createAddress() {
+    var zone = $("select#address-form-control-zone").val()
+    var name = $("input#address-form-control-name").val()
+    var value = $("input#address-form-control-ip").val()
 
-    // reload specific div of index.html
+    if (zone === 'Choose Zone...' || name === '' || value === '') {
+        showCreateFormError($('#address-form-alert'))
+        return false;
+    }
+    hideModalAndFadeInSpinner()
+    $.post({
+        url: '/ajax/object/create/address/',
+        data: {
+            zone: zone,
+            name: name,
+            value: value,
+        }
+    })
+    .done(function(response) {
+        reloadAndFadeOutSpinner()
+        updateYaml(response.yamlconfig)
+    })
+    .fail(function(errorThrown) {
+        console.log(errorThrown.toString())
+    })
+}
+
+
+function createAddrset() {
+    var zone = $("select#adrset-form-control-zone").val()
+    var name = $("input#adrset-form-control-name").val()
+    var valuelist = $("#adrset-form-control-objects").val()
+
+    if (zone === 'Choose Zone...' || name === '' || valuelist === '') {
+        showCreateFormError($('#addrset-form-alert'))
+        return false;
+    }
+    hideModalAndFadeInSpinner()
+    $.post({
+        url: '/ajax/object/create/addrset/',
+        data: {
+            zone: zone,
+            name: name,
+            valuelist: valuelist,
+        }
+    })
+    .done(function(response) {
+        reloadAndFadeOutSpinner()
+        updateYaml(response.yamlconfig)
+    })
+    .fail(function(errorThrown) {
+        console.log(errorThrown.toString())
+    })
+}
+
+
+function createApplication() {
+    var name = $("input#application-form-control-name").val()
+    var port = $("input#application-form-control-port").val()
+    var protocol = $("select#application-form-control-protocol").val()
+
+    if (protocol === 'Protocol' || name === '' || port === '') {
+        showCreateFormError($('#application-form-alert'))
+        return false;
+    }
+    hideModalAndFadeInSpinner()
+    $.post({
+        url: '/ajax/object/create/application/',
+        data: {
+            name: name,
+            port: port,
+            protocol: protocol,
+        }
+    })
+    .done(function(response) {
+        reloadAndFadeOutSpinner()
+        updateYaml(response.yamlconfig)
+    })
+    .fail(function(errorThrown) {
+        console.log(errorThrown.toString())
+    })
+}
+
+
+function createAppset() {
+    var name = $("input#appset-form-control-name").val()
+    var valuelist = $("#appset-form-control-objects").val()
+
+    if (name === '' || valuelist === '') {
+        showCreateFormError($('#appset-form-alert'))
+        return false;
+    }
+    hideModalAndFadeInSpinner()
+    $.post({
+        url: '/ajax/object/create/appset/',
+        data: {
+            name: name,
+            valuelist: valuelist,
+        }
+    })
+    .done(function(response) {
+        reloadAndFadeOutSpinner()
+        updateYaml(response.yamlconfig)
+    })
+    .fail(function(errorThrown) {
+        console.log(errorThrown.toString())
+    })
+}
+
+
+function hideModalAndFadeInSpinner() {
+    $('#create-object-modal').modal('toggle')
+    $('.spinner-container').fadeIn('fast')
+}
+
+function reloadAndFadeOutSpinner() {
+    // reload only specific div of index.html
     $('#search-forms').load('/?param=reloadforms #search-forms');
+    $('.spinner-container').fadeOut('fast')
+}
 
-    $('.spinner-container').fadeOut()
-
-    // update yaml config
-    $('#yamlcontainer').html(response.yamlconfig);
-    $('#yamlcard').removeClass('d-none');
-
+function showCreateFormError(element) {
+    var temp = document.getElementsByTagName('template')[0]
+    var clone = temp.content.cloneNode(true)
+    element.append(clone)
 }
 
 

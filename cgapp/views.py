@@ -1,16 +1,13 @@
 import os
-import uuid
 import git
-import traceback
-import json
 import logging
 from django.shortcuts import render, get_list_or_404
 from django.http import JsonResponse, Http404
 from django.contrib.auth.decorators import login_required
 
-from cgapp import cgsource, cghelpers
+from cgapp.utils import config, helpers, source
 from cgapp.models import SrxZone, SrxAddress, SrxAddrSet, SrxApplication, \
-    SrxAppSet, SrxProtocol
+    SrxAppSet
 
 logger = logging.getLogger(__name__)
 
@@ -36,20 +33,16 @@ def mainView(request):
     except Exception:
         raise Http404("HTTP 404 Error")
 
-    if param != 'reloadforms':
-
-        request.session['configdict'] = {}
-        request.session['configid'] = str(uuid.uuid4())
-        logger.info('Configuration ID: {}'.format(request.session['configid']))
-
     return render(request, 'cgapp/main.html', context)
 
 
-def loadobjects(request):
+def load_objects(request):
 
     loadpolicies = request.GET.get('loadpolicies', None)
     git_url = os.environ.get('CFGEN_GIT_URL', '')
     response = {}
+
+    request.session['configdict'] = {}
 
     if loadpolicies == 'False':
         # abuse try/except for logic because git.Repo does not
@@ -68,7 +61,7 @@ def loadobjects(request):
             git.Repo.clone_from(git_url, 'workspace')
 
     try:
-        s = cgsource.data()
+        s = source.data()
         logger.info('Importyaml (policies == {}) start'.format(loadpolicies))
         if loadpolicies == 'False':
             s.reset_db()
@@ -81,9 +74,7 @@ def loadobjects(request):
         if loadpolicies == 'True':
             s.import_policies()
     except Exception:
-        logger.error('YAML import failed because of the following error:')
-        logger.error(traceback.format_exc())
-        response['error'] = json.dumps(traceback.format_exc())
+        response = helpers.view_exception(Exception)
 
     logger.info('Importyaml (policies == {}) done'.format(loadpolicies))
     return JsonResponse(response, safe=False)
@@ -91,101 +82,93 @@ def loadobjects(request):
 
 def policy_add_address(request):
     try:
-        policy = cghelpers.srxPolicy(request)
-        configdict = policy.add_address()
+        srxpolicy = config.srxPolicy(request)
+        configdict = srxpolicy.add_address()
         request.session['configdict'] = configdict
-        response = cghelpers.convert_dict_to_yaml(configdict)
+        response = helpers.convert_dict_to_yaml(configdict)
     except Exception:
-        response = cghelpers.view_exception(Exception)
+        response = helpers.view_exception(Exception)
     return JsonResponse(response, safe=False)
 
 
 def policy_delete_address(request):
     try:
-        policy = cghelpers.srxPolicy(request)
-        configdict = policy.delete_address()
+        srxpolicy = config.srxPolicy(request)
+        configdict = srxpolicy.delete_address()
         request.session['configdict'] = configdict
-        response = cghelpers.convert_dict_to_yaml(configdict)
+        response = helpers.convert_dict_to_yaml(configdict)
     except Exception:
-        response = cghelpers.view_exception(Exception)
+        response = helpers.view_exception(Exception)
     return JsonResponse(response, safe=False)
 
 
 def policy_add_application(request):
     try:
-        policy = cghelpers.srxPolicy(request)
-        configdict = policy.add_application()
+        srxpolicy = config.srxPolicy(request)
+        configdict = srxpolicy.add_application()
         request.session['configdict'] = configdict
-        response = cghelpers.convert_dict_to_yaml(configdict)
+        response = helpers.convert_dict_to_yaml(configdict)
     except Exception:
-        response = cghelpers.view_exception(Exception)
+        response = helpers.view_exception(Exception)
     return JsonResponse(response, safe=False)
 
 
 def policy_delete_application(request):
     try:
-        policy = cghelpers.srxPolicy(request)
-        configdict = policy.delete_application()
+        srxpolicy = config.srxPolicy(request)
+        configdict = srxpolicy.delete_application()
         request.session['configdict'] = configdict
-        response = cghelpers.convert_dict_to_yaml(configdict)
+        response = helpers.convert_dict_to_yaml(configdict)
     except Exception:
-        response = cghelpers.view_exception(Exception)
+        response = helpers.view_exception(Exception)
     return JsonResponse(response, safe=False)
 
 
-def newobject(request):
-
-    objtype = request.POST.get('objtype', None)
-    valuelist = request.POST.getlist('valuelist[]', None)
-    protocol = request.POST.get('protocol', None)
-    zone = request.POST.get('zone', None)
-    n = request.POST.get('name', None)
-    v = request.POST.get('value', None)
-    p = request.POST.get('port', None)
-
-    c = request.session['configid']
-    response = {}
-
+def object_create_address(request):
     try:
-        if objtype == 'address':
-            z = SrxZone.objects.get(name=zone)
-            SrxAddress.objects.create(zone=z, name=n, ip=v, configid=c)
-
-        elif objtype == 'addrset':
-            z = SrxZone.objects.get(name=zone)
-            obj = SrxAddrSet.objects.create(zone=z, name=n, configid=c)
-            for i in valuelist:
-                a = SrxAddress.objects.get(name=i)
-                obj.addresses.add(a)
-
-        elif objtype == 'application':
-            pr = SrxProtocol.objects.get(ptype=protocol)
-            SrxApplication.objects.create(name=n, protocol=pr,
-                                          port=p, configid=c)
-
-        elif objtype == 'appset':
-            obj = SrxAppSet.objects.create(name=n, configid=c)
-            for i in valuelist:
-                a = SrxApplication.objects.get(name=i)
-                obj.applications.add(a)
-
-        # Call helper functions to build config and convert to yaml
-        configdict = cghelpers.build_configdict(c)
-        yamlconfig = cghelpers.convert_to_yaml(configdict)
-
-        request.session['yamlconfig'] = yamlconfig
-        response['yamlconfig'] = yamlconfig
-
+        srxobject = config.srxObject(request)
+        configdict = srxobject.create_address()
+        request.session['configdict'] = configdict
+        response = helpers.convert_dict_to_yaml(configdict)
     except Exception:
-        logger.error('Creating object failed because of the following error:')
-        logger.error(traceback.format_exc())
-        response['error'] = json.dumps(traceback.format_exc())
-
+        response = helpers.view_exception(Exception)
     return JsonResponse(response, safe=False)
 
 
-def filterobjects(request):
+def object_create_addrset(request):
+    try:
+        srxobject = config.srxObject(request)
+        configdict = srxobject.create_addrset()
+        request.session['configdict'] = configdict
+        response = helpers.convert_dict_to_yaml(configdict)
+    except Exception:
+        response = helpers.view_exception(Exception)
+    return JsonResponse(response, safe=False)
 
+
+def object_create_application(request):
+    try:
+        srxobject = config.srxObject(request)
+        configdict = srxobject.create_application()
+        request.session['configdict'] = configdict
+        response = helpers.convert_dict_to_yaml(configdict)
+    except Exception:
+        response = helpers.view_exception(Exception)
+    return JsonResponse(response, safe=False)
+
+
+def object_create_appset(request):
+    try:
+        srxobject = config.srxObject(request)
+        configdict = srxobject.create_appset()
+        request.session['configdict'] = configdict
+        response = helpers.convert_dict_to_yaml(configdict)
+    except Exception:
+        response = helpers.view_exception(Exception)
+    return JsonResponse(response, safe=False)
+
+
+def filter_objects(request):
     selectedzone = request.GET.get('selectedzone', None)
 
     if selectedzone != 'Choose Zone...':
@@ -195,9 +178,11 @@ def filterobjects(request):
         return JsonResponse(None, safe=False)
 
     q = SrxAddress.objects.filter(zone_id=zone_id)
-    addresses = cghelpers.queryset_to_var(q)
+    addresses = helpers.queryset_to_var(q)
+    response = dict(addresses=addresses)
+    return JsonResponse(response, safe=False)
 
-    response = {}
-    response['addresses'] = addresses
 
+def get_yamlconfig(request):
+    response = helpers.convert_dict_to_yaml(request.session['configdict'])
     return JsonResponse(response, safe=False)
