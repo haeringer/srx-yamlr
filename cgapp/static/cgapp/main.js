@@ -168,7 +168,7 @@ class ObjectSearchAddrObj {
     }
 
     ajax_add_address_to_policy_yaml() {
-        $.post('/ajax/policy-add-address/', {
+        $.post('/ajax/policy/add/address/', {
             policyid: currentObj.policyid,
             direction: this.direction,
             objname: this.name,
@@ -219,7 +219,7 @@ class ObjectSearchAppObj {
     }
 
     ajax_add_application_to_policy_yaml() {
-        $.post('/ajax/policy-add-application/', {
+        $.post('/ajax/policy/add/application/', {
             policyid: currentObj.policyid,
             objname: this.name,
         })
@@ -270,7 +270,7 @@ class ListAddrObj {
     }
 
     ajax_delete_address_from_policy_yaml() {
-        $.post('/ajax/policy-delete-address/', {
+        $.post('/ajax/policy/delete/address/', {
             policyid: currentObj.policyid,
             direction: this.direction,
             objname: this.name,
@@ -323,7 +323,7 @@ class ListAppObj {
     }
 
     ajax_delete_application_from_policy_yaml() {
-        $.post('/ajax/policy-delete-application/', {
+        $.post('/ajax/policy/delete/application/', {
             policyid: currentObj.policyid,
             direction: this.direction,
             objname: this.name,
