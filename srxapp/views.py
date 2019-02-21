@@ -1,5 +1,3 @@
-import os
-import git
 import logging
 from django.shortcuts import render, get_list_or_404
 from django.http import JsonResponse, Http404
@@ -35,46 +33,34 @@ def mainView(request):
 
 
 def load_objects(request):
+    try:
+        loadpolicies = request.GET.get('loadpolicies', None)
+        response = {}
+        src = source.data()
 
-    loadpolicies = request.GET.get('loadpolicies', None)
-    git_url = os.environ.get('YAMLOMAT_GIT_URL', '')
-    response = {}
-
+        if loadpolicies == 'False':
+            # Initialize empty configdict for user session
     request.session['configdict'] = {}
 
-    if loadpolicies == 'False':
-        # abuse try/except for logic because git.Repo does not
-        # provide proper return values if it doesn't succeed
-        try:
-            repo = git.Repo('workspace')
-        except Exception:
-            repo = None
+            helpers.git_clone_to_workspace()
 
-        if repo:
-            logger.info('Updating repo...')
-            remote_repo = repo.remotes.origin
-            remote_repo.pull()
-        else:
-            logger.info('Cloning repo...')
-            git.Repo.clone_from(git_url, 'workspace')
+            logger.info('Importyaml (policies={}) start'.format(loadpolicies))
+            src.reset_db()
+            src.import_zones()
+            src.import_addresses()
+            src.import_addrsets()
+            src.import_protocols()
+            src.import_applications()
+            src.import_appsets()
 
-    try:
-        s = source.data()
-        logger.info('Importyaml (policies == {}) start'.format(loadpolicies))
-        if loadpolicies == 'False':
-            s.reset_db()
-            s.import_zones()
-            s.import_addresses()
-            s.import_addrsets()
-            s.import_protocols()
-            s.import_applications()
-            s.import_appsets()
         if loadpolicies == 'True':
-            s.import_policies()
+            src.import_policies()
+
+        logger.info('Importyaml (policies={}) done'.format(loadpolicies))
+
     except Exception:
         response = helpers.view_exception(Exception)
 
-    logger.info('Importyaml (policies == {}) done'.format(loadpolicies))
     return JsonResponse(response, safe=False)
 
 
