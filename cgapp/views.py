@@ -15,8 +15,6 @@ logger = logging.getLogger(__name__)
 @login_required(redirect_field_name=None)
 def mainView(request):
 
-    param = request.GET.get('param', None)
-
     try:
         zones = get_list_or_404(SrxZone)
         addresses = get_list_or_404(SrxAddress)

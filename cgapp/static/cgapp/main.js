@@ -595,7 +595,7 @@ function hideModalAndFadeInSpinner() {
 
 function reloadAndFadeOutSpinner() {
     // reload only specific div of index.html
-    $('#search-forms').load('/?param=reloadforms #search-forms');
+    $('#search-forms').load('/ #search-forms');
     $('.spinner-container').fadeOut('fast')
 }
 
