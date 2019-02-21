@@ -41,6 +41,7 @@ class srxPolicy:
     def add_address(self):
         cd, d = self.extract_policy_from_configdict()
         zone, direction = self.get_direction_variables()
+        logger.debug('Session configdict:\n  {}\n'.format(cd))
 
         d[zone] = self.zone
         if direction not in d:
@@ -55,6 +56,7 @@ class srxPolicy:
     def delete_address(self):
         cd, d = self.extract_policy_from_configdict()
         zone, direction = self.get_direction_variables()
+        logger.debug('Session configdict:\n  {}\n'.format(cd))
 
         if isinstance(d[direction], list):
             d[direction].remove(self.name)
@@ -68,6 +70,7 @@ class srxPolicy:
 
     def add_application(self):
         cd, d = self.extract_policy_from_configdict()
+        logger.debug('Session configdict:\n  {}\n'.format(cd))
 
         if 'application' not in d:
             d['application'] = self.name
@@ -80,6 +83,7 @@ class srxPolicy:
 
     def delete_application(self):
         cd, d = self.extract_policy_from_configdict()
+        logger.debug('Session configdict:\n  {}\n'.format(cd))
 
         if isinstance(d['application'], list):
             d['application'].remove(self.name)
@@ -116,6 +120,7 @@ class srxObject:
         SrxAddress.objects.create(zone=zone, name=self.name, ip=self.value)
 
         cd, d = self.extract_zone_from_configdict()
+        logger.debug('Session configdict:\n  {}\n'.format(cd))
 
         if 'addresses' not in d:
             d['addresses'] = {self.name: self.value}
@@ -134,6 +139,7 @@ class srxObject:
             obj.addresses.add(address)
 
         cd, d = self.extract_zone_from_configdict()
+        logger.debug('Session configdict:\n  {}\n'.format(cd))
 
         if 'addrsets' not in d:
             d['addrsets'] = {self.name: self.valuelist}
@@ -151,6 +157,7 @@ class srxObject:
 
         cd = copy(self.configdict)
         d = cd.setdefault('applications', {})
+        logger.debug('Session configdict:\n  {}\n'.format(cd))
 
         d[self.name] = {'protocol': self.protocol, 'port': self.port}
 
@@ -165,6 +172,7 @@ class srxObject:
 
         cd = copy(self.configdict)
         d = cd.setdefault('applicationsets', {})
+        logger.debug('Session configdict:\n  {}\n'.format(cd))
 
         d[self.name] = self.valuelist
 
