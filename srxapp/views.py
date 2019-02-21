@@ -40,7 +40,7 @@ def load_objects(request):
 
         if loadpolicies == 'False':
             # Initialize empty configdict for user session
-    request.session['configdict'] = {}
+            request.session['configdict'] = {}
 
             helpers.git_clone_to_workspace()
 
