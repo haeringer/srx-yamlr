@@ -298,6 +298,7 @@ class ListAddrObj {
 
     delete_object_from_list() {
         var zoneContainerCard = $('#added-zone-'+this.direction)
+        var zoneBody = $('#added-zone-body-'+this.direction)
         var objectContainer = $('#added-obj-'+this.direction)
         var objectList = $('#added-list-'+this.direction)
 
@@ -308,6 +309,7 @@ class ListAddrObj {
             zoneContainerCard.fadeOut('fast')
             setTimeout(function(){
                 zoneContainerCard.addClass('d-none')
+                zoneBody.html('')
             }, 200)
         }
 
