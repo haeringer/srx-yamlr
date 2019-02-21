@@ -23,7 +23,6 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = os.environ.get('CFGEN_DJANGOSECRET')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-# DEBUG = True
 DEBUG = os.environ.get('CFGEN_DEBUG') == 'True'
 
 ALLOWED_HOSTS = ['*']
@@ -147,7 +146,7 @@ LOGGING = {
     'formatters': {
         'standard': {
             'format': "[%(asctime)s] %(levelname)s [%(name)s:%(lineno)s] %(message)s",
-            'datefmt': "%d-%b-%Y %H:%M:%S"
+            'datefmt': "%d-%b %H:%M:%S"
         },
     },
     'handlers': {
