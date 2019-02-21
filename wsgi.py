@@ -1,5 +1,5 @@
 """
-WSGI config for cfgen project.
+WSGI config for srx-yamlr project.
 
 It exposes the WSGI callable as a module-level variable named ``application``.
 

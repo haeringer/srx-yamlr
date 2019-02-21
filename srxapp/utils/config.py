@@ -1,7 +1,7 @@
 import logging
 from copy import copy
 
-from cgapp.models import SrxZone, SrxAddress, SrxAddrSet, SrxProtocol, \
+from srxapp.models import SrxZone, SrxAddress, SrxAddrSet, SrxProtocol, \
                             SrxApplication, SrxAppSet
 
 logger = logging.getLogger(__name__)

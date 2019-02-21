@@ -5,8 +5,8 @@ from django.shortcuts import render, get_list_or_404
 from django.http import JsonResponse, Http404
 from django.contrib.auth.decorators import login_required
 
-from cgapp.utils import config, helpers, source
-from cgapp.models import SrxZone, SrxAddress, SrxAddrSet, SrxApplication, \
+from srxapp.utils import config, helpers, source
+from srxapp.models import SrxZone, SrxAddress, SrxAddrSet, SrxApplication, \
     SrxAppSet
 
 logger = logging.getLogger(__name__)
@@ -31,13 +31,13 @@ def mainView(request):
     except Exception:
         raise Http404("HTTP 404 Error")
 
-    return render(request, 'cgapp/main.html', context)
+    return render(request, 'srxapp/main.html', context)
 
 
 def load_objects(request):
 
     loadpolicies = request.GET.get('loadpolicies', None)
-    git_url = os.environ.get('CFGEN_GIT_URL', '')
+    git_url = os.environ.get('YAMLOMAT_GIT_URL', '')
     response = {}
 
     request.session['configdict'] = {}

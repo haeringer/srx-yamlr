@@ -1,3 +1,5 @@
+# SRX YAMLr
+
 ## Requirements (Development on MacOS)
 
 ### Set up Python Virtual Environment
@@ -25,18 +27,18 @@ Set the environment variables for the application:
 
     vi ~/.bash_profile
 
-    # CfGen Environment variables
-    CFGEN_GIT_URL="https://git.intern.example.com/noc/ansible-junos"; export CFGEN_GIT_URL
-    CFGEN_YAMLFILE="workspace/host_vars/kami-kaze.yml"; export CFGEN_YAMLFILE
-    CFGEN_DJANGOSECRET="!7_k=@u=0fh$rxd#8e@w##eqed63fn%4ph!19+3e+se=-69x7%"; export CFGEN_DJANGOSECRET
-    CFGEN_DB_NAME="cfgen_db"; export CFGEN_DB_NAME
-    CFGEN_DB_USER="cfgen"; export CFGEN_DB_USER
-    CFGEN_DB_PASSWORD="rjBvtl2VinRA6QZKNPA46ZQwuR2jmz"; export CFGEN_DB_PASSWORD
-    CFGEN_DEBUG='True'; export CFGEN_DEBUG
+    # SRX YAMLr Environment variables
+    YAMLOMAT_GIT_URL="https://git.intern.example.com/noc/ansible-junos"; export YAMLOMAT_GIT_URL
+    YAMLOMAT_YAMLFILE="workspace/host_vars/kami-kaze.yml"; export YAMLOMAT_YAMLFILE
+    YAMLOMAT_DJANGOSECRET="!7_k=@u=0fh$rxd#8e@w##eqed63fn%4ph!19+3e+se=-69x7%"; export YAMLOMAT_DJANGOSECRET
+    YAMLOMAT_DB_NAME="srx-yamlr_db"; export YAMLOMAT_DB_NAME
+    YAMLOMAT_DB_USER="srx-yamlr"; export YAMLOMAT_DB_USER
+    YAMLOMAT_DB_PASSWORD="rjBvtl2VinRA6QZKNPA46ZQwuR2jmz"; export YAMLOMAT_DB_PASSWORD
+    YAMLOMAT_DEBUG='True'; export YAMLOMAT_DEBUG
 
 Install pip packages:
 
-    cd cfgen/
+    cd srx-yamlr/
     pip install -r requirements.txt
 
 
@@ -44,18 +46,18 @@ Install pip packages:
 
     brew install postgresql
     pg_ctl -D /usr/local/var/postgres start
-    createdb cfgen_db
+    createdb srx-yamlr_db
     psql postgres
-    CREATE ROLE cfgen WITH LOGIN PASSWORD 'rjBvtl2VinRA6QZKNPA46ZQwuR2jmz';
-    GRANT ALL PRIVILEGES ON DATABASE cfgen_db TO cfgen;
-    ALTER USER cfgen CREATEDB;
+    CREATE ROLE srx-yamlr WITH LOGIN PASSWORD 'rjBvtl2VinRA6QZKNPA46ZQwuR2jmz';
+    GRANT ALL PRIVILEGES ON DATABASE srx-yamlr_db TO srx-yamlr;
+    ALTER USER srx-yamlr CREATEDB;
 
 
 ### Run the application
 
 Activate the virtual environment and start the development server:
 
-    cd django/cfgen/
+    cd django/srx-yamlr/
     pyenv activate django
     pg_ctl -D /usr/local/var/postgres start
     python manage.py runserver
@@ -68,8 +70,8 @@ When running for the first time with a fresh database:
 
 ### Update the database after a change to the models
 
-    python manage.py makemigrations cgapp
-    python manage.py sqlmigrate cgapp 00XX
+    python manage.py makemigrations srxapp
+    python manage.py sqlmigrate srxapp 00XX
     python manage.py migrate
 
 
@@ -77,8 +79,8 @@ When running for the first time with a fresh database:
 
 Test with production database:
 
-    python manage.py test cgapp
+    python manage.py test srxapp
 
 Test with in-memory sqlite database (faster):
 
-    python manage.py test --settings=test_settings cgapp
+    python manage.py test --settings=test_settings srxapp

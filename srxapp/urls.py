@@ -1,13 +1,13 @@
 from django.urls import path, include
 from django.views.generic import TemplateView
-from cgapp import views
+from srxapp import views
 
 
-app_name = 'cgapp'
+app_name = 'srxapp'
 urlpatterns = [
     path('', views.mainView, name='mainView'),
     path('auth/', include('django.contrib.auth.urls')),
-    path('load/', TemplateView.as_view(template_name='cgapp/load.html'), name='load'),
+    path('load/', TemplateView.as_view(template_name='srxapp/load.html'), name='load'),
     path('ajax/loadobjects/', views.load_objects, name='load_objects'),
     path('ajax/getyamlconfig/', views.get_yamlconfig, name='get_yamlconfig'),
     path('ajax/filterobjects/', views.filter_objects, name='filter_objects'),

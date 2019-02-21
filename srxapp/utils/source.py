@@ -1,14 +1,14 @@
 import os
 import oyaml as yaml
 
-from cgapp.models import SrxAddress, SrxAddrSet, SrxApplication, \
+from srxapp.models import SrxAddress, SrxAddrSet, SrxApplication, \
     SrxAppSet, SrxZone, SrxPolicy, SrxProtocol
 
 
 class data:
 
     def __init__(self):
-        sourcefile = os.environ.get('CFGEN_YAMLFILE', '')
+        sourcefile = os.environ.get('YAMLOMAT_YAMLFILE', '')
 
         with open(sourcefile, 'r') as infile:
             self.dataset = yaml.load(infile)
