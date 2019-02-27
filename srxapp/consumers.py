@@ -3,30 +3,22 @@ import json
 import subprocess as sp
 
 
-class ConsoleOut(WebsocketConsumer):
-
-    def connect(self):
-        self.accept()
-
-    def disconnect(self, close_code):
-        pass
+class CheckConsumer(WebsocketConsumer):
 
     def receive(self, text_data):
+        cmd = ['ping', '-c 5', '10.13.0.1']
+        cmdstr = ''
+        for c in cmd:
+            cmdstr = cmdstr + c + ' '
 
-        text_data_json = json.loads(text_data)
-        cmdlist = text_data_json['message']
+        self.send(text_data=json.dumps({'message': cmdstr+'\n'}))
 
-        cmd = ''
-        for c in cmdlist:
-            cmd = cmd + c + ' '
-        cmd = cmd + '\n'
+        proc = sp.Popen(cmd, stdout=sp.PIPE, universal_newlines=True)
+        for output_line in proc.stdout:
+            self.send(text_data=json.dumps({'message': output_line}))
 
-        self.send(text_data=json.dumps({'message': cmd}))
 
-        p1 = sp.Popen(cmdlist, stdout=sp.PIPE)
+class DeploymentConsumer(WebsocketConsumer):
 
-        for line in p1.stdout:
-            output = line.decode("utf-8")
-            self.send(text_data=json.dumps({'message': output}))
-
-        self.send(text_data=json.dumps({'message': '\n'}))
+    def receive(self, text_data):
+        pass

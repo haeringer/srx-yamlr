@@ -84,10 +84,10 @@ $(function() {
         window.location.replace('/load')
     })
     $('#check-config').on('click', function() {
-        checkConfig()
+        websocketHandler('check')
     })
     $('#deploy-config').on('click', function() {
-        deployConfig()
+        websocketHandler('deploy')
     })
     $('#edit-yaml').on('click', function() {
         editYaml()
@@ -590,13 +590,13 @@ function createAppset() {
 
 function hideModalAndFadeInSpinner() {
     $('#create-object-modal').modal('toggle')
-    $('.spinner-container').fadeIn('fast')
+    $('.spinner-container').fadeIn()
 }
 
 function reloadAndFadeOutSpinner() {
     // reload only specific div of index.html
     $('#search-forms').load('/ #search-forms');
-    $('.spinner-container').fadeOut('fast')
+    $('.spinner-container').delay(1000).fadeOut()
 }
 
 function showCreateFormError(element) {
@@ -606,42 +606,43 @@ function showCreateFormError(element) {
 }
 
 
-function checkConfig() {
+function websocketHandler(task) {
+    if (task === 'check') {
+        var url = '/ws/check/'
+        websocket(url)
+    } else if (task === 'deploy') {
+        var url = '/ws/deploy/'
+        websocket(url)
+    }
+}
 
+function websocket(url) {
     var ws = new WebSocket(
-        'ws://' + window.location.host +
-        '/ws/consoleout/');
-
-    var message = ['ansible', '--version']
-    var message2 = ['ping', '-c 5', '10.13.0.1']
-
+        'ws://'+window.location.host+url
+    )
     ws.onopen = function() {
         ws.send(JSON.stringify({
-            'message': message
-        }));
-        ws.send(JSON.stringify({
-            'message': message2
-        }));
+            // Backend WebSocket consumer just needs
+            // to receive anything to begin processing
+            'message': 'dummy'
+        }))
     }
-
-    ws.onmessage = function(e) {
-        var data = JSON.parse(e.data);
-        var message = data['message'];
-        ol = document.querySelector('#output-log')
-        ol.value += (message);
-        ol.scrollTop = ol.scrollHeight
-    };
-
+    ws.onmessage = function(event) {
+        var data = JSON.parse(event.data)
+        var receivedMessage = data['message']
+        updateOutputLog(receivedMessage)
+    }
     ws.onclose = function() {
         console.log('Websocket closed')
-    };
-
+    }
 }
 
-
-function deployConfig() {
-    swal('geht noch nich')
+function updateOutputLog(text) {
+    var ol = document.querySelector('#output-log')
+    ol.value += (text)
+    ol.scrollTop = ol.scrollHeight
 }
+
 
 function addPolicy() {
     window.location.replace('/')
