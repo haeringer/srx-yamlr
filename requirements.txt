@@ -1,6 +1,0 @@
-Django==2.1.5
-channels==2.1.6
-PyYAML==3.13
-oyaml==0.7
-psycopg2-binary==2.7.6.1
-GitPython==2.1.11

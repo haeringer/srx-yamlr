@@ -2,28 +2,20 @@
 
 ## Requirements (Development on MacOS)
 
-### Set up Python Virtual Environment
+### Set up Python environment
 
-Install pyenv, virtualenv + desired python version and create the virtualenv:
+Install pipenv (and pyenv) for dependency management and use it to install the packages that are defined in the Pipfile. With pyenv available, the appropriate Python version itself will be installed as well.
 
-    brew update
-    brew install pyenv
-    brew install pyenv-virtualenv
-    pyenv install 3.7.0
-    pyenv virtualenv 3.7.0 django
+    brew install pyenv pipenv
+    cd srx-yamlr
+    pipenv install
 
-Configure working directory to automatically use the desired python version when switching into the directory:
+Activate the virtual environment:
 
-    vi ~/.bash_profile
+    pipenv shell
 
-        eval "$(pyenv init -)"
-        eval "$(pyenv virtualenv-init -)"
 
-    mkdir django
-    cd django
-    pyenv local 3.7.0
-
-Set the environment variables for the application:
+### Set the environment variables for the application
 
     vi ~/.bash_profile
 
@@ -35,11 +27,6 @@ Set the environment variables for the application:
     YAMLOMAT_DB_USER="srx-yamlr"; export YAMLOMAT_DB_USER
     YAMLOMAT_DB_PASSWORD="rjBvtl2VinRA6QZKNPA46ZQwuR2jmz"; export YAMLOMAT_DB_PASSWORD
     YAMLOMAT_DEBUG='True'; export YAMLOMAT_DEBUG
-
-Install pip packages:
-
-    cd srx-yamlr/
-    pip install -r requirements.txt
 
 
 ### Set up PostgreSQL as database
@@ -57,8 +44,8 @@ Install pip packages:
 
 Activate the virtual environment and start the development server:
 
-    cd django/srx-yamlr/
-    pyenv activate django
+    cd srx-yamlr
+    pipenv shell
     pg_ctl -D /usr/local/var/postgres start
     python manage.py runserver
 
