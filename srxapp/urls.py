@@ -1,11 +1,14 @@
 from django.urls import path, include
 from django.views.generic import TemplateView
+from django.contrib.auth import views as auth_views
 from srxapp import views
+from srxapp import forms
 
 
 app_name = 'srxapp'
 urlpatterns = [
     path('', views.mainView, name='mainView'),
+    path('auth/login/', auth_views.LoginView.as_view(authentication_form=forms.LoginForm)),  # override default login form
     path('auth/', include('django.contrib.auth.urls')),
     path('load/', TemplateView.as_view(template_name='srxapp/load.html'), name='load'),
     path('ajax/loadobjects/', views.load_objects, name='load_objects'),
