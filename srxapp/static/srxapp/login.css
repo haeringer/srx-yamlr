@@ -19,6 +19,10 @@ body {
     border-radius: 0 !important;
   }
 
+.brand {
+  font-family: 'Comfortaa', sans-serif;
+}
+
 .form-signin {
   width: 100%;
   max-width: 330px;
