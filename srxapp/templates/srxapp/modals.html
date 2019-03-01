@@ -2,138 +2,137 @@
 <!-- Create Object Modal -->
 
 <div class="modal fade" id="create-object-modal" tabindex="-1" role="dialog" aria-labelledby="create-object-modal-label" aria-hidden="true">
-    <div class="modal-dialog shadow" role="document">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="create-object-modal-label">Create new firewall object</h5>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close" id="create-object-modal-close">
-            <span aria-hidden="true">&times;</span>
+  <div class="modal-dialog shadow" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="create-object-modal-label">Create new firewall object</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close" id="create-object-modal-close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="dropdown mb-4" id="create-object-dropdown">
+          <button class="btn btn-secondary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            Object type
           </button>
+          <div class="dropdown-menu shadow" aria-labelledby="create-object-dropdown">
+            <a class="dropdown-item" href="#">Address</a>
+            <a class="dropdown-item" href="#">Address Set</a>
+            <a class="dropdown-item" href="#">Application</a>
+            <a class="dropdown-item" href="#">Application Set</a>
+          </div>
         </div>
-        <div class="modal-body">
-          <div class="dropdown mb-4" id="create-object-dropdown">
-            <button class="btn btn-secondary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-              Object type
-            </button>
-            <div class="dropdown-menu shadow" aria-labelledby="create-object-dropdown">
-              <a class="dropdown-item" href="#">Address</a>
-              <a class="dropdown-item" href="#">Address Set</a>
-              <a class="dropdown-item" href="#">Application</a>
-              <a class="dropdown-item" href="#">Application Set</a>
+        <div id="form-container">
+          <form class="d-none border-top form-class" id="address-form">
+            <div class="form-group mt-4">
+              <h5>New Address</h5><br>
+              <div id="address-form-alert"></div>
+              <select class="custom-select" id="address-form-control-zone" autocomplete="off">
+                <option selected>Choose Zone...</option>
+                {% for zone in zones %}
+                <option value="{{ zone.name }}">{{ zone.name }}</option>
+                {% endfor %}
+              </select>
             </div>
-          </div>
-          <div id="form-container">
-            <form class="d-none border-top form-class" id="address-form">
-              <div class="form-group mt-4">
-                <h5>New Address</h5><br>
-                <div id="address-form-alert"></div>
-                <select class="custom-select" id="address-form-control-zone" autocomplete="off">
-                  <option selected>Choose Zone...</option>
-                  {% for zone in zones %}
-                  <option value="{{ zone.name }}">{{ zone.name }}</option>
-                  {% endfor %}
-                </select>
-              </div>
-              <div class="form-group">
-                <label for="address-form-control-name">Object Name</label>
-                <input type="text" class="form-control" id="address-form-control-name" autocomplete="off">
-              </div>
-              <div class="form-group">
-                <label for="address-form-control-name">IP Address/Prefix</label>
-                <input type="text" class="form-control" id="address-form-control-ip" autocomplete="off">
-              </div>
-            </form>
-            <form class="d-none border-top form-class" id="adrset-form">
-              <div class="form-group mt-4">
-                <h5>New Address Set</h5><br>
-                <div id="addrset-form-alert"></div>
-                <select class="custom-select" id="adrset-form-control-zone" autocomplete="off">
-                  <option selected>Choose Zone...</option>
-                  {% for zone in zones %}
-                  <option value="{{ zone.name }}">{{ zone.name }}</option>
-                  {% endfor %}
-                </select>
-              </div>
-              <div class="form-group">
-                <label for="adrset-form-control-name">Object Name</label>
-                <input type="text" class="form-control" id="adrset-form-control-name" autocomplete="off">
-              </div>
-              <div class="form-group">
-                <label for="adrset-form-control-objects">Child Objects</label>
-                <select multiple class="form-control" id="adrset-form-control-objects" autocomplete="off">
-                  {% for adr in addresses %}
-                  <option class="small">{{ adr.name }}</option>
-                  {% endfor %}
-                </select>
-              </div>
-            </form>
-            <form class="d-none border-top form-class" id="application-form">
-              <div class="form-group mt-4">
-                <h5>New Application</h5><br>
-                <div id="application-form-alert"></div>
-                <label for="application-form-control-name">Application Name</label>
-                <input type="text" class="form-control" id="application-form-control-name" autocomplete="off">
-              </div>
-              <div class="form-group">
-                <label for="application-form-control-port">Port Number</label>
-                <input type="number" class="form-control" id="application-form-control-port" autocomplete="off">
-              </div>
-              <div class="form-group">
-                <select class="custom-select" id="application-form-control-protocol" autocomplete="off">
-                  <option selected>Protocol</option>
-                  <option value="tcp">TCP</option>
-                  <option value="udp">UDP</option>
-                </select>
-              </div>
-            </form>
-            <form class="d-none border-top form-class" id="appset-form">
-              <div class="form-group mt-4">
-                <h5>New Application Set</h5><br>
-                <div id="appset-form-alert"></div>
-                <label for="appset-form-control-name">Object Name</label>
-                <input type="text" class="form-control" id="appset-form-control-name" autocomplete="off">
-              </div>
-              <div class="form-group">
-                <label for="appset-form-control-objects">Child Objects</label>
-                <select multiple class="form-control" id="appset-form-control-objects">
-                  {% for app in applications %}
-                  <option class="small">{{ app.name }}</option>
-                  {% endfor %}
-                </select>
-              </div>
-            </form>
-          </div>
+            <div class="form-group">
+              <label for="address-form-control-name">Object Name</label>
+              <input type="text" class="form-control" id="address-form-control-name" autocomplete="off">
+            </div>
+            <div class="form-group">
+              <label for="address-form-control-name">IP Address/Prefix</label>
+              <input type="text" class="form-control" id="address-form-control-ip" autocomplete="off">
+            </div>
+          </form>
+          <form class="d-none border-top form-class" id="adrset-form">
+            <div class="form-group mt-4">
+              <h5>New Address Set</h5><br>
+              <div id="addrset-form-alert"></div>
+              <select class="custom-select" id="adrset-form-control-zone" autocomplete="off">
+                <option selected>Choose Zone...</option>
+                {% for zone in zones %}
+                <option value="{{ zone.name }}">{{ zone.name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="adrset-form-control-name">Object Name</label>
+              <input type="text" class="form-control" id="adrset-form-control-name" autocomplete="off">
+            </div>
+            <div class="form-group">
+              <label for="adrset-form-control-objects">Child Objects</label>
+              <select multiple class="form-control" id="adrset-form-control-objects" autocomplete="off">
+                {% for adr in addresses %}
+                <option class="small">{{ adr.name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </form>
+          <form class="d-none border-top form-class" id="application-form">
+            <div class="form-group mt-4">
+              <h5>New Application</h5><br>
+              <div id="application-form-alert"></div>
+              <label for="application-form-control-name">Application Name</label>
+              <input type="text" class="form-control" id="application-form-control-name" autocomplete="off">
+            </div>
+            <div class="form-group">
+              <label for="application-form-control-port">Port Number</label>
+              <input type="number" class="form-control" id="application-form-control-port" autocomplete="off">
+            </div>
+            <div class="form-group">
+              <select class="custom-select" id="application-form-control-protocol" autocomplete="off">
+                <option selected>Protocol</option>
+                <option value="tcp">TCP</option>
+                <option value="udp">UDP</option>
+              </select>
+            </div>
+          </form>
+          <form class="d-none border-top form-class" id="appset-form">
+            <div class="form-group mt-4">
+              <h5>New Application Set</h5><br>
+              <div id="appset-form-alert"></div>
+              <label for="appset-form-control-name">Object Name</label>
+              <input type="text" class="form-control" id="appset-form-control-name" autocomplete="off">
+            </div>
+            <div class="form-group">
+              <label for="appset-form-control-objects">Child Objects</label>
+              <select multiple class="form-control" id="appset-form-control-objects">
+                {% for app in applications %}
+                <option class="small">{{ app.name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </form>
         </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-primary" id="create-object-save">Save</button>
-        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" id="create-object-save">Save</button>
       </div>
     </div>
   </div>
+</div>
 
 
 <!-- Command Output Modal -->
 
 <div class="modal fade" id="output-modal" tabindex="-1" role="dialog" aria-labelledby="output-modal-label" aria-hidden="true">
-    <div class="modal-dialog modal-lg shadow" role="document">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="output-modal-label">Command Output</h5>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close" id="output-modal-close">
-            <span aria-hidden="true">&times;</span>
-          </button>
+  <div class="modal-dialog modal-lg shadow" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="output-modal-label">Command Output</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close" id="output-modal-close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group" id="output-modal-output">
+          <textarea class="form-control" id="output-log" rows="24"></textarea>
         </div>
-        <div class="modal-body">
-          <div class="form-group" id="output-modal-output">
-            <textarea class="form-control" id="output-log" rows="24"></textarea>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-primary" id="output-close">Close</button>
-        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" id="output-close">Close</button>
       </div>
     </div>
   </div>
-  <script>
+</div>
 
 </script>
