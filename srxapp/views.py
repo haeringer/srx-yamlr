@@ -19,12 +19,14 @@ def mainView(request):
         addrsets = get_list_or_404(SrxAddrSet)
         applications = get_list_or_404(SrxApplication)
         appsets = get_list_or_404(SrxAppSet)
+        user = request.user.username
         context = {
             'zones': zones,
             'addresses': addresses,
             'addrsets': addrsets,
             'applications': applications,
             'appsets': appsets,
+            'user': user,
         }
     except Exception:
         raise Http404("HTTP 404 Error")
