@@ -76,6 +76,11 @@ $(function() {
         createObjectHandler()
     })
 
+    // Settings Modal
+    $("button#settings-save").click(function() {
+        settingsHandler()
+    })
+
     // Buttons
     $('#add-policy').on('click', function() {
         addPolicy()
@@ -443,7 +448,7 @@ function filterObjects(zoneselector) {
 function showCreateObjectForm(dropdown) {
     var selectedObj = $(dropdown).text();
 
-    $('#form-container').find('form').addClass('d-none')
+    $('#create-form-container').find('form').addClass('d-none')
 
     if (selectedObj === 'Address') {
         $('#address-form').removeClass('d-none')
@@ -458,7 +463,7 @@ function showCreateObjectForm(dropdown) {
 
 
 function createObjectHandler() {
-    var formContainer = document.getElementById('form-container')
+    var formContainer = document.getElementById('create-form-container')
     var forms = formContainer.querySelectorAll('.form-class')
     var formType
     forms.forEach(function(element) {
@@ -487,7 +492,7 @@ function createAddress() {
         showCreateFormError($('#address-form-alert'))
         return false;
     }
-    hideModalAndFadeInSpinner()
+    hideModalAndFadeInSpinner($('#create-object-modal'))
     $.post({
         url: '/ajax/object/create/address/',
         data: {
@@ -515,7 +520,7 @@ function createAddrset() {
         showCreateFormError($('#addrset-form-alert'))
         return false;
     }
-    hideModalAndFadeInSpinner()
+    hideModalAndFadeInSpinner($('#create-object-modal'))
     $.post({
         url: '/ajax/object/create/addrset/',
         data: {
@@ -543,7 +548,7 @@ function createApplication() {
         showCreateFormError($('#application-form-alert'))
         return false;
     }
-    hideModalAndFadeInSpinner()
+    hideModalAndFadeInSpinner($('#create-object-modal'))
     $.post({
         url: '/ajax/object/create/application/',
         data: {
@@ -570,7 +575,7 @@ function createAppset() {
         showCreateFormError($('#appset-form-alert'))
         return false;
     }
-    hideModalAndFadeInSpinner()
+    hideModalAndFadeInSpinner($('#create-object-modal'))
     $.post({
         url: '/ajax/object/create/appset/',
         data: {
@@ -588,8 +593,39 @@ function createAppset() {
 }
 
 
-function hideModalAndFadeInSpinner() {
-    $('#create-object-modal').modal('toggle')
+function settingsHandler() {
+    if (jenkToken !== '') {
+        var token = $('input#jenkins-token').val()
+        var url = '/ajax/settings/token/jenkins/'
+        setToken(token, url)
+    }
+    if (gogsToken !== '') {
+        var token = $('input#gogs-token').val()
+        var url = '/ajax/settings/token/gogs/'
+        setToken(token, url)
+    }
+}
+
+function setToken(token, url) {
+    hideModalAndFadeInSpinner($('#settings-modal'))
+    $.post({
+        url: url,
+        data: {
+            token: token,
+        }
+    })
+    .done(function(response) {
+        console.log(response.return_value)
+        $('.spinner-container').delay(500).fadeOut()
+    })
+    .fail(function(errorThrown) {
+        console.log(errorThrown.toString())
+    })
+}
+
+
+function hideModalAndFadeInSpinner(Modal) {
+    Modal.modal('toggle')
     $('.spinner-container').fadeIn()
 }
 

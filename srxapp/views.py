@@ -2,6 +2,7 @@ import logging
 from django.shortcuts import render, get_list_or_404
 from django.http import JsonResponse, Http404
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
 
 from srxapp.utils import config, helpers, source
 from srxapp.models import SrxZone, SrxAddress, SrxAddrSet, SrxApplication, \
@@ -12,25 +13,23 @@ logger = logging.getLogger(__name__)
 
 @login_required(redirect_field_name=None)
 def mainView(request):
-
     try:
         zones = get_list_or_404(SrxZone)
         addresses = get_list_or_404(SrxAddress)
         addrsets = get_list_or_404(SrxAddrSet)
         applications = get_list_or_404(SrxApplication)
         appsets = get_list_or_404(SrxAppSet)
-        user = request.user.username
+        username = request.user.username
         context = {
             'zones': zones,
             'addresses': addresses,
             'addrsets': addrsets,
             'applications': applications,
             'appsets': appsets,
-            'user': user,
+            'username': username,
         }
     except Exception:
         raise Http404("HTTP 404 Error")
-
     return render(request, 'srxapp/main.html', context)
 
 
@@ -62,7 +61,6 @@ def load_objects(request):
 
     except Exception:
         response = helpers.view_exception(Exception)
-
     return JsonResponse(response, safe=False)
 
 
@@ -171,4 +169,26 @@ def filter_objects(request):
 
 def get_yamlconfig(request):
     response = helpers.convert_dict_to_yaml(request.session['configdict'])
+    return JsonResponse(response, safe=False)
+
+
+def set_token_jenkins(request):
+    try:
+        user = User.objects.get(username=request.user.username)
+        user.usersettings.jenk_tkn = request.POST.get('token', None)
+        user.save()
+        response = dict(return_value=0)
+    except Exception:
+        response = helpers.view_exception(Exception)
+    return JsonResponse(response, safe=False)
+
+
+def set_token_gogs(request):
+    try:
+        user = User.objects.get(username=request.user.username)
+        user.usersettings.gogs_tkn = request.POST.get('token', None)
+        user.save()
+        response = dict(return_value=0)
+    except Exception:
+        response = helpers.view_exception(Exception)
     return JsonResponse(response, safe=False)
