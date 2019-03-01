@@ -15,11 +15,16 @@
   <body>
 
     <div id="loadingtext">
-        Loading from YAML...
+        Pulling Git repository...
     </div>
 
-    <script src="/static/jquery.min.js"></script>
+    <script>
+      window.paceOptions = {
+        initialRate: .02
+      }
+    </script>
     <script src="/static/pace.min.js"></script>
+    <script src="/static/jquery.min.js"></script>
 
     <script src="/static/srxapp/load.js"></script>
 

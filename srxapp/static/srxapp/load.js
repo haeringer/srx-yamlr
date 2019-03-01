@@ -1,23 +1,31 @@
 
-/**
- * Run loadobjects() two times: load address + application objects while
- * showing progress bar at first run; load policies in background at second run
-*/
-
 $(window).on('load', function() {
-    loadobjects(true);
-});
+
+    loadobjects(true)
+
+    function switchText() {
+        var loadingText = $('#loadingtext')
+
+        loadingText.fadeOut()
+        window.setTimeout(function () {
+            loadingText.html('Importing from YAML...')
+        }, 400)
+        loadingText.delay(400).fadeIn()
+   }
+    setTimeout(switchText, 1200)
+
+})
 
 Pace.on('done', function() {
     $('#loadingtext').hide()
-});
+})
 
 
 function loadobjects(firstRun) {
 
-    var loadpolicies = 'False';
+    var loadpolicies = 'False'
     if (firstRun == false) {
-        loadpolicies = 'True';
+        loadpolicies = 'True'
     }
 
     $.get({
@@ -32,12 +40,14 @@ function loadobjects(firstRun) {
                 + JSON.parse(response.error)
             )
         }
-        window.location.replace('/');
+        window.location.replace('/')
         if (firstRun == true) {
-            loadobjects(false);
+            // Run loadobjects() a second time in order
+            // to load policies in background
+            loadobjects(false)
         }
     })
-    .fail(function(jqXHR, textStatus, errorThrown) {
-        console.log(errorThrown.toString());
-    });
+    .fail(function(errorThrown) {
+        console.log(errorThrown.toString())
+    })
 }
