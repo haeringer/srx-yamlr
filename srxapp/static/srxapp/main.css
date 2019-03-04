@@ -94,6 +94,9 @@ body {
     color: rgb(100, 100, 100);
   }
 
+  #output-log {
+    font-size: 80%;
+  }
 
   /*
    * Content

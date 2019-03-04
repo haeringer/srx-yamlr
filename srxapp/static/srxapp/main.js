@@ -643,6 +643,7 @@ function showCreateFormError(element) {
 
 
 function websocketHandler(task) {
+    $('#output-log').val('')
     if (task === 'check') {
         var url = '/ws/check/'
         websocket(url)
