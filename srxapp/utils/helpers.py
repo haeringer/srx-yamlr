@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 
 def git_clone_to_workspace():
-    git_url = os.environ.get('YAMLOMAT_GIT_URL', '')
+    git_url = os.environ.get('YM_GIT_URL', '')
 
     # abuse try/except for logic because git.Repo does not
     # provide proper return values if it doesn't succeed

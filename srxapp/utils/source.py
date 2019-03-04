@@ -8,7 +8,7 @@ from srxapp.models import SrxAddress, SrxAddrSet, SrxApplication, \
 class data:
 
     def __init__(self):
-        sourcefile = os.environ.get('YAMLOMAT_YAMLFILE', '')
+        sourcefile = os.environ.get('YM_YAMLFILE', '')
 
         with open(sourcefile, 'r') as infile:
             self.dataset = yaml.load(infile)

@@ -20,10 +20,10 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/2.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get('YAMLOMAT_DJANGOSECRET')
+SECRET_KEY = os.environ.get('YM_DJANGOSECRET')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('YAMLOMAT_DEBUG') == 'True'
+DEBUG = os.environ.get('YM_DEBUG') == 'True'
 
 ALLOWED_HOSTS = ['*']
 
@@ -85,11 +85,11 @@ DATABASES = {
     # }
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': os.environ.get('YAMLOMAT_DB_NAME', ''),
-        'USER': os.environ.get('YAMLOMAT_DB_USER', ''),
-        'PASSWORD': os.environ.get('YAMLOMAT_DB_PASSWORD', ''),
-        'HOST': os.environ.get('YAMLOMAT_DB_HOST', ''),
-        'PORT': os.environ.get('YAMLOMAT_DB_PORT', ''),
+        'NAME': os.environ.get('YM_DB_NAME', ''),
+        'USER': os.environ.get('YM_DB_USER', ''),
+        'PASSWORD': os.environ.get('YM_DB_PASSWORD', ''),
+        'HOST': os.environ.get('YM_DB_HOST', ''),
+        'PORT': os.environ.get('YM_DB_PORT', ''),
     }
 }
 
