@@ -12,6 +12,7 @@ pyyaml = "*"
 oyaml = "*"
 psycopg2-binary = "*"
 gitpython = "*"
+requests = "*"
 
 [requires]
 python_version = "3.7"
