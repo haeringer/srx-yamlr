@@ -172,17 +172,6 @@ def get_yamlconfig(request):
     return JsonResponse(response, safe=False)
 
 
-def set_token_jenkins(request):
-    try:
-        user = User.objects.get(username=request.user.username)
-        user.usersettings.jenk_tkn = request.POST.get('token', None)
-        user.save()
-        response = dict(return_value=0)
-    except Exception:
-        response = helpers.view_exception(Exception)
-    return JsonResponse(response, safe=False)
-
-
 def set_token_gogs(request):
     try:
         user = User.objects.get(username=request.user.username)

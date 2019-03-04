@@ -594,15 +594,10 @@ function createAppset() {
 
 
 function settingsHandler() {
-    if (jenkToken !== '') {
-        var token = $('input#jenkins-token').val()
-        var url = '/ajax/settings/token/jenkins/'
-        setToken(token, url)
-    }
+    var gogsToken = $('input#gogs-token').val()
     if (gogsToken !== '') {
-        var token = $('input#gogs-token').val()
         var url = '/ajax/settings/token/gogs/'
-        setToken(token, url)
+        setToken(gogsToken, url)
     }
 }
 

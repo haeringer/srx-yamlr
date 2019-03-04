@@ -78,7 +78,6 @@ class SrxPolicy(BaseModel):
 
 class UserSettings(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    jenk_tkn = models.CharField(max_length=40, blank=True)
     gogs_tkn = models.CharField(max_length=40, blank=True)
 
 

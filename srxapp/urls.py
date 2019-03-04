@@ -22,6 +22,5 @@ urlpatterns = [
     path('ajax/object/create/addrset/', views.object_create_addrset, name='object_create_addrset'),
     path('ajax/object/create/application/', views.object_create_application, name='object_create_application'),
     path('ajax/object/create/appset/', views.object_create_appset, name='object_create_appset'),
-    path('ajax/settings/token/jenkins/', views.set_token_jenkins, name='set_token_jenkins'),
     path('ajax/settings/token/gogs/', views.set_token_gogs, name='set_token_gogs'),
 ]
