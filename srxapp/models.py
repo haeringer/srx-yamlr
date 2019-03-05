@@ -62,7 +62,8 @@ class SrxAppSet(BaseModel):
 
 class SrxPolicy(BaseModel):
 
-    name = models.CharField(max_length=255)
+    name = models.CharField(max_length=63)
+    policyhash = models.CharField(max_length=32, default='')
     fromzone = models.ManyToManyField(SrxZone, related_name='fromzone')
     tozone = models.ManyToManyField(SrxZone, related_name='tozone')
     srcaddress = models.ManyToManyField(SrxAddress, related_name='srcaddress')

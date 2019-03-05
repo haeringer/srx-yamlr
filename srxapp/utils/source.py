@@ -1,6 +1,7 @@
 import os
 import oyaml as yaml
 
+from srxapp.utils import helpers
 from srxapp.models import SrxAddress, SrxAddrSet, SrxApplication, \
     SrxAppSet, SrxZone, SrxPolicy, SrxProtocol
 
@@ -89,14 +90,21 @@ class data:
 
     def import_policies(self):
         for policy, values in self.dataset['policies'].items():
-
-            obj, created = SrxPolicy.objects.update_or_create(name=policy)
-
             frm = SrxZone.objects.get(name=values['fromzone'])
             to = SrxZone.objects.get(name=values['tozone'])
             src = values['source']
             dest = values['destination']
             apps = values['application']
+
+            sorted_dict_for_hash = helpers.dict_with_sorted_list_values(
+                source=src, destination=dest)
+
+            policyhash = hash(repr(sorted_dict_for_hash))
+
+            obj, created = SrxPolicy.objects.update_or_create(name=policy)
+
+            obj.policyhash = policyhash
+            obj.save(update_fields=['policyhash'])
 
             obj.fromzone.add(frm)
             obj.tozone.add(to)
