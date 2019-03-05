@@ -71,3 +71,15 @@ def get_jenkins_job_url(commit):
         jnk_url, jnk_job, commit)
 
     return job_url
+
+
+def dict_with_sorted_list_values(**kwargs):
+    new_dict = {}
+
+    for key, values in kwargs.items():
+        if isinstance(values, list):
+            new_dict[key] = sorted(values)
+        else:
+            new_dict[key] = values
+
+    return new_dict
