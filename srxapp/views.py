@@ -1,12 +1,11 @@
 import logging
-from django.shortcuts import render, get_list_or_404
+from django.shortcuts import render
 from django.http import JsonResponse, Http404
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
+from copy import copy
 
 from srxapp.utils import config, helpers, source
-from srxapp.models import SrxZone, SrxAddress, SrxAddrSet, SrxApplication, \
-    SrxAppSet
 
 logger = logging.getLogger(__name__)
 
@@ -14,51 +13,40 @@ logger = logging.getLogger(__name__)
 @login_required(redirect_field_name=None)
 def mainView(request):
     try:
-        zones = get_list_or_404(SrxZone)
-        addresses = get_list_or_404(SrxAddress)
-        addrsets = get_list_or_404(SrxAddrSet)
-        applications = get_list_or_404(SrxApplication)
-        appsets = get_list_or_404(SrxAppSet)
-        username = request.user.username
+        sourcedict = copy(request.session['sourcedict'])
         context = {
-            'zones': zones,
-            'addresses': addresses,
-            'addrsets': addrsets,
-            'applications': applications,
-            'appsets': appsets,
-            'username': username,
+            'zones': sourcedict['zones'],
+            'addresses': sourcedict['addresses'],
+            'addrsets': sourcedict['addrsets'],
+            'applications': sourcedict['applications'],
+            'appsets': sourcedict['appsets'],
+            'username': request.user.username,
         }
     except Exception:
+        logger.error(helpers.view_exception(Exception))
         raise Http404("HTTP 404 Error")
     return render(request, 'srxapp/main.html', context)
 
 
+@login_required(redirect_field_name=None)
 def load_objects(request):
     try:
-        loadpolicies = request.GET.get('loadpolicies', None)
+        # Initialize empty dictionaries for user session
+        request.session['sourcedict'] = {}
+        request.session['configdict'] = {}
+
+        helpers.git_clone_to_workspace()
+
+        logger.info('Importing YAML source data...')
+        src = source.sourceData(request)
+        src.import_zones()
+        src.import_addresses()
+        src.import_addrsets()
+        src.import_applications()
+        src.import_appsets()
+        src.import_policies()
+
         response = {}
-        src = source.data()
-
-        if loadpolicies == 'False':
-            # Initialize empty configdict for user session
-            request.session['configdict'] = {}
-
-            helpers.git_clone_to_workspace()
-
-            logger.info('Importyaml (policies={}) start'.format(loadpolicies))
-            src.reset_db()
-            src.import_zones()
-            src.import_addresses()
-            src.import_addrsets()
-            src.import_protocols()
-            src.import_applications()
-            src.import_appsets()
-
-        if loadpolicies == 'True':
-            src.import_policies()
-
-        logger.info('Importyaml (policies={}) done'.format(loadpolicies))
-
     except Exception:
         response = helpers.view_exception(Exception)
     return JsonResponse(response, safe=False)
@@ -154,16 +142,17 @@ def object_create_appset(request):
 
 def filter_objects(request):
     selectedzone = request.GET.get('selectedzone', None)
-
-    if selectedzone != 'Choose Zone...':
-        q = SrxZone.objects.filter(name=selectedzone)
-        zone_id = q[0].id
-    else:
+    if selectedzone == 'Choose Zone...':
         return JsonResponse(None, safe=False)
 
-    q = SrxAddress.objects.filter(zone_id=zone_id)
-    addresses = helpers.queryset_to_var(q)
-    response = dict(addresses=addresses)
+    sourcedict = copy(request.session['sourcedict'])
+
+    addresses_filtered = []
+    for address in sourcedict['addresses']:
+        if address['zone'] == selectedzone:
+            addresses_filtered.append(address['name'])
+
+    response = dict(addresses=addresses_filtered)
     return JsonResponse(response, safe=False)
 
 

@@ -27,21 +27,7 @@ Activate the virtual environment:
     YM_JENKINS_JOB="ansible-junos_test"; export YM_JENKINS_JOB
     YM_YAMLFILE="workspace/host_vars/kami-kaze.yml"; export YM_YAMLFILE
     YM_DJANGOSECRET="!7_k=@u=0fh$rxd#8e@w##eqed63fn%4ph!19+3e+se=-69x7%"; export YM_DJANGOSECRET
-    YM_DB_NAME="cfgen_db"; export YM_DB_NAME
-    YM_DB_USER="cfgen"; export YM_DB_USER
-    YM_DB_PASSWORD="rjBvtl2VinRA6QZKNPA46ZQwuR2jmz"; export YM_DB_PASSWORD
     YM_DEBUG='True'; export YM_DEBUG
-
-
-### Set up PostgreSQL as database
-
-    brew install postgresql
-    pg_ctl -D /usr/local/var/postgres start
-    createdb srx-yamlr_db
-    psql postgres
-    CREATE ROLE srx-yamlr WITH LOGIN PASSWORD 'rjBvtl2VinRA6QZKNPA46ZQwuR2jmz';
-    GRANT ALL PRIVILEGES ON DATABASE srx-yamlr_db TO srx-yamlr;
-    ALTER USER srx-yamlr CREATEDB;
 
 
 ### Run the application
@@ -50,7 +36,6 @@ Activate the virtual environment and start the development server:
 
     cd srx-yamlr
     pipenv shell
-    pg_ctl -D /usr/local/var/postgres start
     python manage.py runserver
 
 When running for the first time with a fresh database:
@@ -68,10 +53,4 @@ When running for the first time with a fresh database:
 
 ### Run unit tests
 
-Test with production database:
-
     python manage.py test srxapp
-
-Test with in-memory sqlite database (faster):
-
-    python manage.py test --settings=test_settings srxapp

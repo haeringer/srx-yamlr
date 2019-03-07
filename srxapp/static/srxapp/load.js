@@ -1,18 +1,18 @@
 
 $(window).on('load', function() {
 
-    loadobjects(true)
+    loadobjects()
 
     function switchText() {
         var loadingText = $('#loadingtext')
 
-        loadingText.fadeOut()
+        loadingText.fadeOut('fast')
         window.setTimeout(function () {
             loadingText.html('Importing from YAML...')
-        }, 400)
-        loadingText.delay(400).fadeIn()
+        }, 200)
+        loadingText.delay(200).fadeIn('fast')
    }
-    setTimeout(switchText, 1200)
+    setTimeout(switchText, 600)
 
 })
 
@@ -21,18 +21,9 @@ Pace.on('done', function() {
 })
 
 
-function loadobjects(firstRun) {
-
-    var loadpolicies = 'False'
-    if (firstRun == false) {
-        loadpolicies = 'True'
-    }
-
+function loadobjects() {
     $.get({
         url: '/ajax/loadobjects/',
-        data: {
-            loadpolicies: loadpolicies,
-        }
     })
     .done(function(response) {
         if (response.error != null) {
@@ -41,11 +32,6 @@ function loadobjects(firstRun) {
             )
         }
         window.location.replace('/')
-        if (firstRun == true) {
-            // Run loadobjects() a second time in order
-            // to load policies in background
-            loadobjects(false)
-        }
     })
     .fail(function(errorThrown) {
         console.log(errorThrown.toString())

@@ -1,8 +1,6 @@
 import logging
 from copy import copy
 
-from srxapp.models import SrxZone, SrxAddress, SrxAddrSet, SrxProtocol, \
-                            SrxApplication, SrxAppSet
 
 logger = logging.getLogger(__name__)
 
@@ -11,6 +9,7 @@ class srxPolicy:
 
     def __init__(self, request):
         self.configdict = request.session['configdict']
+        self.sourcedict = request.session['sourcedict']
         self.direction = request.POST.get('direction', None)
         self.name = request.POST.get('objname', None)
         self.zone = request.POST.get('zone', None)
@@ -99,6 +98,7 @@ class srxObject:
 
     def __init__(self, request):
         self.configdict = request.session['configdict']
+        self.sourcedict = request.session['sourcedict']
         self.name = request.POST.get('name', None)
         self.zone = request.POST.get('zone', None)
         self.protocol = request.POST.get('protocol', None)
@@ -116,8 +116,12 @@ class srxObject:
         return configdict
 
     def create_address(self):
-        zone = SrxZone.objects.get(name=self.zone)
-        SrxAddress.objects.create(zone=zone, name=self.name, ip=self.value)
+        self.sourcedict['addresses'].append({
+            'name': self.name,
+            'ip': self.value,
+            'zone': self.zone,
+            'id': uuid4().hex,
+        })
 
         cd, d = self.extract_zone_from_configdict()
         logger.debug('Session configdict:\n  {}\n'.format(cd))
@@ -132,11 +136,12 @@ class srxObject:
         return self.update_configdict_with_zone(cd, d)
 
     def create_addrset(self):
-        zone = SrxZone.objects.get(name=self.zone)
-        obj = SrxAddrSet.objects.create(zone=zone, name=self.name)
-        for name in self.valuelist:
-            address = SrxAddress.objects.get(name=name)
-            obj.addresses.add(address)
+        self.sourcedict['addrsets'].append({
+            'name': self.name,
+            'zone': self.zone,
+            'addresses': self.valuelist,
+            'id': uuid4().hex,
+        })
 
         cd, d = self.extract_zone_from_configdict()
         logger.debug('Session configdict:\n  {}\n'.format(cd))
@@ -151,9 +156,12 @@ class srxObject:
         return self.update_configdict_with_zone(cd, d)
 
     def create_application(self):
-        protocol = SrxProtocol.objects.get(ptype=self.protocol)
-        SrxApplication.objects.create(name=self.name, protocol=protocol,
-                                      port=self.port)
+        self.sourcedict['applications'].append({
+            'name': self.name,
+            'port': self.port,
+            'protocol': self.protocol,
+            'id': uuid4().hex,
+        })
 
         cd = copy(self.configdict)
         d = cd.setdefault('applications', {})
@@ -165,10 +173,11 @@ class srxObject:
         return cd
 
     def create_appset(self):
-        obj = SrxAppSet.objects.create(name=self.name)
-        for name in self.valuelist:
-            application = SrxApplication.objects.get(name=name)
-            obj.applications.add(application)
+        self.sourcedict['appsets'].append({
+            'name': self.name,
+            'applications': self.valuelist,
+            'id': uuid4().hex,
+        })
 
         cd = copy(self.configdict)
         d = cd.setdefault('applicationsets', {})
