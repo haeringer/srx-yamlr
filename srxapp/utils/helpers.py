@@ -33,6 +33,10 @@ def view_exception(Exception):
     return dict(error=json.dumps(traceback.format_exc()))
 
 
+def log_config(configdict):
+    logger.debug('Session configdict:\n  {}\n'.format(configdict))
+
+
 def convert_dict_to_yaml(dictionary):
     return dict(yamlconfig=yaml.dump(dictionary, default_flow_style=False))
 
