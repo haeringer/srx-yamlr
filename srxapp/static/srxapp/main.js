@@ -1,6 +1,6 @@
 
-var currentObj = {
-    policyid: [],
+var currentPolicy = {
+    policyname: [],
     from: [],
     to: [],
     app: [],
@@ -10,7 +10,8 @@ var currentObj = {
 * Run on page load
 */
 $(window).on('load', function() {
-    currentObj.policyid = generateId()
+    var nameId = generateId()
+    currentPolicy.policyname = 'allow-'+nameId+'-to-'+nameId
     getYamlConfig()
 })
 
@@ -76,12 +77,19 @@ $(function() {
         createObjectHandler()
     })
 
+    // Rename Policy Modal
+    $("button#rename-policy-save").on('click', function() {
+        renamePolicy()
+    })
     // Settings Modal
     $("button#settings-save").click(function() {
         settingsHandler()
     })
 
     // Buttons
+    $('#rename-policy').on('click', function() {
+        renamePolicyFormSetup()
+    })
     $('#add-policy').on('click', function() {
         addPolicy()
     })
@@ -105,6 +113,36 @@ $(function() {
     $('[data-toggle="tooltip"]').tooltip()
 
 })
+
+
+function renamePolicyFormSetup() {
+    var policyNameInput = $('#input-policy-name')
+    var policyNameModal = $('#rename-policy-modal')
+
+    policyNameInput.val(currentPolicy.policyname)
+    policyNameModal.on('shown.bs.modal', function() {
+        policyNameInput.focus();
+    })
+}
+
+
+function renamePolicy() {
+    var previousName = currentPolicy.policyname
+    currentPolicy.policyname = $('#input-policy-name').val()
+    $('#rename-policy-modal').modal('toggle')
+
+    $.post('/ajax/policy/rename/', {
+        previousname: previousName,
+        policyname: currentPolicy.policyname,
+    })
+    .done(function(response) {
+        check_response_backend_error(response)
+        updateYaml(response.yamlconfig)
+    })
+    .fail(function(errorThrown) {
+        console.log(errorThrown.toString())
+    })
+}
 
 
 function objectSearchHandler(htmlObj) {
@@ -153,10 +191,10 @@ class ObjectSearchAddrObj {
 
         if (this.direction === 'from') {
             var otherZone = $('#added-zone-body-to').html()
-            var objUsed = currentObj.from.includes(this.name)
+            var objUsed = currentPolicy.from.includes(this.name)
         } else if (this.direction === 'to') {
             var otherZone = $('#added-zone-body-from').html()
-            var objUsed = currentObj.to.includes(this.name)
+            var objUsed = currentPolicy.to.includes(this.name)
         }
 
         if (this.zone === otherZone) {
@@ -185,7 +223,7 @@ class ObjectSearchAddrObj {
 
     ajax_add_address_to_policy_yaml() {
         $.post('/ajax/policy/add/address/', {
-            policyid: currentObj.policyid,
+            policyname: currentPolicy.policyname,
             direction: this.direction,
             objname: this.name,
             zone: this.zone,
@@ -211,9 +249,9 @@ class ObjectSearchAddrObj {
         objectlist_append_html(addedObj)
 
         if (this.direction === 'from') {
-            currentObj.from.push(this.name)
+            currentPolicy.from.push(this.name)
         } else if (this.direction === 'to') {
-            currentObj.to.push(this.name)
+            currentPolicy.to.push(this.name)
         }
     }
 }
@@ -227,7 +265,7 @@ class ObjectSearchAppObj {
     }
 
     validate_application_use() {
-        if (currentObj.app.includes(this.name)) {
+        if (currentPolicy.app.includes(this.name)) {
             swal("Object already in use!")
         } else {
             return true;
@@ -236,7 +274,7 @@ class ObjectSearchAppObj {
 
     ajax_add_application_to_policy_yaml() {
         $.post('/ajax/policy/add/application/', {
-            policyid: currentObj.policyid,
+            policyname: currentPolicy.policyname,
             objname: this.name,
         })
         .done(function(response) {
@@ -257,7 +295,7 @@ class ObjectSearchAppObj {
         }
 
         objectlist_append_html(addedObj)
-        currentObj.app.push(this.name)
+        currentPolicy.app.push(this.name)
     }
 }
 
@@ -287,7 +325,7 @@ class ListAddrObj {
 
     ajax_delete_address_from_policy_yaml() {
         $.post('/ajax/policy/delete/address/', {
-            policyid: currentObj.policyid,
+            policyname: currentPolicy.policyname,
             direction: this.direction,
             objname: this.name,
             zone: this.zone,
@@ -319,14 +357,14 @@ class ListAddrObj {
         }
 
         if (this.direction === 'from') {
-            var index = currentObj.from.indexOf(this.name)
+            var index = currentPolicy.from.indexOf(this.name)
             if (index > -1) {
-                currentObj.from.splice(index, 1)
+                currentPolicy.from.splice(index, 1)
             }
         } else if (this.direction === 'to') {
-            var index = currentObj.to.indexOf(this.name)
+            var index = currentPolicy.to.indexOf(this.name)
             if (index > -1) {
-                currentObj.to.splice(index, 1)
+                currentPolicy.to.splice(index, 1)
             }
         }
     }
@@ -342,7 +380,7 @@ class ListAppObj {
 
     ajax_delete_application_from_policy_yaml() {
         $.post('/ajax/policy/delete/application/', {
-            policyid: currentObj.policyid,
+            policyname: currentPolicy.policyname,
             direction: this.direction,
             objname: this.name,
             zone: this.zone,
@@ -362,9 +400,9 @@ class ListAppObj {
             $('#added-obj-app').addClass('d-none')
         }
 
-        var index = currentObj.app.indexOf(this.name);
+        var index = currentPolicy.app.indexOf(this.name);
         if (index > -1) {
-            currentObj.app.splice(index, 1);
+            currentPolicy.app.splice(index, 1);
         }
     }
 }
@@ -611,7 +649,7 @@ function setToken(token, url) {
     })
     .done(function(response) {
         console.log(response.return_value)
-        $('.spinner-container').delay(500).fadeOut()
+        $('.spinner-container').delay(400).fadeOut()
     })
     .fail(function(errorThrown) {
         console.log(errorThrown.toString())
@@ -627,7 +665,7 @@ function hideModalAndFadeInSpinner(Modal) {
 function reloadAndFadeOutSpinner() {
     // reload only specific div of index.html
     $('#search-forms').load('/ #search-forms');
-    $('.spinner-container').delay(1000).fadeOut()
+    $('.spinner-container').delay(400).fadeOut()
 }
 
 function showCreateFormError(element) {
@@ -720,7 +758,7 @@ function generateId() {
 }
 
 /* Check if arrays inside object are empty helper function */
-function currentObjIsEmpty(obj) {
+function currentPolicyIsEmpty(obj) {
     var i = obj.from.length + obj.to.length + obj.app.length
     if (i === 0) {
         return true;

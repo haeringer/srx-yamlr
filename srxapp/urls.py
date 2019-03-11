@@ -14,6 +14,7 @@ urlpatterns = [
     path('ajax/loadobjects/', views.load_objects, name='load_objects'),
     path('ajax/getyamlconfig/', views.get_yamlconfig, name='get_yamlconfig'),
     path('ajax/filterobjects/', views.filter_objects, name='filter_objects'),
+    path('ajax/policy/rename/', views.policy_rename, name='policy_rename'),
     path('ajax/policy/add/address/', views.policy_add_address, name='policy_add_address'),
     path('ajax/policy/add/application/', views.policy_add_application, name='policy_add_application'),
     path('ajax/policy/delete/address/', views.policy_delete_address, name='policy_delete_address'),

@@ -129,6 +129,17 @@ def object_create_application(request):
     return JsonResponse(response, safe=False)
 
 
+def policy_rename(request):
+    try:
+        srxpolicy = config.srxPolicy(request)
+        configdict = srxpolicy.update_policyname()
+        request.session['configdict'] = configdict
+        response = helpers.convert_dict_to_yaml(configdict)
+    except Exception:
+        response = helpers.view_exception(Exception)
+    return JsonResponse(response, safe=False)
+
+
 def object_create_appset(request):
     try:
         srxobject = config.srxObject(request)

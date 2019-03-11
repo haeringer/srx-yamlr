@@ -11,6 +11,7 @@ class srxPolicy:
         self.name = request.POST.get('objname', None)
         self.zone = request.POST.get('zone', None)
         self.policyname = request.POST.get('policyname', None)
+        self.previousname = request.POST.get('previousname', None)
 
     def get_direction_variables(self):
         if self.direction == 'from':
@@ -38,6 +39,11 @@ class srxPolicy:
 
         helpers.log_config(configdict)
         return configdict
+
+    def update_policyname(self):
+        cd = self.configdict
+        cd['policies'][self.policyname] = cd['policies'].pop(self.previousname)
+        return cd
 
     def add_address(self):
         p = self.extract_policy_from_configdict()
