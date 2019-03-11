@@ -1,3 +1,4 @@
+from copy import deepcopy
 from uuid import uuid4
 from srxapp.utils import helpers
 
@@ -21,12 +22,12 @@ class srxPolicy:
         return zone, direction
 
     def extract_policy_from_configdict(self):
-        policydict = dict(self.configdict.setdefault(
+        policydict = deepcopy(self.configdict.setdefault(
             'policies', {}).setdefault(self.policyname, {}))
         return policydict
 
     def update_configdict_with_policy(self, policydict):
-        configdict = dict(self.configdict)
+        configdict = deepcopy(self.configdict)
         configdict.setdefault('policies', {}).setdefault(self.policyname, {})
 
         if policydict != {}:
@@ -111,12 +112,12 @@ class srxObject:
         self.valuelist = request.POST.getlist('valuelist[]', None)
 
     def extract_zone_from_configdict(self):
-        zonedict = dict(self.configdict.setdefault(
+        zonedict = deepcopy(self.configdict.setdefault(
             'zones', {}).setdefault(self.zone, {}))
         return zonedict
 
     def update_configdict_with_zone(self, zonedict):
-        configdict = dict(self.configdict)
+        configdict = deepcopy(self.configdict)
         configdict.setdefault('zones', {}).setdefault(self.zone, {})
         configdict['zones'][self.zone].update(zonedict)
         helpers.log_config(configdict)

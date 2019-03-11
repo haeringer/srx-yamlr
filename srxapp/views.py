@@ -3,7 +3,7 @@ from django.shortcuts import render
 from django.http import JsonResponse, Http404
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-from copy import copy
+from copy import deepcopy
 
 from srxapp.utils import config, helpers, source
 
@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 @login_required(redirect_field_name=None)
 def mainView(request):
     try:
-        sourcedict = copy(request.session['sourcedict'])
+        sourcedict = deepcopy(request.session['sourcedict'])
         context = {
             'zones': sourcedict['zones'],
             'addresses': sourcedict['addresses'],
@@ -156,7 +156,7 @@ def filter_objects(request):
     if selectedzone == 'Choose Zone...':
         return JsonResponse(None, safe=False)
 
-    sourcedict = copy(request.session['sourcedict'])
+    sourcedict = deepcopy(request.session['sourcedict'])
 
     addresses_filtered = []
     for address in sourcedict['addresses']:
