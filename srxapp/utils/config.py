@@ -1,4 +1,3 @@
-from copy import copy
 from uuid import uuid4
 from srxapp.utils import helpers
 
@@ -11,8 +10,7 @@ class srxPolicy:
         self.direction = request.POST.get('direction', None)
         self.name = request.POST.get('objname', None)
         self.zone = request.POST.get('zone', None)
-        self.policyid = request.POST.get('policyid', None)
-        self.policyname = 'allow-{0}-to-{0}'.format(self.policyid)
+        self.policyname = request.POST.get('policyname', None)
 
     def get_direction_variables(self):
         if self.direction == 'from':
@@ -22,74 +20,76 @@ class srxPolicy:
         return zone, direction
 
     def extract_policy_from_configdict(self):
-        cd = copy(self.configdict)
-        d = cd.setdefault('policies', {}).setdefault(self.policyname, {})
-        return cd, d
+        policydict = dict(self.configdict.setdefault(
+            'policies', {}).setdefault(self.policyname, {}))
+        return policydict
 
-    def update_configdict_with_policy(self, configdict, policydict):
-        if policydict == {}:
+    def update_configdict_with_policy(self, policydict):
+        configdict = dict(self.configdict)
+        configdict.setdefault('policies', {}).setdefault(self.policyname, {})
+
+        if policydict != {}:
+            policy = {self.policyname: policydict}
+            configdict['policies'].update(policy)
+        else:
             configdict['policies'].pop(self.policyname)
             if configdict['policies'] == {}:
                 configdict.pop('policies')
-        else:
-            configdict['policies'][self.policyname].update(policydict)
+
+        helpers.log_config(configdict)
         return configdict
 
     def add_address(self):
-        cd, d = self.extract_policy_from_configdict()
+        p = self.extract_policy_from_configdict()
         zone, direction = self.get_direction_variables()
-        helpers.log_config(cd)
 
-        d[zone] = self.zone
-        if direction not in d:
-            d[direction] = self.name
+        p[zone] = self.zone
+        if direction not in p:
+            p[direction] = self.name
         else:
-            if isinstance(d[direction], str):
-                d[direction] = [d[direction]]
-            d[direction].append(self.name)
+            if isinstance(p[direction], str):
+                p[direction] = [p[direction]]
+            p[direction].append(self.name)
 
-        return self.update_configdict_with_policy(cd, d)
+        return self.update_configdict_with_policy(p)
 
     def delete_address(self):
-        cd, d = self.extract_policy_from_configdict()
+        p = self.extract_policy_from_configdict()
         zone, direction = self.get_direction_variables()
-        helpers.log_config(cd)
 
-        if isinstance(d[direction], list):
-            d[direction].remove(self.name)
-            if len(d[direction]) == 1:
-                d[direction] = d[direction][0]
+        if isinstance(p[direction], list):
+            p[direction].remove(self.name)
+            if len(p[direction]) == 1:
+                p[direction] = p[direction][0]
         else:
-            d.pop(direction)
-            d.pop(zone)
+            p.pop(direction)
+            p.pop(zone)
 
-        return self.update_configdict_with_policy(cd, d)
+        return self.update_configdict_with_policy(p)
 
     def add_application(self):
-        cd, d = self.extract_policy_from_configdict()
-        helpers.log_config(cd)
+        p = self.extract_policy_from_configdict()
 
-        if 'application' not in d:
-            d['application'] = self.name
+        if 'application' not in p:
+            p['application'] = self.name
         else:
-            if isinstance(d['application'], str):
-                d['application'] = [d['application']]
-            d['application'].append(self.name)
+            if isinstance(p['application'], str):
+                p['application'] = [p['application']]
+            p['application'].append(self.name)
 
-        return self.update_configdict_with_policy(cd, d)
+        return self.update_configdict_with_policy(p)
 
     def delete_application(self):
-        cd, d = self.extract_policy_from_configdict()
-        helpers.log_config(cd)
+        p = self.extract_policy_from_configdict()
 
-        if isinstance(d['application'], list):
-            d['application'].remove(self.name)
-            if len(d['application']) == 1:
-                d['application'] = d['application'][0]
+        if isinstance(p['application'], list):
+            p['application'].remove(self.name)
+            if len(p['application']) == 1:
+                p['application'] = p['application'][0]
         else:
-            d.pop('application')
+            p.pop('application')
 
-        return self.update_configdict_with_policy(cd, d)
+        return self.update_configdict_with_policy(p)
 
 
 class srxObject:
@@ -105,12 +105,15 @@ class srxObject:
         self.valuelist = request.POST.getlist('valuelist[]', None)
 
     def extract_zone_from_configdict(self):
-        cd = copy(self.configdict)
-        d = cd.setdefault('zones', {}).setdefault(self.zone, {})
-        return cd, d
+        zonedict = dict(self.configdict.setdefault(
+            'zones', {}).setdefault(self.zone, {}))
+        return zonedict
 
-    def update_configdict_with_zone(self, configdict, zonedict):
+    def update_configdict_with_zone(self, zonedict):
+        configdict = dict(self.configdict)
+        configdict.setdefault('zones', {}).setdefault(self.zone, {})
         configdict['zones'][self.zone].update(zonedict)
+        helpers.log_config(configdict)
         return configdict
 
     def create_address(self):
@@ -121,17 +124,16 @@ class srxObject:
             'id': uuid4().hex,
         })
 
-        cd, d = self.extract_zone_from_configdict()
-        helpers.log_config(cd)
+        z = self.extract_zone_from_configdict()
 
-        if 'addresses' not in d:
-            d['addresses'] = {self.name: self.value}
+        if 'addresses' not in z:
+            z['addresses'] = {self.name: self.value}
         else:
-            if isinstance(d['addresses'], dict):
-                d['addresses'] = [d['addresses']]
-            d['addresses'].append({self.name: self.value})
+            if isinstance(z['addresses'], dict):
+                z['addresses'] = [z['addresses']]
+            z['addresses'].append({self.name: self.value})
 
-        return self.update_configdict_with_zone(cd, d)
+        return self.update_configdict_with_zone(z)
 
     def create_addrset(self):
         self.sourcedict['addrsets'].append({
@@ -141,17 +143,16 @@ class srxObject:
             'id': uuid4().hex,
         })
 
-        cd, d = self.extract_zone_from_configdict()
-        helpers.log_config(cd)
+        z = self.extract_zone_from_configdict()
 
-        if 'addrsets' not in d:
-            d['addrsets'] = {self.name: self.valuelist}
+        if 'addrsets' not in z:
+            z['addrsets'] = {self.name: self.valuelist}
         else:
-            if isinstance(d['addrsets'], dict):
-                d['addrsets'] = [d['addrsets']]
-            d['addrsets'].append({self.name: self.valuelist})
+            if isinstance(z['addrsets'], dict):
+                z['addrsets'] = [z['addrsets']]
+            z['addrsets'].append({self.name: self.valuelist})
 
-        return self.update_configdict_with_zone(cd, d)
+        return self.update_configdict_with_zone(z)
 
     def create_application(self):
         self.sourcedict['applications'].append({
@@ -161,14 +162,13 @@ class srxObject:
             'id': uuid4().hex,
         })
 
-        cd = copy(self.configdict)
-        d = cd.setdefault('applications', {})
-        helpers.log_config(cd)
+        configdict = dict(self.configdict)
+        a = configdict.setdefault('applications', {})
+        a[self.name] = {'protocol': self.protocol, 'port': self.port}
+        configdict['applications'].update(a)
 
-        d[self.name] = {'protocol': self.protocol, 'port': self.port}
-
-        cd['applications'].update(d)
-        return cd
+        helpers.log_config(configdict)
+        return configdict
 
     def create_appset(self):
         self.sourcedict['appsets'].append({
@@ -177,11 +177,10 @@ class srxObject:
             'id': uuid4().hex,
         })
 
-        cd = copy(self.configdict)
-        d = cd.setdefault('applicationsets', {})
-        helpers.log_config(cd)
+        configdict = dict(self.configdict)
+        a = configdict.setdefault('applicationsets', {})
+        a[self.name] = self.valuelist
+        configdict['applicationsets'].update(a)
 
-        d[self.name] = self.valuelist
-
-        cd['applicationsets'].update(d)
-        return cd
+        helpers.log_config(configdict)
+        return configdict
