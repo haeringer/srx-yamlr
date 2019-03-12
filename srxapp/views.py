@@ -55,9 +55,12 @@ def load_objects(request):
 def policy_add_address(request):
     try:
         srxpolicy = config.srxPolicy(request)
-        configdict = srxpolicy.add_address()
-        request.session['configdict'] = configdict
-        response = helpers.convert_dict_to_yaml(configdict)
+        result = srxpolicy.add_address()
+        if result != 'policy_exists':
+            request.session['configdict'] = result
+            response = helpers.convert_dict_to_yaml(result)
+        else:
+            response = result
     except Exception:
         response = helpers.view_exception(Exception)
     return JsonResponse(response, safe=False)
@@ -66,9 +69,9 @@ def policy_add_address(request):
 def policy_delete_address(request):
     try:
         srxpolicy = config.srxPolicy(request)
-        configdict = srxpolicy.delete_address()
-        request.session['configdict'] = configdict
-        response = helpers.convert_dict_to_yaml(configdict)
+        result = srxpolicy.delete_address()
+        request.session['configdict'] = result
+        response = helpers.convert_dict_to_yaml(result)
     except Exception:
         response = helpers.view_exception(Exception)
     return JsonResponse(response, safe=False)
@@ -77,9 +80,9 @@ def policy_delete_address(request):
 def policy_add_application(request):
     try:
         srxpolicy = config.srxPolicy(request)
-        configdict = srxpolicy.add_application()
-        request.session['configdict'] = configdict
-        response = helpers.convert_dict_to_yaml(configdict)
+        result = srxpolicy.add_application()
+        request.session['configdict'] = result
+        response = helpers.convert_dict_to_yaml(result)
     except Exception:
         response = helpers.view_exception(Exception)
     return JsonResponse(response, safe=False)
@@ -88,9 +91,9 @@ def policy_add_application(request):
 def policy_delete_application(request):
     try:
         srxpolicy = config.srxPolicy(request)
-        configdict = srxpolicy.delete_application()
-        request.session['configdict'] = configdict
-        response = helpers.convert_dict_to_yaml(configdict)
+        result = srxpolicy.delete_application()
+        request.session['configdict'] = result
+        response = helpers.convert_dict_to_yaml(result)
     except Exception:
         response = helpers.view_exception(Exception)
     return JsonResponse(response, safe=False)
@@ -99,9 +102,9 @@ def policy_delete_application(request):
 def object_create_address(request):
     try:
         srxobject = config.srxObject(request)
-        configdict = srxobject.create_address()
-        request.session['configdict'] = configdict
-        response = helpers.convert_dict_to_yaml(configdict)
+        result = srxobject.create_address()
+        request.session['configdict'] = result
+        response = helpers.convert_dict_to_yaml(result)
     except Exception:
         response = helpers.view_exception(Exception)
     return JsonResponse(response, safe=False)
@@ -110,9 +113,9 @@ def object_create_address(request):
 def object_create_addrset(request):
     try:
         srxobject = config.srxObject(request)
-        configdict = srxobject.create_addrset()
-        request.session['configdict'] = configdict
-        response = helpers.convert_dict_to_yaml(configdict)
+        result = srxobject.create_addrset()
+        request.session['configdict'] = result
+        response = helpers.convert_dict_to_yaml(result)
     except Exception:
         response = helpers.view_exception(Exception)
     return JsonResponse(response, safe=False)
@@ -121,9 +124,9 @@ def object_create_addrset(request):
 def object_create_application(request):
     try:
         srxobject = config.srxObject(request)
-        configdict = srxobject.create_application()
-        request.session['configdict'] = configdict
-        response = helpers.convert_dict_to_yaml(configdict)
+        result = srxobject.create_application()
+        request.session['configdict'] = result
+        response = helpers.convert_dict_to_yaml(result)
     except Exception:
         response = helpers.view_exception(Exception)
     return JsonResponse(response, safe=False)
@@ -132,9 +135,9 @@ def object_create_application(request):
 def policy_rename(request):
     try:
         srxpolicy = config.srxPolicy(request)
-        configdict = srxpolicy.update_policyname()
-        request.session['configdict'] = configdict
-        response = helpers.convert_dict_to_yaml(configdict)
+        result = srxpolicy.update_policyname()
+        request.session['configdict'] = result
+        response = helpers.convert_dict_to_yaml(result)
     except Exception:
         response = helpers.view_exception(Exception)
     return JsonResponse(response, safe=False)
@@ -143,9 +146,9 @@ def policy_rename(request):
 def object_create_appset(request):
     try:
         srxobject = config.srxObject(request)
-        configdict = srxobject.create_appset()
-        request.session['configdict'] = configdict
-        response = helpers.convert_dict_to_yaml(configdict)
+        result = srxobject.create_appset()
+        request.session['configdict'] = result
+        response = helpers.convert_dict_to_yaml(result)
     except Exception:
         response = helpers.view_exception(Exception)
     return JsonResponse(response, safe=False)

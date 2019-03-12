@@ -154,8 +154,6 @@ function objectSearchHandler(htmlObj) {
         const objectSearchAddrObj = new ObjectSearchAddrObj(htmlObj)
         if (objectSearchAddrObj.validate_policy_logic() === true) {
             objectSearchAddrObj.ajax_add_address_to_policy_yaml()
-            objectSearchAddrObj.blend_in_zone()
-            objectSearchAddrObj.add_object_to_list()
         } else {
             return;
         }
@@ -163,7 +161,6 @@ function objectSearchHandler(htmlObj) {
         const objectSearchAppObj = new ObjectSearchAppObj(htmlObj)
         if (objectSearchAppObj.validate_application_use() === true) {
             objectSearchAppObj.ajax_add_application_to_policy_yaml()
-            objectSearchAppObj.add_object_to_list()
         } else {
             return;
         }
@@ -209,6 +206,30 @@ class ObjectSearchAddrObj {
         }
     }
 
+    ajax_add_address_to_policy_yaml() {
+        var thisParent = this
+        $.post('/ajax/policy/add/address/', {
+            policyname: currentPolicy.policyname,
+            direction: this.direction,
+            objname: this.name,
+            zone: this.zone,
+        })
+        .done(function(response) {
+            if (response !== 'policy_exists') {
+                thisParent.blend_in_zone()
+                thisParent.add_object_to_list()
+                check_response_backend_error(response)
+                updateYaml(response.yamlconfig)
+            } else {
+                swal('A Policy with this combination of source and destination'
+                     +' already exists.')
+            }
+        })
+        .fail(function(errorThrown) {
+            console.log(errorThrown.toString())
+        })
+    }
+
     blend_in_zone() {
         var zoneContainerCard = $('#added-zone-'+this.direction)
         var zoneBody = $('#added-zone-body-'+this.direction)
@@ -219,22 +240,6 @@ class ObjectSearchAddrObj {
         } else {
             return;
         }
-    }
-
-    ajax_add_address_to_policy_yaml() {
-        $.post('/ajax/policy/add/address/', {
-            policyname: currentPolicy.policyname,
-            direction: this.direction,
-            objname: this.name,
-            zone: this.zone,
-        })
-        .done(function(response) {
-            check_response_backend_error(response)
-            updateYaml(response.yamlconfig)
-        })
-        .fail(function(errorThrown) {
-            console.log(errorThrown.toString())
-        })
     }
 
     add_object_to_list() {
@@ -273,11 +278,13 @@ class ObjectSearchAppObj {
     }
 
     ajax_add_application_to_policy_yaml() {
+        var thisParent = this
         $.post('/ajax/policy/add/application/', {
             policyname: currentPolicy.policyname,
             objname: this.name,
         })
         .done(function(response) {
+            thisParent.add_object_to_list()
             check_response_backend_error(response)
             updateYaml(response.yamlconfig)
         })

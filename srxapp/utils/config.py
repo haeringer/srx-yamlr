@@ -41,6 +41,22 @@ class srxPolicy:
         helpers.log_config(configdict)
         return configdict
 
+    def check_for_policy_existing(self, policydict):
+        existing = False
+
+        if 'source' not in policydict or 'destination' not in policydict:
+            return
+
+        sorted_dict_for_hash = helpers.dict_with_sorted_list_values(
+            source=policydict['source'], destination=policydict['destination'])
+        newpolicyhash = hash(repr(sorted_dict_for_hash))
+
+        for policy in self.sourcedict['policies']:
+            if newpolicyhash == policy['policyhash']:
+                existing = True
+
+        return existing
+
     def update_policyname(self):
         cd = self.configdict
         cd['policies'][self.policyname] = cd['policies'].pop(self.previousname)
@@ -57,6 +73,10 @@ class srxPolicy:
             if isinstance(p[direction], str):
                 p[direction] = [p[direction]]
             p[direction].append(self.name)
+
+        existing = self.check_for_policy_existing(p)
+        if existing:
+            return 'policy_exists'
 
         return self.update_configdict_with_policy(p)
 
