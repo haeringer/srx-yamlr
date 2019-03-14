@@ -66,7 +66,7 @@
         <div class="col-sm pr-0">
 
           <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 pl-3 border-bottom">
-            <h1 class="h2">Firewall Policies</h1>
+            <h3 class="h3">Build Firewall Policy</h3>
             <div class="btn-toolbar mb-2 mb-md-0 pr-2">
               <div class="btn-group mr-2">
                 <div data-toggle="tooltip" data-placement="bottom" title="Edit policy name">
@@ -104,7 +104,7 @@
 
                     <input autofocus class="form-control searchform" type="text" id="search-from" onkeyup="objectSearch(this)" placeholder="Search IP address or object name" aria-label="Search" autocomplete="off">
 
-                    <ul class="list-inline d-none search-results-list" id="search-from-ul">
+                    <ul class="list-inline d-none search-results-list shadow" id="search-from-ul">
                     {% for adr in addresses %}
                       <li class="search-results-item" id="from_{{ adr.id }}_address">
                         <div class="row">
@@ -141,7 +141,7 @@
 
                     <input class="form-control searchform" type="text" id="search-to" onkeyup="objectSearch(this)" placeholder="Search IP address or object name" aria-label="Search" autocomplete="off">
 
-                    <ul class="list-inline d-none search-results-list" id="search-to-ul">
+                    <ul class="list-inline d-none search-results-list shadow" id="search-to-ul">
                     {% for adr in addresses %}
                       <li class="search-results-item" id="to_{{ adr.id }}_address">
                         <div class="row">
@@ -178,7 +178,7 @@
 
                     <input class="form-control searchform" type="text" id="search-app" onkeyup="objectSearch(this)" placeholder="Search application or protocol port" aria-label="Search" autocomplete="off">
 
-                    <ul class="list-inline d-none search-results-list" id="search-app-ul">
+                    <ul class="list-inline d-none search-results-list shadow" id="search-app-ul">
                     {% for app in applications %}
                       <li class="search-results-item" id="app_{{ app.id }}_application">
                         <div class="row">
@@ -213,12 +213,12 @@
 
                 <div class="col-sm">
 
-                  <div class="card text-black-50 mb-2 d-none" id="added-zone-from">
+                  <div class="card hide-border text-black-50 mb-3 d-none" id="added-zone-from">
                     <div class="card-body bg-light pt-3 pb-3 font-weight-bold" id="added-zone-body-from">
                     </div>
                   </div>
 
-                  <div class="card panel-default d-none" id="added-obj-from">
+                  <div class="card hide-border panel-default d-none" id="added-obj-from">
                     <ul class="list-group list-group-flush" id="added-list-from">
                     </ul>
                   </div>
@@ -228,12 +228,12 @@
 
                 <div class="col-sm">
 
-                  <div class="card text-black-50 mb-2 d-none" id="added-zone-to">
+                  <div class="card hide-border text-black-50 mb-3 d-none" id="added-zone-to">
                     <div class="card-body bg-light pt-3 pb-3 font-weight-bold" id="added-zone-body-to">
                     </div>
                   </div>
 
-                  <div class="card panel-default d-none" id="added-obj-to">
+                  <div class="card hide-border panel-default d-none" id="added-obj-to">
                     <ul class="list-group list-group-flush" id="added-list-to">
                     </ul>
                   </div>
@@ -243,7 +243,7 @@
 
                 <div class="col-sm">
 
-                  <div class="card panel-default d-none" id="added-obj-app">
+                  <div class="card hide-border panel-default d-none" id="added-obj-app">
                     <ul class="list-group list-group-flush" id="added-list-app">
                     </ul>
                   </div>
@@ -253,7 +253,7 @@
               </div>
 
             </div>
-            <div class="col-3 pt-4 bg-light yamlcol">
+            <div class="col-3 pt-4 bg-light">
               <div class="row">
                 <div class="col" >
                   <div class="row ml-3">
@@ -262,7 +262,7 @@
                 </div>
               </div>
               <div class="row ml-3 d-none" id="yamlcard">
-                <div class="card mt-1">
+                <div class="card hide-border mt-1">
                   <pre class="card-body mr-3" id="yamlcontainer">
                   </pre>
                 </div>
