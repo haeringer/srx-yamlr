@@ -146,7 +146,7 @@ class srxObject:
     def create_address(self):
         self.sourcedict['addresses'].append({
             'name': self.name,
-            'ip': self.value,
+            'val': self.value,
             'zone': self.zone,
             'id': uuid4().hex,
         })
@@ -165,8 +165,8 @@ class srxObject:
     def create_addrset(self):
         self.sourcedict['addrsets'].append({
             'name': self.name,
+            'val': self.valuelist,
             'zone': self.zone,
-            'addresses': self.valuelist,
             'id': uuid4().hex,
         })
 
@@ -182,10 +182,11 @@ class srxObject:
         return self.update_configdict_with_zone(z)
 
     def create_application(self):
+        val = str(self.protocol)+' '+str(self.port)
+
         self.sourcedict['applications'].append({
             'name': self.name,
-            'port': self.port,
-            'protocol': self.protocol,
+            'val': val,
             'id': uuid4().hex,
         })
 
@@ -200,7 +201,7 @@ class srxObject:
     def create_appset(self):
         self.sourcedict['appsets'].append({
             'name': self.name,
-            'applications': self.valuelist,
+            'val': self.valuelist,
             'id': uuid4().hex,
         })
 

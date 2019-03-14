@@ -27,14 +27,14 @@ class sourceData:
             for name, ip in zone_addresses.items():
                 addresses.append({
                     'name': name,
-                    'ip': ip,
+                    'val': ip,
                     'zone': zone,
                     'id': uuid4().hex,
                 })
             # add one 'any' address per zone to configuration set
             addresses.append({
                 'name': 'any',
-                'ip': zone,
+                'val': zone,
                 'zone': zone,
                 'id': uuid4().hex,
             })
@@ -48,7 +48,7 @@ class sourceData:
                     for name, addresses in values['addrsets'].items():
                         addrsets.append({
                             'name': name,
-                            'addresses': addresses,
+                            'val': addresses,
                             'zone': zone,
                             'id': uuid4().hex,
                         })
@@ -58,10 +58,10 @@ class sourceData:
 
         def fill_application_list(applications_dict):
             for name, values in applications_dict.items():
+                val = str(values['protocol'])+' '+str(values.get('port', ''))
                 applications.append({
                     'name': name,
-                    'protocol': values['protocol'],
-                    'port': values.get('port'),
+                    'val': val,
                     'id': uuid4().hex,
                 })
 
@@ -74,7 +74,7 @@ class sourceData:
         for name, values in self.dataset['applicationsets'].items():
             appsets.append({
                 'name': name,
-                'applications': values,
+                'val': values,
                 'id': uuid4().hex,
             })
 

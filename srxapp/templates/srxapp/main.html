@@ -111,7 +111,7 @@
                           <div class="col-auto mr-auto lgi-name"><a href="#" class="obj-name">{{ adr.name }}</a></div>
                           <div class="d-none obj-zone">{{ adr.zone }}</div>
                           <div class="w-100"></div>
-                          <div class="col-auto mr-auto lgi-name"><small><a href="#" class="text-black-50 obj-val">{{ adr.ip }}</a></small></div>
+                          <div class="col-auto mr-auto lgi-name"><small><a href="#" class="text-black-50 obj-val">{{ adr.val }}</a></small></div>
                         </div>
                       </li>
                     {% endfor %}
@@ -122,7 +122,7 @@
                           <div class="d-none obj-zone">{{ adrset.zone }}</div>
                           <div class="w-100"></div>
                           <div class="col-auto mr-auto lgi-name"><small><a href="#" class="text-black-50 obj-val">
-                            {% for a in adrset.addresses %}
+                            {% for a in adrset.val %}
                               {{ a }}<br>
                             {% endfor %}
                             </a></small>
@@ -148,7 +148,7 @@
                           <div class="col-auto mr-auto lgi-name"><a href="#" class="obj-name">{{ adr.name }}</a></div>
                           <div class="d-none obj-zone">{{ adr.zone }}</div>
                           <div class="w-100"></div>
-                          <div class="col-auto mr-auto lgi-name"><small><a href="#" class="text-black-50 obj-val">{{ adr.ip }}</a></small></div>
+                          <div class="col-auto mr-auto lgi-name"><small><a href="#" class="text-black-50 obj-val">{{ adr.val }}</a></small></div>
                         </div>
                       </li>
                     {% endfor %}
@@ -159,7 +159,7 @@
                           <div class="w-100"></div>
                           <div class="d-none obj-zone">{{ adrset.zone }}</div>
                           <div class="col-auto mr-auto lgi-name"><small><a href="#" class="text-black-50 obj-val">
-                            {% for a in adrset.addresses %}
+                            {% for a in adrset.val %}
                               {{ a }}<br>
                             {% endfor %}
                             </a></small>
@@ -184,7 +184,7 @@
                         <div class="row">
                           <div class="col-auto mr-auto lgi-name"><a href="#" class="obj-name">{{ app.name }}</a></div>
                           <div class="w-100"></div>
-                          <div class="col-auto mr-auto lgi-name"><small><a href="#" class="text-black-50 obj-val">{{ app.protocol }} {{ app.port }}</a></small></div>
+                          <div class="col-auto mr-auto lgi-name"><small><a href="#" class="text-black-50 obj-val">{{ app.val }}</a></small></div>
                         </div>
                       </li>
                     {% endfor %}
@@ -194,7 +194,7 @@
                           <div class="col-auto mr-auto lgi-name"><a href="#" class="obj-name">{{ appset.name }}</a></div>
                           <div class="w-100"></div>
                           <div class="col-auto mr-auto lgi-name"><small><a href="#" class="text-black-50 obj-val">
-                            {% for a in appset.applications %}
+                            {% for a in appset.val %}
                               {{ a }}<br>
                             {% endfor %}
                             </a></small>
