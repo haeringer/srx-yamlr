@@ -42,7 +42,7 @@ class srxPolicy:
         return configdict
 
     def check_for_policy_existing(self, policydict):
-        existing = False
+        p_existing = None
 
         if 'source' not in policydict or 'destination' not in policydict:
             return
@@ -51,11 +51,53 @@ class srxPolicy:
             source=policydict['source'], destination=policydict['destination'])
         newpolicyhash = hash(repr(sorted_dict_for_hash))
 
-        for policy in self.sourcedict['policies']:
-            if newpolicyhash == policy['policyhash']:
-                existing = True
+        for p in self.sourcedict['policies']:
+            if newpolicyhash == p['policyhash']:
+                p_existing = deepcopy(p)
 
-        return existing
+        return p_existing
+
+    def get_existing_policy_details(self, p_existing):
+        pe_detail = dict(srcaddresses=[], srcaddrsets=[], destaddresses=[],
+                         destaddrsets=[], applications=[], appsets=[])
+
+        def get_policy_objects(sourcedict, p_part):
+            objects = []
+
+            for obj in sourcedict:
+                if (isinstance(p_part, list)):
+                    if obj['name'] in p_part:
+                        objects.append(obj)
+                else:
+                    if obj['name'] in [p_part]:
+                        objects.append(obj)
+            return objects
+
+        pe_detail['pname'] = p_existing['name']
+
+        sd = self.sourcedict
+        src = p_existing['source']
+        dest = p_existing['destination']
+        app = p_existing['application']
+
+        pe_detail['srcaddresses'] = get_policy_objects(sd['addresses'], src)
+        pe_detail['destaddresses'] = get_policy_objects(sd['addresses'], dest)
+        pe_detail['srcaddrsets'] = get_policy_objects(sd['addrsets'], src)
+        pe_detail['destaddrsets'] = get_policy_objects(sd['addrsets'], dest)
+        pe_detail['applications'] = get_policy_objects(sd['applications'], app)
+        pe_detail['appsets'] = get_policy_objects(sd['appsets'], app)
+
+        return pe_detail
+
+    def format_existing_policy(self, p_existing):
+        pname = str(p_existing['name'])
+
+        del p_existing['name']
+        del p_existing['policyhash']
+
+        pe_fmt = dict(policies={pname: p_existing})
+
+        return pe_fmt
 
     def update_policyname(self):
         cd = self.configdict
@@ -74,9 +116,12 @@ class srxPolicy:
                 p[direction] = [p[direction]]
             p[direction].append(self.name)
 
-        existing = self.check_for_policy_existing(p)
-        if existing:
-            return 'policy_exists'
+        p_existing = self.check_for_policy_existing(p)
+        if p_existing:
+            pe_detail = self.get_existing_policy_details(p_existing)
+            pe_fmt = self.format_existing_policy(p_existing)
+
+            return dict(p_exists=True, pe_detail=pe_detail, p_existing=pe_fmt)
 
         return self.update_configdict_with_policy(p)
 

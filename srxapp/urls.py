@@ -12,6 +12,7 @@ urlpatterns = [
     path('auth/', include('django.contrib.auth.urls')),
     path('load/', TemplateView.as_view(template_name='srxapp/load.html'), name='load'),
     path('ajax/loadobjects/', views.load_objects, name='load_objects'),
+    path('ajax/loadpolicy/', views.get_existing_policy_details, name='get_existing_policy_details'),
     path('ajax/getyamlconfig/', views.get_yamlconfig, name='get_yamlconfig'),
     path('ajax/filterobjects/', views.filter_objects, name='filter_objects'),
     path('ajax/policy/rename/', views.policy_rename, name='policy_rename'),

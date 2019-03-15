@@ -34,6 +34,7 @@ def load_objects(request):
         # Initialize empty dictionaries for user session
         request.session['sourcedict'] = {}
         request.session['configdict'] = {}
+        request.session['pe_detail'] = {}
 
         helpers.git_clone_to_workspace()
 
@@ -56,11 +57,13 @@ def policy_add_address(request):
     try:
         srxpolicy = config.srxPolicy(request)
         result = srxpolicy.add_address()
-        if result != 'policy_exists':
+        if 'p_exists' not in result:
             request.session['configdict'] = result
             response = helpers.convert_dict_to_yaml(result)
         else:
-            response = result
+            request.session['configdict'] = result['p_existing']
+            request.session['pe_detail'] = result['pe_detail']
+            response = 'p_exists'
     except Exception:
         response = helpers.view_exception(Exception)
     return JsonResponse(response, safe=False)
@@ -172,6 +175,11 @@ def filter_objects(request):
 
 def get_yamlconfig(request):
     response = helpers.convert_dict_to_yaml(request.session['configdict'])
+    return JsonResponse(response, safe=False)
+
+
+def get_existing_policy_details(request):
+    response = request.session['pe_detail']
     return JsonResponse(response, safe=False)
 
 

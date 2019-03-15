@@ -10,21 +10,17 @@ var currentPolicy = {
 * Run on page load
 */
 $(window).on('load', function() {
-    var nameId = generateId()
-    currentPolicy.policyname = 'allow-'+nameId+'-to-'+nameId
-    getYamlConfig()
+    var url = new URL(window.location.href)
+    if (url.search === '?loadpolicy') {
+        getExistingPolicyDetails()
+        getYamlConfig()
+    } else {
+        var nameId = generateId()
+        currentPolicy.policyname = 'allow-'+nameId+'-to-'+nameId
+        getYamlConfig()
+    }
 })
 
-function getYamlConfig() {
-    $.post('/ajax/getyamlconfig/')
-    .done(function(response) {
-        check_response_backend_error(response)
-        updateYaml(response.yamlconfig)
-    })
-    .fail(function(errorThrown) {
-        console.log(errorThrown.toString())
-    })
-}
 
 // Make ajax POST requests work with Django's CSRF protection
 $.ajaxSetup({
@@ -59,7 +55,7 @@ $(function() {
     // Search Forms - use .on 'click' with parent selected to recognize
     // events also on dynamically added items
     $('#search-forms').on('click', '.search-results-item', function() {
-        objectSearchHandler(this)
+        addObjPreBuild(this)
     })
     $('.list-group').on('click', '.lgi-icon-close', function() {
 	    var list_item = this.parentNode.parentNode
@@ -91,7 +87,7 @@ $(function() {
         renamePolicyFormSetup()
     })
     $('#add-policy').on('click', function() {
-        addPolicy()
+        window.location.replace('/')
     })
     $('#clear-config').on('click', function() {
         window.location.replace('/load')
@@ -115,26 +111,8 @@ $(function() {
 })
 
 
-function renamePolicyFormSetup() {
-    var policyNameInput = $('#input-policy-name')
-    var policyNameModal = $('#rename-policy-modal')
-
-    policyNameInput.val(currentPolicy.policyname)
-    policyNameModal.on('shown.bs.modal', function() {
-        policyNameInput.focus();
-    })
-}
-
-
-function renamePolicy() {
-    var previousName = currentPolicy.policyname
-    currentPolicy.policyname = $('#input-policy-name').val()
-    $('#rename-policy-modal').modal('toggle')
-
-    $.post('/ajax/policy/rename/', {
-        previousname: previousName,
-        policyname: currentPolicy.policyname,
-    })
+function getYamlConfig() {
+    $.post('/ajax/getyamlconfig/')
     .done(function(response) {
         check_response_backend_error(response)
         updateYaml(response.yamlconfig)
@@ -144,38 +122,88 @@ function renamePolicy() {
     })
 }
 
+function getExistingPolicyDetails() {
+    $.post('/ajax/loadpolicy/')
+    .done(function(response) {
+        currentPolicy.policyname = response.pname
+        loadExistingPolicy(response)
+        console.log(currentPolicy)
+        console.log(response)
+    })
+    .fail(function(errorThrown) {
+        console.log(errorThrown.toString())
+    })
+}
 
-function objectSearchHandler(htmlObj) {
-    var objtype = htmlObj.id.split("_", 3).pop()
+function loadExistingPolicy(pe_detail) {
 
-    resetSearch(htmlObj)
-
-    if (objtype === 'address' || objtype === 'addrset') {
-        const objectSearchAddrObj = new ObjectSearchAddrObj(htmlObj)
-        if (objectSearchAddrObj.validate_policy_logic() === true) {
-            objectSearchAddrObj.ajax_add_address_to_policy_yaml()
-        } else {
-            return;
+    function addObjFromExistingPolicy(pd, objtype, direction=null) {
+        for (var i = 0; i < pd.length; i++) {
+            var obj = pd[i]
+            obj.type = objtype
+            if (direction !== null) {
+                obj.direction = direction
+            }
+            addObjExisting(obj)
         }
-    } else if (objtype === 'application' || objtype === 'appset') {
-        const objectSearchAppObj = new ObjectSearchAppObj(htmlObj)
-        if (objectSearchAppObj.validate_application_use() === true) {
-            objectSearchAppObj.ajax_add_application_to_policy_yaml()
-        } else {
-            return;
+    }
+    addObjFromExistingPolicy(pe_detail.srcaddresses, 'address', 'from')
+    addObjFromExistingPolicy(pe_detail.srcaddrsets, 'addrset', 'from')
+    addObjFromExistingPolicy(pe_detail.destaddresses, 'address', 'to')
+    addObjFromExistingPolicy(pe_detail.destaddrsets, 'addrset', 'to')
+    addObjFromExistingPolicy(pe_detail.applications, 'application')
+    addObjFromExistingPolicy(pe_detail.appsets, 'appset')
+}
+
+
+function addObjPreBuild (searchResultElement) {
+    var searchResultObj = {
+        type: searchResultElement.id.split("_", 3).pop(),
+        oid: searchResultElement.id.split("_", 2).pop(),
+        direction: searchResultElement.id.split("_").shift(),
+        name: $(searchResultElement).find('.obj-name').html(),
+        val: $(searchResultElement).find('.obj-val').html(),
+        zone: $(searchResultElement).find('.obj-zone').html(),
+    }
+
+    resetSearch(searchResultElement)
+    addObj(searchResultObj, true)
+}
+
+
+function addObjExisting(obj) {
+    if (obj.type === 'address' ||
+        obj.type === 'addrset') {
+        const addrObj = new AddrObj(obj)
+        addrObj.blend_in_zone()
+        addrObj.add_object_to_list()
+    } else if (obj.type === 'application' ||
+               obj.type === 'appset') {
+        const appObj = new AppObj(obj)
+        appObj.add_object_to_list()
+    }
+}
+
+function addObj(obj) {
+    if (obj.type === 'address' ||
+        obj.type === 'addrset') {
+        const addrObj = new AddrObj(obj)
+        if (addrObj.validate_policy_logic() === true) {
+            addrObj.ajax_add_address_to_policy_yaml()
+        }
+    } else if (obj.type === 'application' ||
+               obj.type === 'appset') {
+        const appObj = new AppObj(obj)
+        if (appObj.validate_application_use() === true) {
+            appObj.ajax_add_application_to_policy_yaml()
         }
     }
 }
 
 
-class ObjectSearchAddrObj {
-    constructor(search_result_item) {
-        this.objtype = search_result_item.id.split("_", 3).pop()
-        this.objectid = search_result_item.id.split("_", 2).pop()
-        this.direction = search_result_item.id.split("_").shift()
-        this.name = $(search_result_item).find('.obj-name').html()
-        this.val = $(search_result_item).find('.obj-val').html()
-        this.zone = $(search_result_item).find('.obj-zone').html()
+class AddrObj {
+    constructor(obj) {
+        this.obj = obj
     }
 
     validate_policy_logic() {
@@ -183,21 +211,21 @@ class ObjectSearchAddrObj {
         var errorZone = "Can't use the same zone for source and destination!"
         var errorUsed = "Object already in use!"
 
-        var presentZone = $('#added-zone-body-'+this.direction).html()
-        var thisZoneContainerCard = $('#added-zone-'+this.direction)
+        var presentZone = $('#added-zone-body-'+this.obj.direction).html()
+        var thisZoneContainerCard = $('#added-zone-'+this.obj.direction)
 
-        if (this.direction === 'from') {
+        if (this.obj.direction === 'from') {
             var otherZone = $('#added-zone-body-to').html()
-            var objUsed = currentPolicy.from.includes(this.name)
-        } else if (this.direction === 'to') {
+            var objUsed = currentPolicy.from.includes(this.obj.name)
+        } else if (this.obj.direction === 'to') {
             var otherZone = $('#added-zone-body-from').html()
-            var objUsed = currentPolicy.to.includes(this.name)
+            var objUsed = currentPolicy.to.includes(this.obj.name)
         }
 
-        if (this.zone === otherZone) {
+        if (this.obj.zone === otherZone) {
             swal(errorZone)
         } else if (!thisZoneContainerCard.hasClass('d-none') &&
-                  (this.zone != presentZone)) {
+                  (this.obj.zone != presentZone)) {
             swal(errorDifferent)
         } else if (objUsed === true) {
             swal(errorUsed)
@@ -208,21 +236,28 @@ class ObjectSearchAddrObj {
 
     ajax_add_address_to_policy_yaml() {
         var thisParent = this
+
         $.post('/ajax/policy/add/address/', {
             policyname: currentPolicy.policyname,
-            direction: this.direction,
-            objname: this.name,
-            zone: this.zone,
+            direction: this.obj.direction,
+            objname: this.obj.name,
+            zone: this.obj.zone,
         })
         .done(function(response) {
-            if (response !== 'policy_exists') {
+            if (response !== 'p_exists') {
                 thisParent.blend_in_zone()
                 thisParent.add_object_to_list()
                 check_response_backend_error(response)
                 updateYaml(response.yamlconfig)
             } else {
-                swal('A Policy with this combination of source and destination'
-                     +' already exists.')
+                swal({
+                    title: 'Policy already exists',
+                    text: 'Loading the existing policy for editing...',
+                    icon: 'warning',
+                })
+                .then(() => {
+                    window.location.replace('/?loadpolicy')
+                })
             }
         })
         .fail(function(errorThrown) {
@@ -231,12 +266,12 @@ class ObjectSearchAddrObj {
     }
 
     blend_in_zone() {
-        var zoneContainerCard = $('#added-zone-'+this.direction)
-        var zoneBody = $('#added-zone-body-'+this.direction)
+        var zoneContainerCard = $('#added-zone-'+this.obj.direction)
+        var zoneBody = $('#added-zone-body-'+this.obj.direction)
 
         if (zoneContainerCard.hasClass('d-none')) {
             zoneContainerCard.removeClass('d-none').show()
-            zoneBody.html(this.zone)
+            zoneBody.html(this.obj.zone)
         } else {
             return;
         }
@@ -244,33 +279,30 @@ class ObjectSearchAddrObj {
 
     add_object_to_list() {
         var addedObj = {
-            obj: this,
-            container: $('#added-obj-'+this.direction),
-            list: $('#added-list-'+this.direction),
-            id: this.direction+'_'+this.objectid+'_'+this.objtype+'_added',
-            zone: this.zone,
+            obj: this.obj,
+            container: $('#added-obj-'+this.obj.direction),
+            list: $('#added-list-'+this.obj.direction),
+            id: this.obj.direction+'_'+this.obj.oid+'_'+this.obj.type+'_added',
+            zone: this.obj.zone,
         }
 
         objectlist_append_html(addedObj)
 
-        if (this.direction === 'from') {
-            currentPolicy.from.push(this.name)
-        } else if (this.direction === 'to') {
-            currentPolicy.to.push(this.name)
+        if (this.obj.direction === 'from') {
+            currentPolicy.from.push(this.obj.name)
+        } else if (this.obj.direction === 'to') {
+            currentPolicy.to.push(this.obj.name)
         }
     }
 }
 
-class ObjectSearchAppObj {
-    constructor(search_result_item) {
-        this.objtype = search_result_item.id.split("_", 3).pop()
-        this.objectid = search_result_item.id.split("_", 2).pop()
-        this.name = $(search_result_item).find('.obj-name').html()
-        this.val = $(search_result_item).find('.obj-val').html()
+class AppObj {
+    constructor(obj) {
+        this.obj = obj
     }
 
     validate_application_use() {
-        if (currentPolicy.app.includes(this.name)) {
+        if (currentPolicy.app.includes(this.obj.name)) {
             swal("Object already in use!")
         } else {
             return true;
@@ -281,7 +313,7 @@ class ObjectSearchAppObj {
         var thisParent = this
         $.post('/ajax/policy/add/application/', {
             policyname: currentPolicy.policyname,
-            objname: this.name,
+            objname: this.obj.name,
         })
         .done(function(response) {
             thisParent.add_object_to_list()
@@ -295,14 +327,14 @@ class ObjectSearchAppObj {
 
     add_object_to_list() {
         var addedObj = {
-            obj: this,
+            obj: this.obj,
             container: $('#added-obj-app'),
             list: $('#added-list-app'),
-            id: 'app_'+this.objectid+'_'+this.objtype+'_added',
+            id: 'app_'+this.obj.oid+'_'+this.obj.type+'_added',
         }
 
         objectlist_append_html(addedObj)
-        currentPolicy.app.push(this.name)
+        currentPolicy.app.push(this.obj.name)
     }
 }
 
@@ -638,6 +670,36 @@ function createAppset() {
 }
 
 
+function renamePolicyFormSetup() {
+    var policyNameInput = $('#input-policy-name')
+    var policyNameModal = $('#rename-policy-modal')
+
+    policyNameInput.val(currentPolicy.policyname)
+    policyNameModal.on('shown.bs.modal', function() {
+        policyNameInput.focus();
+    })
+}
+
+
+function renamePolicy() {
+    var previousName = currentPolicy.policyname
+    currentPolicy.policyname = $('#input-policy-name').val()
+    $('#rename-policy-modal').modal('toggle')
+
+    $.post('/ajax/policy/rename/', {
+        previousname: previousName,
+        policyname: currentPolicy.policyname,
+    })
+    .done(function(response) {
+        check_response_backend_error(response)
+        updateYaml(response.yamlconfig)
+    })
+    .fail(function(errorThrown) {
+        console.log(errorThrown.toString())
+    })
+}
+
+
 function settingsHandler() {
     var gogsToken = $('input#gogs-token').val()
     if (gogsToken !== '') {
@@ -721,31 +783,22 @@ function updateOutputLog(text) {
 }
 
 
-function addPolicy() {
-    window.location.replace('/')
-}
-
-function editYaml() {
-    swal('geht noch nich')
-}
-
-
 function objectSearch(e) {
-    var input, filter, ul, li, a, a0, a1, i;
-    input = document.getElementById(e.id);
-    filter = input.value.toUpperCase();
-    ul = document.getElementById(e.id + '-ul');
-    li = ul.getElementsByTagName('li');
+    var input, filter, ul, li, a, a0, a1, i
+    input = document.getElementById(e.id)
+    filter = input.value.toUpperCase()
+    ul = document.getElementById(e.id + '-ul')
+    li = ul.getElementsByTagName('li')
 
     for (i = 0; i < li.length; i++) {
-        a0 = li[i].getElementsByTagName('a')[0];
-        a1 = li[i].getElementsByTagName('a')[1];
-        a = a0.innerHTML.toUpperCase() + ' ' + a1.innerHTML.toUpperCase();
+        a0 = li[i].getElementsByTagName('a')[0]
+        a1 = li[i].getElementsByTagName('a')[1]
+        a = a0.innerHTML.toUpperCase() + ' ' + a1.innerHTML.toUpperCase()
         if (a.indexOf(filter) > -1 && filter.length >= 1) {
-            ul.classList.remove('d-none');
-            li[i].style.display = '';
+            ul.classList.remove('d-none')
+            li[i].style.display = ''
         } else {
-            li[i].style.display = 'none';
+            li[i].style.display = 'none'
         }
     }
 }
