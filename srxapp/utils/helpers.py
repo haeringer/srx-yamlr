@@ -6,6 +6,9 @@ import logging
 import traceback
 import requests
 
+from simplecrypt import encrypt, decrypt
+from base64 import b64encode, b64decode
+
 logger = logging.getLogger(__name__)
 
 
@@ -71,3 +74,19 @@ def dict_with_sorted_list_values(**kwargs):
             new_dict[key] = values
 
     return new_dict
+
+
+def encrypt_string(string):
+    key = os.environ.get('YM_DJANGOSECRET', '')
+
+    cipher = encrypt(key, string)
+    encoded_cipher = b64encode(cipher)
+    return encoded_cipher.decode('utf-8')
+
+
+def decrypt_string(string):
+    key = os.environ.get('YM_DJANGOSECRET', '')
+
+    cipher = b64decode(string)
+    plain_text = decrypt(key, cipher)
+    return plain_text.decode('utf-8')

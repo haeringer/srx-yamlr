@@ -186,7 +186,9 @@ def get_existing_policy_details(request):
 def set_token_gogs(request):
     try:
         user = User.objects.get(username=request.user.username)
-        user.usersettings.gogs_tkn = request.POST.get('token', None)
+        token = request.POST.get('token', None)
+        token_encrypted = helpers.encrypt_string(token)
+        user.usersettings.gogs_tkn = token_encrypted
         user.save()
         response = dict(return_value=0)
     except Exception:
