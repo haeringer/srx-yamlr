@@ -13,6 +13,8 @@ logger = logging.getLogger(__name__)
 @login_required(redirect_field_name=None)
 def mainView(request):
     try:
+        user = User.objects.get(username=request.user.username)
+        token_set = helpers.check_if_token_set(user)
         sourcedict = deepcopy(request.session['sourcedict'])
         context = {
             'zones': sourcedict['zones'],
@@ -21,6 +23,7 @@ def mainView(request):
             'applications': sourcedict['applications'],
             'appsets': sourcedict['appsets'],
             'username': request.user.username,
+            'token_set': token_set,
         }
     except Exception:
         logger.error(helpers.view_exception(Exception))

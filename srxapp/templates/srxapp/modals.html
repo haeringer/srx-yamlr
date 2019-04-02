@@ -175,7 +175,18 @@
       </div>
       <div class="modal-body">
         <div class="form-group" id="settings-modal-form">
-          <h6>Git Access Token</h6>
+          <div class="row">
+            <div class="col-4">
+              <h6>Git Access Token</h6>
+            </div>
+            <div class="col-8" id="token-set-check">
+              {% if token_set %}
+                <i class="fas fa-circle mr-2 custom-green"></i><small>Token has been set</small>
+              {% else %}
+                <i class="fas fa-circle mr-2 custom-red"></i><small>Token not set</small>
+              {% endif %}
+            </div>
+          </div>
           <div class="form-group">
             <input type="password" class="form-control" id="gogs-token">
           </div>

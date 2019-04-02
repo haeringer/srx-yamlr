@@ -709,7 +709,7 @@ function settingsHandler() {
 }
 
 function setToken(token, url) {
-    hideModalAndFadeInSpinner($('#settings-modal'))
+    $('.spinner-container').fadeIn()
     $.post({
         url: url,
         data: {
@@ -718,7 +718,11 @@ function setToken(token, url) {
     })
     .done(function(response) {
         console.log(response.return_value)
-        $('.spinner-container').delay(400).fadeOut()
+        $('#token-set-check').html(
+            `<i class="fas fa-circle mr-2 custom-green"></i>`+
+            `<small>Token has been set</small>`
+        )
+        $('.spinner-container').fadeOut()
     })
     .fail(function(errorThrown) {
         console.log(errorThrown.toString())

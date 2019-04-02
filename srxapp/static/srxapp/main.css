@@ -138,6 +138,13 @@ body {
     box-shadow: 0 0 0 3px rgba(255, 255, 255, .25);
   }
 
+  .custom-green {
+    color:rgb(107, 238, 118);
+  }
+
+  .custom-red {
+    color:rgb(252, 84, 84);
+  }
 
   /* PACE.js */
 
@@ -189,7 +196,7 @@ body {
     right: 0;
     bottom: 0;
     background-color: rgba(255, 255, 255, 0.6);
-    z-index: 2;
+    z-index: 1500;
     cursor: pointer;
   }
 

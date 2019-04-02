@@ -90,3 +90,12 @@ def decrypt_string(string):
     cipher = b64decode(string)
     plain_text = decrypt(key, cipher)
     return plain_text.decode('utf-8')
+
+
+def check_if_token_set(user):
+    dbstring = user.usersettings.gogs_tkn
+    
+    if dbstring == '':
+        return False
+    else:
+        return True
