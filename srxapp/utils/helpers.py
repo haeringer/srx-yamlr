@@ -6,6 +6,7 @@ import logging
 import traceback
 import requests
 
+from django.utils.encoding import force_text
 from simplecrypt import encrypt, decrypt
 from base64 import b64encode, b64decode
 
@@ -76,8 +77,13 @@ def dict_with_sorted_list_values(**kwargs):
     return new_dict
 
 
+def get_django_secret():
+    secret = os.environ.get('YM_DJANGOSECRET', '')
+    return force_text(secret)
+
+
 def encrypt_string(string):
-    key = os.environ.get('YM_DJANGOSECRET', '')
+    key = get_django_secret()
 
     cipher = encrypt(key, string)
     encoded_cipher = b64encode(cipher)
@@ -85,7 +91,7 @@ def encrypt_string(string):
 
 
 def decrypt_string(string):
-    key = os.environ.get('YM_DJANGOSECRET', '')
+    key = get_django_secret()
 
     cipher = b64decode(string)
     plain_text = decrypt(key, cipher)
@@ -94,7 +100,7 @@ def decrypt_string(string):
 
 def check_if_token_set(user):
     dbstring = user.usersettings.gogs_tkn
-    
+
     if dbstring == '':
         return False
     else:
