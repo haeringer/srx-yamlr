@@ -11,10 +11,6 @@ logger = logging.getLogger(__name__)
 
 class SrxappWebsocketConsumer(WebsocketConsumer):
 
-    def connect(self):
-        self.accept()
-        self.user = self.scope["user"]
-
     def send(self, message):
         super().send(text_data=json.dumps({'message': message}))
 
@@ -56,7 +52,7 @@ class CheckConsumer(SrxappWebsocketConsumer):
 
             diff = difflib.context_diff(diff_data, console_out.text)
             delta = ''.join(l[2:] for l in diff if l.startswith('+ '))
-            diff_data = '{}{}'.format(diff_data, delta)
+            diff_data = ''.join([diff_data, delta])
 
             if delta != '':
                 self.send(delta)
