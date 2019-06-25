@@ -8,5 +8,4 @@ db.sqlite3
 media
 workspace
 .DS_Store
-config-new.yml
 .vscode/settings.json
