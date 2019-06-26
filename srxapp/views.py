@@ -11,27 +11,6 @@ logger = logging.getLogger(__name__)
 
 
 @login_required(redirect_field_name=None)
-def mainView(request):
-    try:
-        user = User.objects.get(username=request.user.username)
-        token_set = helpers.check_if_token_set(user)
-        sourcedict = deepcopy(request.session['sourcedict'])
-        context = {
-            'zones': sourcedict['zones'],
-            'addresses': sourcedict['addresses'],
-            'addrsets': sourcedict['addrsets'],
-            'applications': sourcedict['applications'],
-            'appsets': sourcedict['appsets'],
-            'username': request.user.username,
-            'token_set': token_set,
-        }
-    except Exception:
-        logger.error(helpers.view_exception(Exception))
-        raise Http404("HTTP 404 Error")
-    return render(request, 'srxapp/main.html', context)
-
-
-@login_required(redirect_field_name=None)
 def load_objects(request):
     try:
         # Initialize empty dictionaries for user session
@@ -54,6 +33,27 @@ def load_objects(request):
     except Exception:
         response = helpers.view_exception(Exception)
     return JsonResponse(response, safe=False)
+
+
+@login_required(redirect_field_name=None)
+def main_view(request):
+    try:
+        user = User.objects.get(username=request.user.username)
+        token_set = helpers.check_if_token_set(user)
+        sourcedict = deepcopy(request.session['sourcedict'])
+        context = {
+            'zones': sourcedict['zones'],
+            'addresses': sourcedict['addresses'],
+            'addrsets': sourcedict['addrsets'],
+            'applications': sourcedict['applications'],
+            'appsets': sourcedict['appsets'],
+            'username': request.user.username,
+            'token_set': token_set,
+        }
+    except Exception:
+        logger.error(helpers.view_exception(Exception))
+        raise Http404("HTTP 404 Error")
+    return render(request, 'srxapp/main.html', context)
 
 
 def policy_add_address(request):
