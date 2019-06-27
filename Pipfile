@@ -7,11 +7,9 @@ verify_ssl = true
 
 [packages]
 django = "*"
-pyyaml = "*"
-oyaml = "*"
-psycopg2-binary = "*"
 gitpython = "*"
 simple-crypt = "*"
+oyaml = "*"
 
 [requires]
 python_version = "3.7"
