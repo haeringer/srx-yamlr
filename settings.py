@@ -31,7 +31,6 @@ ALLOWED_HOSTS = ['*']
 # Application definition
 
 INSTALLED_APPS = [
-    'channels',
     'srxapp.apps.config',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -70,9 +69,6 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'wsgi.application'
-
-# Required for channels:
-ASGI_APPLICATION = "routing.application"
 
 
 # Database

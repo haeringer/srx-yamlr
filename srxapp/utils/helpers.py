@@ -4,7 +4,6 @@ import git
 import oyaml as yaml
 import logging
 import traceback
-import requests
 
 from django.utils.encoding import force_text
 from simplecrypt import encrypt, decrypt
@@ -43,26 +42,6 @@ def log_config(configdict):
 
 def convert_dict_to_yaml(dictionary):
     return dict(yamlconfig=yaml.dump(dictionary, default_flow_style=False))
-
-
-def get_jenkins_session_object():
-    jnk_user = os.environ.get('YM_JENKINS_USER', '')
-    jnk_tkn = os.environ.get('YM_JENKINS_TOKEN', '')
-
-    session = requests.Session()
-    session.auth = (jnk_user, jnk_tkn)
-    session.verify = False
-
-    return session
-
-
-def get_jenkins_job_url(commit):
-    jnk_url = os.environ.get('YM_JENKINS_URL', '')
-    jnk_job = os.environ.get('YM_JENKINS_JOB', '')
-    job_url = '{}/job/{}/buildWithParameters?commit={}'.format(
-        jnk_url, jnk_job, commit)
-
-    return job_url
 
 
 def dict_with_sorted_list_values(**kwargs):

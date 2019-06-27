@@ -93,10 +93,10 @@ $(function() {
         window.location.replace('/load')
     })
     $('#check-config').on('click', function() {
-        websocketHandler('check')
+        alert('nothing here yet')
     })
     $('#deploy-config').on('click', function() {
-        websocketHandler('deploy')
+        alert('nothing here yet')
     })
     $('#edit-yaml').on('click', function() {
         editYaml()
@@ -745,45 +745,6 @@ function showCreateFormError(element) {
     var temp = document.getElementsByTagName('template')[0]
     var clone = temp.content.cloneNode(true)
     element.append(clone)
-}
-
-
-function websocketHandler(task) {
-    $('#output-log').val('')
-    if (task === 'check') {
-        var url = '/ws/check/'
-        websocket(url)
-    } else if (task === 'deploy') {
-        var url = '/ws/deploy/'
-        websocket(url)
-    }
-}
-
-function websocket(url) {
-    var ws = new WebSocket(
-        'ws://'+window.location.host+url
-    )
-    ws.onopen = function() {
-        ws.send(JSON.stringify({
-            // Backend WebSocket consumer just needs
-            // to receive anything to begin processing
-            'message': 'dummy'
-        }))
-    }
-    ws.onmessage = function(event) {
-        var data = JSON.parse(event.data)
-        var receivedMessage = data['message']
-        updateOutputLog(receivedMessage)
-    }
-    ws.onclose = function() {
-        console.log('Websocket closed')
-    }
-}
-
-function updateOutputLog(text) {
-    var ol = document.querySelector('#output-log')
-    ol.value += (text)
-    ol.scrollTop = ol.scrollHeight
 }
 
 

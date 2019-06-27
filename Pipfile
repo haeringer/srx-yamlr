@@ -7,12 +7,10 @@ verify_ssl = true
 
 [packages]
 django = "*"
-channels = "*"
 pyyaml = "*"
 oyaml = "*"
 psycopg2-binary = "*"
 gitpython = "*"
-requests = "*"
 simple-crypt = "*"
 
 [requires]
