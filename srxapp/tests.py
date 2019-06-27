@@ -19,7 +19,7 @@ class Tests(TestCase):
         client.get('/')
 
         # Add new test objects to database
-        zones = self.client.session['sourcedict']['zones']
+        zones = self.client.session['workingdict']['zones']
         zone_a = zones[0]['name']
         zone_b = zones[1]['name']
         self.testzone = zone_a
@@ -63,7 +63,7 @@ class Tests(TestCase):
         self.assertEqual(self.client.session['_auth_user_id'], '1')
 
     def test_session_imported_data(self):
-        self.assertIn('zones', self.client.session['sourcedict'])
+        self.assertIn('zones', self.client.session['workingdict'])
 
     # def test_build_policy(self):
     #     self.policyid = '123456789'

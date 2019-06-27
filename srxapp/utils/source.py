@@ -8,19 +8,19 @@ from srxapp.utils import helpers
 class sourceData:
 
     def __init__(self, request):
-        self.sourcedict = request.session['sourcedict']
+        self.workingdict = request.session['workingdict']
         sourcefile = os.environ.get('YM_YAMLFILE', '')
         with open(sourcefile, 'r') as infile:
             self.dataset = yaml.load(infile, Loader=yaml.FullLoader)
 
     def import_zones(self):
-        zones = self.sourcedict.setdefault('zones', [])
+        zones = self.workingdict.setdefault('zones', [])
 
         for name in self.dataset['zones']:
             zones.append({'name': name})
 
     def import_addresses(self):
-        addresses = self.sourcedict.setdefault('addresses', [])
+        addresses = self.workingdict.setdefault('addresses', [])
 
         for zone, values in self.dataset['zones'].items():
             zone_addresses = values['addresses']
@@ -40,7 +40,7 @@ class sourceData:
             })
 
     def import_addrsets(self):
-        addrsets = self.sourcedict.setdefault('addrsets', [])
+        addrsets = self.workingdict.setdefault('addrsets', [])
 
         for zone, values in self.dataset['zones'].items():
             if 'addrsets' in values:
@@ -54,7 +54,7 @@ class sourceData:
                         })
 
     def import_applications(self):
-        applications = self.sourcedict.setdefault('applications', [])
+        applications = self.workingdict.setdefault('applications', [])
 
         def fill_application_list(applications_dict):
             for name, values in applications_dict.items():
@@ -69,7 +69,7 @@ class sourceData:
         fill_application_list(self.dataset['default-applications'])
 
     def import_appsets(self):
-        appsets = self.sourcedict.setdefault('appsets', [])
+        appsets = self.workingdict.setdefault('appsets', [])
 
         for name, values in self.dataset['applicationsets'].items():
             appsets.append({
@@ -79,7 +79,7 @@ class sourceData:
             })
 
     def import_policies(self):
-        policies = self.sourcedict.setdefault('policies', [])
+        policies = self.workingdict.setdefault('policies', [])
 
         for name, values in self.dataset['policies'].items():
 

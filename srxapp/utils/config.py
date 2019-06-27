@@ -7,7 +7,7 @@ class srxPolicy:
 
     def __init__(self, request):
         self.configdict = request.session['configdict']
-        self.sourcedict = request.session['sourcedict']
+        self.workingdict = request.session['workingdict']
         self.direction = request.POST.get('direction', None)
         self.name = request.POST.get('objname', None)
         self.zone = request.POST.get('zone', None)
@@ -51,7 +51,7 @@ class srxPolicy:
             source=policydict['source'], destination=policydict['destination'])
         newpolicyhash = hash(repr(sorted_dict_for_hash))
 
-        for p in self.sourcedict['policies']:
+        for p in self.workingdict['policies']:
             if newpolicyhash == p['policyhash']:
                 p_existing = deepcopy(p)
 
@@ -61,10 +61,10 @@ class srxPolicy:
         pe_detail = dict(srcaddresses=[], srcaddrsets=[], destaddresses=[],
                          destaddrsets=[], applications=[], appsets=[])
 
-        def get_policy_objects(sourcedict, p_part):
+        def get_policy_objects(workingdict, p_part):
             objects = []
 
-            for obj in sourcedict:
+            for obj in workingdict:
                 if (isinstance(p_part, list)):
                     if obj['name'] in p_part:
                         objects.append(obj)
@@ -75,7 +75,7 @@ class srxPolicy:
 
         pe_detail['pname'] = p_existing['name']
 
-        sd = self.sourcedict
+        sd = self.workingdict
         src = p_existing['source']
         dest = p_existing['destination']
         app = p_existing['application']
@@ -168,7 +168,7 @@ class srxObject:
 
     def __init__(self, request):
         self.configdict = request.session['configdict']
-        self.sourcedict = request.session['sourcedict']
+        self.workingdict = request.session['workingdict']
         self.name = request.POST.get('name', None)
         self.zone = request.POST.get('zone', None)
         self.protocol = request.POST.get('protocol', None)
@@ -189,7 +189,7 @@ class srxObject:
         return configdict
 
     def create_address(self):
-        self.sourcedict['addresses'].append({
+        self.workingdict['addresses'].append({
             'name': self.name,
             'val': self.value,
             'zone': self.zone,
@@ -208,7 +208,7 @@ class srxObject:
         return self.update_configdict_with_zone(z)
 
     def create_addrset(self):
-        self.sourcedict['addrsets'].append({
+        self.workingdict['addrsets'].append({
             'name': self.name,
             'val': self.valuelist,
             'zone': self.zone,
@@ -229,7 +229,7 @@ class srxObject:
     def create_application(self):
         val = str(self.protocol)+' '+str(self.port)
 
-        self.sourcedict['applications'].append({
+        self.workingdict['applications'].append({
             'name': self.name,
             'val': val,
             'id': uuid4().hex,
@@ -244,7 +244,7 @@ class srxObject:
         return configdict
 
     def create_appset(self):
-        self.sourcedict['appsets'].append({
+        self.workingdict['appsets'].append({
             'name': self.name,
             'val': self.valuelist,
             'id': uuid4().hex,

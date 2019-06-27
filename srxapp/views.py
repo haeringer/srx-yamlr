@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 def load_objects(request):
     try:
         # Initialize empty dictionaries for user session
-        request.session['sourcedict'] = {}
+        request.session['workingdict'] = {}
         request.session['configdict'] = {}
         request.session['pe_detail'] = {}
 
@@ -40,13 +40,13 @@ def main_view(request):
     try:
         user = User.objects.get(username=request.user.username)
         token_set = helpers.check_if_token_set(user)
-        sourcedict = deepcopy(request.session['sourcedict'])
+        workingdict = deepcopy(request.session['workingdict'])
         context = {
-            'zones': sourcedict['zones'],
-            'addresses': sourcedict['addresses'],
-            'addrsets': sourcedict['addrsets'],
-            'applications': sourcedict['applications'],
-            'appsets': sourcedict['appsets'],
+            'zones': workingdict['zones'],
+            'addresses': workingdict['addresses'],
+            'addrsets': workingdict['addrsets'],
+            'applications': workingdict['applications'],
+            'appsets': workingdict['appsets'],
             'username': request.user.username,
             'token_set': token_set,
         }
@@ -165,10 +165,10 @@ def filter_objects(request):
     if selectedzone == 'Choose Zone...':
         return JsonResponse(None, safe=False)
 
-    sourcedict = deepcopy(request.session['sourcedict'])
+    workingdict = deepcopy(request.session['workingdict'])
 
     addresses_filtered = []
-    for address in sourcedict['addresses']:
+    for address in workingdict['addresses']:
         if address['zone'] == selectedzone:
             addresses_filtered.append(address['name'])
 
