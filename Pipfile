@@ -4,12 +4,13 @@ url = "https://pypi.org/simple"
 verify_ssl = true
 
 [dev-packages]
+flake8 = "*"
 
 [packages]
-django = "*"
-gitpython = "*"
-simple-crypt = "*"
-oyaml = "*"
+django = "==2.2.2"
+gitpython = "==2.1.11"
+simple-crypt = "==4.1.7"
+oyaml = "==0.9"
 
 [requires]
 python_version = "3.7"
