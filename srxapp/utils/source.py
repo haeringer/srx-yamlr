@@ -1,8 +1,11 @@
 import os
-import oyaml as yaml
 
+from ruamel.yaml import YAML
 from uuid import uuid4
 from srxapp.utils import helpers
+
+yaml = YAML()
+yaml.indent(mapping=2, sequence=4, offset=2)
 
 
 class sourceData:

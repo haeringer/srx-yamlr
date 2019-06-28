@@ -1,15 +1,17 @@
 import os
 import json
 import git
-import oyaml as yaml
 import logging
 import traceback
 
+from ruamel.yaml import YAML
 from django.utils.encoding import force_text
 from simplecrypt import encrypt, decrypt
 from base64 import b64encode, b64decode
 
 logger = logging.getLogger(__name__)
+yaml = YAML()
+yaml.indent(mapping=2, sequence=4, offset=2)
 
 
 def git_clone_to_workspace():
@@ -41,7 +43,13 @@ def log_config(configdict):
 
 
 def convert_dict_to_yaml(dictionary):
-    return dict(yamlconfig=yaml.dump(dictionary, default_flow_style=False))
+    with open('/tmp/srx-yamlr_tmp', 'w') as stream:
+        yaml.dump(dictionary, stream)
+
+    with open('/tmp/srx-yamlr_tmp', 'r') as stream:
+        yamlconfig = stream.read()
+
+    return dict(yamlconfig=yamlconfig)
 
 
 def dict_with_sorted_list_values(**kwargs):
