@@ -172,7 +172,7 @@ class srxObject:
         self.name = request.POST.get('name', None)
         self.zone = request.POST.get('zone', None)
         self.protocol = request.POST.get('protocol', None)
-        self.port = request.POST.get('port', None)
+        self.port = int(request.POST.get('port', None))
         self.value = request.POST.get('value', None)
         self.valuelist = request.POST.getlist('valuelist[]', None)
 
