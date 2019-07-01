@@ -106,7 +106,9 @@ $(function() {
         $('#output-modal').modal('toggle')
     })
 
-    $('[data-toggle="tooltip"]').tooltip()
+    $('[data-toggle="tooltip"]').tooltip({
+        trigger : 'hover'
+    })
 
 })
 
