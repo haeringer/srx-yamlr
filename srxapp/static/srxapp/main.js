@@ -200,6 +200,7 @@ function addObj(obj) {
             appObj.ajax_add_application_to_policy_yaml()
         }
     }
+    $('#rename-policy, #add-policy').prop('disabled', false);
 }
 
 
