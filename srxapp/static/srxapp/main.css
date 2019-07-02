@@ -146,6 +146,41 @@ body {
     color:rgb(252, 84, 84);
   }
 
+
+  /*
+   * Mini-Navigation YAML vs. Git Diff
+   */
+
+  .nav-link {
+    color: #888;
+  }
+
+  .active {
+    color: #333;
+  }
+
+  .nav-link:hover {
+    color: #000;
+  }
+
+  .scrollable {
+    width: 100%;
+    overflow-x: auto;
+  }
+
+  #diffcard {
+    width: 100%;
+  }
+
+  #yamlcard {
+    width: 100%;
+  }
+
+  #nav-tabContent {
+    width: 95%;
+  }
+
+
   /* PACE.js */
 
   .pace {

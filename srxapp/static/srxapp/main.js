@@ -92,10 +92,10 @@ $(function() {
     $('#clear-config').on('click', function() {
         window.location.replace('/load')
     })
-    $('#check-config').on('click', function() {
-        alert('nothing here yet')
+    $('#write-config').on('click', function() {
+        writeYamlConfig()
     })
-    $('#deploy-config').on('click', function() {
+    $('#commit-config').on('click', function() {
         alert('nothing here yet')
     })
     $('#edit-yaml').on('click', function() {
@@ -200,7 +200,7 @@ function addObj(obj) {
             appObj.ajax_add_application_to_policy_yaml()
         }
     }
-    $('#rename-policy, #add-policy').prop('disabled', false);
+    $('#rename-policy, #add-policy').prop('disabled', false)
 }
 
 
@@ -442,9 +442,9 @@ class ListAppObj {
             $('#added-obj-app').addClass('d-none')
         }
 
-        var index = currentPolicy.app.indexOf(this.name);
+        var index = currentPolicy.app.indexOf(this.name)
         if (index > -1) {
-            currentPolicy.app.splice(index, 1);
+            currentPolicy.app.splice(index, 1)
         }
     }
 }
@@ -492,6 +492,32 @@ function updateYaml(yamlconfig) {
     if (yamlconfig === '{}\n') {
         $('#yamlcard').addClass('d-none')
     }
+    $('#yamlcard-tab').tab('show')
+    $('#diffcard').addClass('d-none')
+    $('#commit-config').prop('disabled', true)
+}
+
+
+function updateGitDiff(diff) {
+    $('#diffcontainer').html('')
+    var lines = diff.split('\n')
+    lines.splice(0,2)
+
+    for (i = 0; i < lines.length; i++) {
+        var el = $('<div>'+lines[i]+'\n'+'</div>')
+
+        $('#diffcontainer').append(el)
+        if (lines[i].startsWith('+ ')) {
+            console.log(el)
+            el.addClass('text-success')
+        } else {
+            el.addClass('text-muted')
+        }
+    }
+
+    $('#diffcard').removeClass('d-none')
+    $('#commit-config').prop('disabled', false)
+    $('#diffcard-tab').tab('show')
 }
 
 
@@ -526,7 +552,7 @@ function filterObjects(zoneselector) {
 
 
 function showCreateObjectForm(dropdown) {
-    var selectedObj = $(dropdown).text();
+    var selectedObj = $(dropdown).text()
 
     $('#create-form-container').find('form').addClass('d-none')
 
@@ -679,7 +705,7 @@ function renamePolicyFormSetup() {
 
     policyNameInput.val(currentPolicy.policyname)
     policyNameModal.on('shown.bs.modal', function() {
-        policyNameInput.focus();
+        policyNameInput.focus()
     })
 }
 
@@ -696,6 +722,19 @@ function renamePolicy() {
     .done(function(response) {
         check_response_backend_error(response)
         updateYaml(response.yamlconfig)
+    })
+    .fail(function(errorThrown) {
+        console.log(errorThrown.toString())
+    })
+}
+
+
+function writeYamlConfig() {
+    $('.spinner-container').fadeIn()
+    $.post('/ajax/writeyamlconfig/')
+    .done(function(response) {
+        $('.spinner-container').fadeOut()
+        updateGitDiff(response)
     })
     .fail(function(errorThrown) {
         console.log(errorThrown.toString())
