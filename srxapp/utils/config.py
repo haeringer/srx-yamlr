@@ -144,6 +144,7 @@ class srxPolicy:
 
         if 'application' not in p:
             p['application'] = self.name
+            p['action'] = 'permit'
         else:
             if isinstance(p['application'], str):
                 p['application'] = [p['application']]
@@ -160,6 +161,7 @@ class srxPolicy:
                 p['application'] = p['application'][0]
         else:
             p.pop('application')
+            p.pop('action')
 
         return self.update_configdict_with_policy(p)
 
