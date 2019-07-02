@@ -22,6 +22,7 @@ def load_objects(request):
 
         logger.info('Importing YAML source data...')
         src = source.sourceData(request)
+        src.read_source_file()
         src.import_zones()
         src.import_addresses()
         src.import_addrsets()
@@ -138,10 +139,10 @@ def object_create_application(request):
     return JsonResponse(response, safe=False)
 
 
-def policy_rename(request):
+def object_create_appset(request):
     try:
-        srxpolicy = config.srxPolicy(request)
-        result = srxpolicy.update_policyname()
+        srxobject = config.srxObject(request)
+        result = srxobject.create_appset()
         request.session['configdict'] = result
         response = helpers.convert_dict_to_yaml(result)
     except Exception:
@@ -149,10 +150,10 @@ def policy_rename(request):
     return JsonResponse(response, safe=False)
 
 
-def object_create_appset(request):
+def policy_rename(request):
     try:
-        srxobject = config.srxObject(request)
-        result = srxobject.create_appset()
+        srxpolicy = config.srxPolicy(request)
+        result = srxpolicy.update_policyname()
         request.session['configdict'] = result
         response = helpers.convert_dict_to_yaml(result)
     except Exception:
@@ -173,6 +174,17 @@ def filter_objects(request):
             addresses_filtered.append(address['name'])
 
     response = dict(addresses=addresses_filtered)
+    return JsonResponse(response, safe=False)
+
+
+def write_yamlconfig(request):
+    try:
+        logger.info('Writing YAML config to source file...')
+        src = source.sourceData(request)
+        src.update_source_file()
+        response = helpers.git_get_diff()
+    except Exception:
+        response = helpers.view_exception(Exception)
     return JsonResponse(response, safe=False)
 
 

@@ -40,6 +40,8 @@ urlpatterns = [
          name='object_create_application'),
     path('ajax/object/create/appset/', views.object_create_appset,
          name='object_create_appset'),
+    path('ajax/writeyamlconfig/', views.write_yamlconfig,
+         name='write_yamlconfig'),
     path('ajax/settings/token/gogs/', views.set_token_gogs,
          name='set_token_gogs'),
 ]
