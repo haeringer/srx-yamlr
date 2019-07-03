@@ -44,6 +44,12 @@ body {
     border-radius: 0 !important;
   }
 
+  .spinner-border-sm {
+    -webkit-border-radius: 50% !important;
+    -moz-border-radius: 50% !important;
+    border-radius: 50% !important;
+  }
+
   .swal-button:focus {
     outline: none;
     box-shadow: none;

@@ -93,7 +93,7 @@ $(function() {
         window.location.replace('/load')
     })
     $('#write-config').on('click', function() {
-        writeYamlConfig()
+        writeYamlConfig(this)
     })
     $('#commit-config').on('click', function() {
         alert('nothing here yet')
@@ -729,12 +729,17 @@ function renamePolicy() {
 }
 
 
-function writeYamlConfig() {
-    $('.spinner-container').fadeIn()
+function writeYamlConfig(writeButton) {
+    $(writeButton).prop('disabled', true)
+    $(writeButton).html(
+        `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>`
+    )
+
     $.post('/ajax/writeyamlconfig/')
     .done(function(response) {
-        $('.spinner-container').fadeOut()
         updateGitDiff(response)
+        $(writeButton).prop('disabled', false)
+        $(writeButton).html(`<i class="fas fa-check"></i>`)
     })
     .fail(function(errorThrown) {
         console.log(errorThrown.toString())
