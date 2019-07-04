@@ -7,9 +7,9 @@ from srxapp import forms
 
 app_name = 'srxapp'
 urlpatterns = [
-    path('auth/', include('django.contrib.auth.urls')),
     path('auth/login/', auth_views.LoginView.as_view(
          authentication_form=forms.LoginForm)),  # override default login form
+    path('auth/', include('django.contrib.auth.urls')),
     path('', views.main_view,
          name='main_view'),
     path('load/', TemplateView.as_view(template_name='srxapp/load.html'),
@@ -42,6 +42,10 @@ urlpatterns = [
          name='object_create_appset'),
     path('ajax/writeyamlconfig/', views.write_yamlconfig,
          name='write_yamlconfig'),
+    path('ajax/commitconfig/', views.commit_config,
+         name='commit_config'),
+    path('ajax/checktoken/gogs/', views.check_token_gogs,
+         name='check_token_gogs'),
     path('ajax/settings/token/gogs/', views.set_token_gogs,
          name='set_token_gogs'),
 ]

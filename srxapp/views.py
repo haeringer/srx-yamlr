@@ -4,9 +4,8 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from copy import deepcopy
 
-from srxapp.utils import config, helpers, source
+from srxapp.utils import config, helpers, source, githandler
 
-logger = logging.getLogger(__name__)
 
 @login_required(redirect_field_name=None)
 def load_objects(request):
@@ -16,7 +15,8 @@ def load_objects(request):
         request.session['configdict'] = {}
         request.session['pe_detail'] = {}
 
-        helpers.git_clone_to_workspace()
+        repo = githandler.Repo()
+        repo.git_clone()
 
         src = source.sourceData(request)
         src.read_source_file()
@@ -49,7 +49,7 @@ def main_view(request):
             'token_set': token_set,
         }
     except Exception:
-        logger.error(helpers.view_exception(Exception))
+        helpers.view_exception(Exception)
         raise Http404("HTTP 404 Error")
     return render(request, 'srxapp/main.html', context)
 
@@ -178,7 +178,23 @@ def write_yamlconfig(request):
     try:
         src = source.sourceData(request)
         src.update_source_file()
-        response = helpers.git_get_diff()
+        repo = githandler.Repo()
+        response = repo.git_get_diff()
+    except Exception:
+        response = helpers.view_exception(Exception)
+    return JsonResponse(response, safe=False)
+
+
+def commit_config(request):
+    try:
+        user = User.objects.get(username=request.user.username)
+        token_encrypted = user.usersettings.gogs_tkn
+        token = helpers.decrypt_string(token_encrypted)
+        repo = githandler.Repo()
+        repo.git_commit()
+        response = repo.git_push(token)
+        if response == 'success':
+            request.session['configdict'] = {}
     except Exception:
         response = helpers.view_exception(Exception)
     return JsonResponse(response, safe=False)
@@ -202,6 +218,15 @@ def set_token_gogs(request):
         user.usersettings.gogs_tkn = token_encrypted
         user.save()
         response = dict(return_value=0)
+    except Exception:
+        response = helpers.view_exception(Exception)
+    return JsonResponse(response, safe=False)
+
+
+def check_token_gogs(request):
+    try:
+        user = User.objects.get(username=request.user.username)
+        response = helpers.check_if_token_set(user)
     except Exception:
         response = helpers.view_exception(Exception)
     return JsonResponse(response, safe=False)

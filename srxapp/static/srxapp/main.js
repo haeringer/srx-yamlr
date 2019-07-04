@@ -96,7 +96,7 @@ $(function() {
         writeYamlConfig(this)
     })
     $('#commit-config').on('click', function() {
-        alert('nothing here yet')
+        commitConfig(this)
     })
     $('#edit-yaml').on('click', function() {
         editYaml()
@@ -508,15 +508,13 @@ function updateGitDiff(diff) {
 
         $('#diffcontainer').append(el)
         if (lines[i].startsWith('+ ')) {
-            console.log(el)
-            el.addClass('text-success')
+            el.addClass('custom-diffgreen')
         } else {
-            el.addClass('text-muted')
+            el.addClass('custom-diffgrey')
         }
     }
 
     $('#diffcard').removeClass('d-none')
-    $('#commit-config').prop('disabled', false)
     $('#diffcard-tab').tab('show')
 }
 
@@ -731,15 +729,45 @@ function renamePolicy() {
 
 function writeYamlConfig(writeButton) {
     $(writeButton).prop('disabled', true)
-    $(writeButton).html(
-        `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>`
-    )
+    $(writeButton).html(`<i class="spinner-border spinner-border-sm"></i>`)
 
     $.post('/ajax/writeyamlconfig/')
     .done(function(response) {
         updateGitDiff(response)
         $(writeButton).prop('disabled', false)
         $(writeButton).html(`<i class="fas fa-check"></i>`)
+        enableCommitButton()
+    })
+    .fail(function(errorThrown) {
+        console.log(errorThrown.toString())
+    })
+}
+
+
+function commitConfig(commitButton) {
+    $(commitButton).prop('disabled', true)
+    $(commitButton).html(`<i class="spinner-border spinner-border-sm"></i>`)
+
+    $.post('/ajax/commitconfig/')
+    .done(function(response) {
+        if (response === 'success') {
+            $('#diffcard').addClass('d-none')
+            $('#yamlcard-tab').tab('show')
+            swal({
+                title: 'Success',
+                text: 'Configuration has been committed to Git',
+                icon: 'success',
+            })
+            .then(() => {
+                window.location.replace('/')
+            })
+        } else {
+            alert('Git commit failed because of the following error:\n\n'
+                + JSON.parse(response.error)
+            )
+        }
+        $(commitButton).prop('disabled', false)
+        $(commitButton).html(`<i class="fas fa-angle-double-right"></i>`)
     })
     .fail(function(errorThrown) {
         console.log(errorThrown.toString())
@@ -755,6 +783,7 @@ function settingsHandler() {
     }
 }
 
+
 function setToken(token, url) {
     $('.spinner-container').fadeIn()
     $.post({
@@ -764,12 +793,34 @@ function setToken(token, url) {
         }
     })
     .done(function(response) {
-        console.log(response.return_value)
-        $('#token-set-check').html(
-            `<i class="fas fa-circle mr-2 custom-green"></i>`+
-            `<small>Token has been set</small>`
-        )
         $('.spinner-container').fadeOut()
+
+        if (response.return_value === 0) {
+            $('#token-set-check').html(
+                `<i class="fas fa-circle mr-2 custom-green"></i>`+
+                `<small>Token has been set</small>`
+            )
+        }
+        if ($('#yamlcard').hasClass('d-none') === false) {
+            window.location.replace('/')
+        }
+    })
+    .fail(function(errorThrown) {
+        console.log(errorThrown.toString())
+    })
+}
+
+
+function enableCommitButton() {
+    $.post({
+        url: 'ajax/checktoken/gogs/',
+    })
+    .done(function(response) {
+        if (response === true) {
+            $('#commit-config').prop('disabled', false)
+        } else {
+            swal("To commit the change, please set your Git token first")
+        }
     })
     .fail(function(errorThrown) {
         console.log(errorThrown.toString())
@@ -827,14 +878,4 @@ function resetSearch(item) {
 
 function generateId() {
     return Math.random().toString(36).substr(2, 9).toUpperCase()
-}
-
-/* Check if arrays inside object are empty helper function */
-function currentPolicyIsEmpty(obj) {
-    var i = obj.from.length + obj.to.length + obj.app.length
-    if (i === 0) {
-        return true;
-    } else {
-        return false;
-    }
 }
