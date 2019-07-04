@@ -39,15 +39,21 @@ body {
   }
 
   * {
-    -webkit-border-radius: 0 !important;
-    -moz-border-radius: 0 !important;
     border-radius: 0 !important;
   }
 
-  .spinner-border-sm {
-    -webkit-border-radius: 50% !important;
-    -moz-border-radius: 50% !important;
+  .spinner-border-sm,
+  .swal-icon, .swal-icon--success__ring {
     border-radius: 50% !important;
+  }
+  .swal-icon--success::before {
+    border-radius: 120px 0 0 120px !important;
+  }
+  .swal-icon--success::after {
+    border-radius: 0 120px 120px 0 !important;
+  }
+  .swal-icon--success__line {
+    border-radius: 2px !important;
   }
 
   .swal-button:focus {
@@ -150,6 +156,14 @@ body {
 
   .custom-red {
     color:rgb(252, 84, 84);
+  }
+
+  .custom-diffgrey {
+    color: #aeb7c0;
+  }
+
+  .custom-diffgreen {
+    color: #52c66c;
   }
 
 
