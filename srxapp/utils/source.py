@@ -1,10 +1,13 @@
 import os
-
+import logging
 from ruamel.yaml import YAML
 from uuid import uuid4
 from srxapp.utils import helpers
 from django.core.cache import cache
 
+from srxapp.utils import helpers, const
+
+logger = logging.getLogger(__name__)
 yaml = YAML()
 yaml.indent(mapping=2, sequence=4, offset=2)
 
@@ -17,6 +20,7 @@ class sourceData:
         self.configdict = request.session['configdict']
 
     def read_source_file(self):
+        logger.info('Importing YAML source data...')
         with open(self.filepath, 'r') as sourcefile:
             self.sourcedict = yaml.load(sourcefile)
             cache.set('sourcedict', self.sourcedict)
@@ -40,6 +44,8 @@ class sourceData:
         update_simple_dict('applicationsets')
         update_zone_dict('addresses')
         update_zone_dict('addrsets')
+
+        logger.info('Writing YAML config to source file...')
 
         with open(self.filepath, 'w') as sourcefile:
             yaml.dump(sourcedict, sourcefile)

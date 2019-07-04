@@ -1,4 +1,3 @@
-import logging
 from django.shortcuts import render
 from django.http import JsonResponse, Http404
 from django.contrib.auth.decorators import login_required
@@ -8,7 +7,6 @@ from copy import deepcopy
 from srxapp.utils import config, helpers, source
 
 logger = logging.getLogger(__name__)
-
 
 @login_required(redirect_field_name=None)
 def load_objects(request):
@@ -20,7 +18,6 @@ def load_objects(request):
 
         helpers.git_clone_to_workspace()
 
-        logger.info('Importing YAML source data...')
         src = source.sourceData(request)
         src.read_source_file()
         src.import_zones()
@@ -179,7 +176,6 @@ def filter_objects(request):
 
 def write_yamlconfig(request):
     try:
-        logger.info('Writing YAML config to source file...')
         src = source.sourceData(request)
         src.update_source_file()
         response = helpers.git_get_diff()
