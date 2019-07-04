@@ -21,8 +21,8 @@ Activate the virtual environment:
     vi ~/.bash_profile || ~/.bashrc
 
     # SRX YAMLr Environment variables
-    YM_GIT_URL="https://git.intern.example.com/noc/ansible-junos"; export YM_GIT_URL
-    YM_YAMLFILE="workspace/host_vars/kami-kaze.yml"; export YM_YAMLFILE
+    YM_ANSIBLEREPO="https://git.intern.example.com/noc/ansible-junos"; export YM_ANSIBLEREPO
+    YM_YAMLFILE="host_vars/kami-kaze.yml"; export YM_YAMLFILE
     YM_DJANGOSECRET="!7_k=@u=0fh$rxd#8e@w##eqed63fn%4ph!19+3e+se=-69x7%"; export YM_DJANGOSECRET
     YM_DEBUG='True'; export YM_DEBUG
 
