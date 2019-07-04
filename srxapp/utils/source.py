@@ -2,10 +2,9 @@ import os
 import logging
 from ruamel.yaml import YAML
 from uuid import uuid4
-from srxapp.utils import helpers
 from django.core.cache import cache
 
-from srxapp.utils import helpers, const
+from srxapp.utils import helpers
 
 logger = logging.getLogger(__name__)
 yaml = YAML()
@@ -15,7 +14,9 @@ yaml.indent(mapping=2, sequence=4, offset=2)
 class sourceData:
 
     def __init__(self, request):
-        self.filepath = os.environ.get('YM_YAMLFILE', '')
+        workspace = 'workspace/'+request.user.get_username()
+        yamlfile = os.environ.get('YM_YAMLFILE', '')
+        self.filepath = workspace+'/'+yamlfile
         self.workingdict = request.session['workingdict']
         self.configdict = request.session['configdict']
 
@@ -27,6 +28,9 @@ class sourceData:
 
     def update_source_file(self):
         sourcedict = cache.get('sourcedict')
+        if not sourcedict:
+            self.read_source_file()
+            sourcedict = cache.get('sourcedict')
 
         def update_simple_dict(vartype):
             if vartype in self.configdict:

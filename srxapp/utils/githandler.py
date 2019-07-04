@@ -3,25 +3,26 @@ import shutil
 import git
 import logging
 
-from srxapp.utils import const, helpers
+from srxapp.utils import helpers
 
 logger = logging.getLogger(__name__)
 
 
 class Repo:
 
-    def __init__(self):
+    def __init__(self, request):
         self.remote_repo = os.environ.get('YM_ANSIBLEREPO', '')
-        if os.path.isdir(const.WORKSPACE):
-            self.local_repo = git.Repo(const.WORKSPACE)
+        self.workspace = 'workspace/'+request.user.get_username()
+        if os.path.isdir(self.workspace):
+            self.local_repo = git.Repo(self.workspace)
 
     def git_clone(self):
         try:
-            if os.path.isdir(const.WORKSPACE):
-                shutil.rmtree(const.WORKSPACE)
+            if os.path.isdir(self.workspace):
+                shutil.rmtree(self.workspace)
 
             logger.info('Cloning git repository...')
-            git.Repo.clone_from(self.remote_repo, const.WORKSPACE)
+            git.Repo.clone_from(self.remote_repo, self.workspace)
 
         except Exception:
             helpers.view_exception(Exception)
@@ -46,18 +47,18 @@ class Repo:
 
     def git_push(self, token):
         try:
-            def compose_url_with_token(urlprefix):
+            def compose_address_with_token(urlprefix):
                 repo = self.remote_repo.replace(urlprefix, '')
                 return urlprefix + token + '@' + repo
 
             if self.remote_repo.startswith('https'):
-                address = compose_url_with_token('https://')
+                address = compose_address_with_token('https://')
             else:
-                address = compose_url_with_token('http://')
+                address = compose_address_with_token('http://')
 
             logger.info('Pushing config to {}...'.format(self.remote_repo))
-            self.local_repo.git.fetch()
-            self.local_repo.git.push('-n', address)
+            self.local_repo.git.pull()
+            self.local_repo.git.push(address)
             return 'success'
 
         except Exception:

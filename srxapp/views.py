@@ -15,7 +15,7 @@ def load_objects(request):
         request.session['configdict'] = {}
         request.session['pe_detail'] = {}
 
-        repo = githandler.Repo()
+        repo = githandler.Repo(request)
         repo.git_clone()
 
         src = source.sourceData(request)
@@ -178,7 +178,7 @@ def write_yamlconfig(request):
     try:
         src = source.sourceData(request)
         src.update_source_file()
-        repo = githandler.Repo()
+        repo = githandler.Repo(request)
         response = repo.git_get_diff()
     except Exception:
         response = helpers.view_exception(Exception)
@@ -190,11 +190,13 @@ def commit_config(request):
         user = User.objects.get(username=request.user.username)
         token_encrypted = user.usersettings.gogs_tkn
         token = helpers.decrypt_string(token_encrypted)
-        repo = githandler.Repo()
+
+        repo = githandler.Repo(request)
         repo.git_commit()
         response = repo.git_push(token)
         if response == 'success':
             request.session['configdict'] = {}
+
     except Exception:
         response = helpers.view_exception(Exception)
     return JsonResponse(response, safe=False)
