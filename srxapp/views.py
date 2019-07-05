@@ -10,24 +10,27 @@ from srxapp.utils import config, helpers, source, githandler
 @login_required(redirect_field_name=None)
 def load_objects(request):
     try:
+        response = {}
         # Initialize empty dictionaries for user session
         request.session['workingdict'] = {}
         request.session['configdict'] = {}
         request.session['pe_detail'] = {}
 
         repo = githandler.Repo(request)
-        repo.git_clone()
+        clone_result = repo.git_clone()
 
-        src = source.sourceData(request)
-        src.read_source_file()
-        src.import_zones()
-        src.import_addresses()
-        src.import_addrsets()
-        src.import_applications()
-        src.import_appsets()
-        src.import_policies()
+        if clone_result == 'success':
+            src = source.sourceData(request)
+            src.read_source_file()
+            src.import_zones()
+            src.import_addresses()
+            src.import_addrsets()
+            src.import_applications()
+            src.import_appsets()
+            src.import_policies()
+        else:
+            response = clone_result
 
-        response = {}
     except Exception:
         response = helpers.view_exception(Exception)
     return JsonResponse(response, safe=False)

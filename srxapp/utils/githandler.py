@@ -23,13 +23,15 @@ class Repo:
 
             logger.info('Cloning git repository...')
             git.Repo.clone_from(self.remote_repo, self.workspace)
+            return 'success'
 
         except Exception:
-            helpers.view_exception(Exception)
+            return helpers.view_exception(Exception)
 
     def git_get_diff(self):
         try:
             return self.local_repo.git.diff()
+
         except Exception:
             helpers.view_exception(Exception)
 
