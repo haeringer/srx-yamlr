@@ -1,14 +1,28 @@
 # SRX YAMLr
 
-## Requirements
+## Prerequisites
 
-### Setting up the Python environment
+Install pyenv + pipenv for dependency management.
 
-Install pipenv + pyenv for dependency management and use it to install the packages that are defined in the Pipfile. With pyenv available, the appropriate Python version itself will be installed as well.
+MacOS:
 
-    brew||apt||yum install pyenv pipenv
+    brew install python pyenv pipenv
+
+CentOS:
+
+    curl https://pyenv.run | bash
+    sudo yum install epel-release
+    sudo yum install python-pip
+    sudo -H pip install -U pipenv
+
+## Project installation
+
+When having problems installing the appropriate Python version through pyenv, check the dependencies on https://github.com/pyenv/pyenv/wiki/common-build-problems.
+
     git clone https://gogs.intern.example.com/noc/SRX YAMLr.git
-    cd srx-yamlr
+    cd SRX YAMLr
+    pyenv install 3.7.2
+    pipenv --python ~/.pyenv/versions/3.7.2/bin/python
     pipenv install
 
 Activate the virtual environment:
@@ -16,7 +30,7 @@ Activate the virtual environment:
     pipenv shell
 
 
-### Setting the environment variables for the application
+### Set the environment variables for the application
 
     vi ~/.bash_profile || ~/.bashrc
 
@@ -27,18 +41,23 @@ Activate the virtual environment:
     YM_DEBUG='True'; export YM_DEBUG
 
 
-### Runnig the application
+### When running the application for the first time with a fresh database:
+
+    python manage.py migrate
+    python manage.py createsuperuser
+
+
+## Appendix
+
+### Running the application in a development environment
 
 Activate the virtual environment and start the development server:
 
     cd srx-yamlr
     pipenv shell
-    python manage.py runserver
+    python manage.py runserver 0.0.0.0:8000
 
-When running for the first time with a fresh database:
-
-    python manage.py migrate
-    python manage.py createsuperuser
+Access the application via http://localhost:8000. The admin page can be reached at http://localhost:8000/admin.
 
 
 ### Updating the database after a change to the models
@@ -47,7 +66,6 @@ When running for the first time with a fresh database:
     python manage.py sqlmigrate srxapp 00XX
     python manage.py migrate
 
-
-### Running unit tests
+### Run unit tests
 
     python manage.py test srxapp
