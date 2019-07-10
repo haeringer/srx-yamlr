@@ -9,3 +9,5 @@ media
 workspace
 .DS_Store
 .vscode/settings.json
+.coverage
+htmlcov
