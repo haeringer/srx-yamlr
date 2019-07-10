@@ -9,10 +9,9 @@ logger = logging.getLogger(__name__)
 
 
 class Repo:
-
     def __init__(self, request):
-        self.remote_repo = os.environ.get('YM_ANSIBLEREPO', '')
-        self.workspace = 'workspace/'+request.user.get_username()
+        self.remote_repo = os.environ.get("YM_ANSIBLEREPO", "")
+        self.workspace = "workspace/" + request.user.get_username()
         if os.path.isdir(self.workspace):
             self.local_repo = git.Repo(self.workspace)
 
@@ -21,9 +20,9 @@ class Repo:
             if os.path.isdir(self.workspace):
                 shutil.rmtree(self.workspace)
 
-            logger.info('Cloning git repository...')
+            logger.info("Cloning git repository...")
             git.Repo.clone_from(self.remote_repo, self.workspace)
-            return 'success'
+            return "success"
 
         except Exception:
             return helpers.view_exception(Exception)
@@ -37,10 +36,10 @@ class Repo:
 
     def git_commit(self):
         try:
-            file_to_commit = os.environ.get('YM_YAMLFILE', '')
-            commit_message = 'SRX YAMLr firewall policy change'
+            file_to_commit = os.environ.get("YM_YAMLFILE", "")
+            commit_message = "SRX YAMLr firewall policy change"
 
-            logger.info('Committing config')
+            logger.info("Committing config")
             self.local_repo.git.add(file_to_commit)
             self.local_repo.git.commit(m=commit_message)
 
@@ -49,19 +48,20 @@ class Repo:
 
     def git_push(self, token):
         try:
+
             def compose_address_with_token(urlprefix):
-                repo = self.remote_repo.replace(urlprefix, '')
-                return urlprefix + token + '@' + repo
+                repo = self.remote_repo.replace(urlprefix, "")
+                return urlprefix + token + "@" + repo
 
-            if self.remote_repo.startswith('https'):
-                address = compose_address_with_token('https://')
+            if self.remote_repo.startswith("https"):
+                address = compose_address_with_token("https://")
             else:
-                address = compose_address_with_token('http://')
+                address = compose_address_with_token("http://")
 
-            logger.info('Pushing config to {}...'.format(self.remote_repo))
+            logger.info("Pushing config to {}...".format(self.remote_repo))
             self.local_repo.git.pull()
             self.local_repo.git.push(address)
-            return 'success'
+            return "success"
 
         except Exception:
             return helpers.view_exception(Exception)

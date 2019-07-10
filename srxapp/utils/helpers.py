@@ -19,14 +19,14 @@ def view_exception(Exception):
 
 
 def log_config(configdict):
-    logger.debug('Session configdict:\n  {}\n'.format(configdict))
+    logger.debug("Session configdict:\n  {}\n".format(configdict))
 
 
 def convert_dict_to_yaml(dictionary):
-    with open('/tmp/srx-yamlr_tmp', 'w') as stream:
+    with open("/tmp/srx-yamlr_tmp", "w") as stream:
         yaml.dump(dictionary, stream)
 
-    with open('/tmp/srx-yamlr_tmp', 'r') as stream:
+    with open("/tmp/srx-yamlr_tmp", "r") as stream:
         yamlconfig = stream.read()
 
     return dict(yamlconfig=yamlconfig)
@@ -45,7 +45,7 @@ def dict_with_sorted_list_values(**kwargs):
 
 
 def get_django_secret():
-    secret = os.environ.get('YM_DJANGOSECRET', '')
+    secret = os.environ.get("YM_DJANGOSECRET", "")
     return force_text(secret)
 
 
@@ -54,7 +54,7 @@ def encrypt_string(string):
 
     cipher = encrypt(key, string)
     encoded_cipher = b64encode(cipher)
-    return encoded_cipher.decode('utf-8')
+    return encoded_cipher.decode("utf-8")
 
 
 def decrypt_string(string):
@@ -62,13 +62,13 @@ def decrypt_string(string):
 
     cipher = b64decode(string)
     plain_text = decrypt(key, cipher)
-    return plain_text.decode('utf-8')
+    return plain_text.decode("utf-8")
 
 
 def check_if_token_set(user):
     dbstring = user.usersettings.gogs_tkn
 
-    if dbstring == '':
+    if dbstring == "":
         return False
     else:
         return True
