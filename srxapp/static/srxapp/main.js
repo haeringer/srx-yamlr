@@ -1,457 +1,457 @@
-
 var currentPolicy = {
-    policyname: [],
-    from: [],
-    to: [],
-    app: [],
+  policyname: [],
+  from: [],
+  to: [],
+  app: [],
 }
 
 /*
-* Run on page load
-*/
-$(window).on('load', function() {
-    var url = new URL(window.location.href)
-    if (url.search === '?loadpolicy') {
-        getExistingPolicyDetails()
-        getYamlConfig()
-    } else {
-        var nameId = generateId()
-        currentPolicy.policyname = 'allow-'+nameId+'-to-'+nameId
-        getYamlConfig()
-    }
+ * Run on page load
+ */
+$(window).on("load", function() {
+  var url = new URL(window.location.href)
+  if (url.search === "?loadpolicy") {
+    getExistingPolicyDetails()
+    getYamlConfig()
+  } else {
+    var nameId = generateId()
+    currentPolicy.policyname = "allow-" + nameId + "-to-" + nameId
+    getYamlConfig()
+  }
 })
-
 
 // Make ajax POST requests work with Django's CSRF protection
 $.ajaxSetup({
-    beforeSend: function(xhr, settings) {
-        function getCookie(name) {
-            var cookieValue = null
-            if (document.cookie && document.cookie != '') {
-                var cookies = document.cookie.split(';')
-                for (var i = 0; i < cookies.length; i++) {
-                    var cookie = jQuery.trim(cookies[i])
-                    if (cookie.substring(0, name.length + 1) == (name + '=')) {
-                        cookieValue = decodeURIComponent(cookie.substring(
-                                                         name.length + 1))
-                        break;
-                    }
-                }
-            }
-            return cookieValue;
+  beforeSend: function(xhr, settings) {
+    function getCookie(name) {
+      var cookieValue = null
+      if (document.cookie && document.cookie != "") {
+        var cookies = document.cookie.split(";")
+        for (var i = 0; i < cookies.length; i++) {
+          var cookie = jQuery.trim(cookies[i])
+          if (cookie.substring(0, name.length + 1) == name + "=") {
+            cookieValue = decodeURIComponent(cookie.substring(name.length + 1))
+            break
+          }
         }
-        if (!(/^http:.*/.test(settings.url) ||
-              /^https:.*/.test(settings.url))) {
-            xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'))
-        }
+      }
+      return cookieValue
     }
+    if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
+      xhr.setRequestHeader("X-CSRFToken", getCookie("csrftoken"))
+    }
+  },
 })
 
 /*
-* Event listeners etc. - run once DOM is ready
-*/
+ * Event listeners etc. - run once DOM is ready
+ */
 $(function() {
+  // Search Forms - use .on 'click' with parent selected to recognize
+  // events also on dynamically added items
+  $("#search-forms").on("click", ".search-results-item", function() {
+    addObjPreBuild(this)
+  })
+  $(".list-group").on("click", ".lgi-icon-close", function() {
+    var list_item = this.parentNode.parentNode
+    listObjectHandler(list_item)
+  })
 
-    // Search Forms - use .on 'click' with parent selected to recognize
-    // events also on dynamically added items
-    $('#search-forms').on('click', '.search-results-item', function() {
-        addObjPreBuild(this)
-    })
-    $('.list-group').on('click', '.lgi-icon-close', function() {
-	    var list_item = this.parentNode.parentNode
-        listObjectHandler(list_item)
-    })
+  // Create Object Modal related functions
+  $("#create-object-dropdown a").on("click", function() {
+    showCreateObjectForm(this)
+  })
+  $("#adrset-form-control-zone").on("click", function() {
+    filterObjects(this)
+  })
+  $("button#create-object-save").click(function() {
+    createObjectHandler()
+  })
 
-    // Create Object Modal related functions
-    $('#create-object-dropdown a').on('click', function () {
-        showCreateObjectForm(this)
-    })
-    $('#adrset-form-control-zone').on('click', function() {
-        filterObjects(this)
-    })
-    $("button#create-object-save").click(function() {
-        createObjectHandler()
-    })
+  // Rename Policy Modal
+  $("button#rename-policy-save").on("click", function() {
+    renamePolicy()
+  })
+  // Settings Modal
+  $("button#settings-save").click(function() {
+    settingsHandler()
+  })
 
-    // Rename Policy Modal
-    $("button#rename-policy-save").on('click', function() {
-        renamePolicy()
-    })
-    // Settings Modal
-    $("button#settings-save").click(function() {
-        settingsHandler()
-    })
+  // Buttons
+  $("#rename-policy").on("click", function() {
+    renamePolicyFormSetup()
+  })
+  $("#add-policy").on("click", function() {
+    window.location.replace("/")
+  })
+  $("#clear-config").on("click", function() {
+    window.location.replace("/load")
+  })
+  $("#write-config").on("click", function() {
+    writeYamlConfig(this)
+  })
+  $("#commit-config").on("click", function() {
+    commitConfig(this)
+  })
+  $("#edit-yaml").on("click", function() {
+    editYaml()
+  })
 
-    // Buttons
-    $('#rename-policy').on('click', function() {
-        renamePolicyFormSetup()
-    })
-    $('#add-policy').on('click', function() {
-        window.location.replace('/')
-    })
-    $('#clear-config').on('click', function() {
-        window.location.replace('/load')
-    })
-    $('#write-config').on('click', function() {
-        writeYamlConfig(this)
-    })
-    $('#commit-config').on('click', function() {
-        commitConfig(this)
-    })
-    $('#edit-yaml').on('click', function() {
-        editYaml()
-    })
+  $("#output-close").on("click", function() {
+    $("#output-modal").modal("toggle")
+  })
 
-    $('#output-close').on('click', function() {
-        $('#output-modal').modal('toggle')
-    })
-
-    $('[data-toggle="tooltip"]').tooltip({
-        trigger : 'hover'
-    })
-
+  $('[data-toggle="tooltip"]').tooltip({
+    trigger: "hover",
+  })
 })
 
-
 function getYamlConfig() {
-    $.post('/ajax/getyamlconfig/')
+  $.post("/ajax/getyamlconfig/")
     .done(function(response) {
-        check_response_backend_error(response)
-        updateYaml(response.yamlconfig)
+      check_response_backend_error(response)
+      updateYaml(response.yamlconfig)
     })
     .fail(function(errorThrown) {
-        console.log(errorThrown.toString())
+      console.log(errorThrown.toString())
     })
 }
 
 function getExistingPolicyDetails() {
-    $.post('/ajax/loadpolicy/')
+  $.post("/ajax/loadpolicy/")
     .done(function(response) {
-        currentPolicy.policyname = response.pname
-        loadExistingPolicy(response)
-        console.log(currentPolicy)
-        console.log(response)
+      currentPolicy.policyname = response.pname
+      loadExistingPolicy(response)
+      console.log(currentPolicy)
+      console.log(response)
     })
     .fail(function(errorThrown) {
-        console.log(errorThrown.toString())
+      console.log(errorThrown.toString())
     })
 }
 
 function loadExistingPolicy(pe_detail) {
-
-    function addObjFromExistingPolicy(pd, objtype, direction=null) {
-        for (var i = 0; i < pd.length; i++) {
-            var obj = pd[i]
-            obj.type = objtype
-            if (direction !== null) {
-                obj.direction = direction
-            }
-            addObjExisting(obj)
-        }
+  function addObjFromExistingPolicy(pd, objtype, direction = null) {
+    for (var i = 0; i < pd.length; i++) {
+      var obj = pd[i]
+      obj.type = objtype
+      if (direction !== null) {
+        obj.direction = direction
+      }
+      addObjExisting(obj)
     }
-    addObjFromExistingPolicy(pe_detail.srcaddresses, 'address', 'from')
-    addObjFromExistingPolicy(pe_detail.srcaddrsets, 'addrset', 'from')
-    addObjFromExistingPolicy(pe_detail.destaddresses, 'address', 'to')
-    addObjFromExistingPolicy(pe_detail.destaddrsets, 'addrset', 'to')
-    addObjFromExistingPolicy(pe_detail.applications, 'application')
-    addObjFromExistingPolicy(pe_detail.appsets, 'appset')
+  }
+  addObjFromExistingPolicy(pe_detail.srcaddresses, "address", "from")
+  addObjFromExistingPolicy(pe_detail.srcaddrsets, "addrset", "from")
+  addObjFromExistingPolicy(pe_detail.destaddresses, "address", "to")
+  addObjFromExistingPolicy(pe_detail.destaddrsets, "addrset", "to")
+  addObjFromExistingPolicy(pe_detail.applications, "application")
+  addObjFromExistingPolicy(pe_detail.appsets, "appset")
 }
 
+function addObjPreBuild(searchResultElement) {
+  var searchResultObj = {
+    type: searchResultElement.id.split("_", 3).pop(),
+    oid: searchResultElement.id.split("_", 2).pop(),
+    direction: searchResultElement.id.split("_").shift(),
+    name: $(searchResultElement)
+      .find(".obj-name")
+      .html(),
+    val: $(searchResultElement)
+      .find(".obj-val")
+      .html(),
+    zone: $(searchResultElement)
+      .find(".obj-zone")
+      .html(),
+  }
 
-function addObjPreBuild (searchResultElement) {
-    var searchResultObj = {
-        type: searchResultElement.id.split("_", 3).pop(),
-        oid: searchResultElement.id.split("_", 2).pop(),
-        direction: searchResultElement.id.split("_").shift(),
-        name: $(searchResultElement).find('.obj-name').html(),
-        val: $(searchResultElement).find('.obj-val').html(),
-        zone: $(searchResultElement).find('.obj-zone').html(),
-    }
-
-    resetSearch(searchResultElement)
-    addObj(searchResultObj, true)
+  resetSearch(searchResultElement)
+  addObj(searchResultObj, true)
 }
-
 
 function addObjExisting(obj) {
-    if (obj.type === 'address' ||
-        obj.type === 'addrset') {
-        const addrObj = new AddrObj(obj)
-        addrObj.blend_in_zone()
-        addrObj.add_object_to_list()
-    } else if (obj.type === 'application' ||
-               obj.type === 'appset') {
-        const appObj = new AppObj(obj)
-        appObj.add_object_to_list()
-    }
+  if (obj.type === "address" || obj.type === "addrset") {
+    const addrObj = new AddrObj(obj)
+    addrObj.blend_in_zone()
+    addrObj.add_object_to_list()
+  } else if (obj.type === "application" || obj.type === "appset") {
+    const appObj = new AppObj(obj)
+    appObj.add_object_to_list()
+  }
 }
 
 function addObj(obj) {
-    if (obj.type === 'address' ||
-        obj.type === 'addrset') {
-        const addrObj = new AddrObj(obj)
-        if (addrObj.validate_policy_logic() === true) {
-            addrObj.ajax_add_address_to_policy_yaml()
-        }
-    } else if (obj.type === 'application' ||
-               obj.type === 'appset') {
-        const appObj = new AppObj(obj)
-        if (appObj.validate_application_use() === true) {
-            appObj.ajax_add_application_to_policy_yaml()
-        }
+  if (obj.type === "address" || obj.type === "addrset") {
+    const addrObj = new AddrObj(obj)
+    if (addrObj.validate_policy_logic() === true) {
+      addrObj.ajax_add_address_to_policy_yaml()
     }
-    $('#rename-policy, #add-policy').prop('disabled', false)
+  } else if (obj.type === "application" || obj.type === "appset") {
+    const appObj = new AppObj(obj)
+    if (appObj.validate_application_use() === true) {
+      appObj.ajax_add_application_to_policy_yaml()
+    }
+  }
+  $("#rename-policy, #add-policy").prop("disabled", false)
 }
 
-
 class AddrObj {
-    constructor(obj) {
-        this.obj = obj
+  constructor(obj) {
+    this.obj = obj
+  }
+
+  validate_policy_logic() {
+    var errorDifferent = "Can't use objects from different zones!"
+    var errorZone = "Can't use the same zone for source and destination!"
+    var errorUsed = "Object already in use!"
+
+    var presentZone = $("#added-zone-body-" + this.obj.direction).html()
+    var thisZoneContainerCard = $("#added-zone-" + this.obj.direction)
+
+    if (this.obj.direction === "from") {
+      var otherZone = $("#added-zone-body-to").html()
+      var objUsed = currentPolicy.from.includes(this.obj.name)
+    } else if (this.obj.direction === "to") {
+      var otherZone = $("#added-zone-body-from").html()
+      var objUsed = currentPolicy.to.includes(this.obj.name)
     }
 
-    validate_policy_logic() {
-        var errorDifferent = "Can't use objects from different zones!"
-        var errorZone = "Can't use the same zone for source and destination!"
-        var errorUsed = "Object already in use!"
+    if (this.obj.zone === otherZone) {
+      swal(errorZone)
+    } else if (
+      !thisZoneContainerCard.hasClass("d-none") &&
+      this.obj.zone != presentZone
+    ) {
+      swal(errorDifferent)
+    } else if (objUsed === true) {
+      swal(errorUsed)
+    } else {
+      return true
+    }
+  }
 
-        var presentZone = $('#added-zone-body-'+this.obj.direction).html()
-        var thisZoneContainerCard = $('#added-zone-'+this.obj.direction)
+  ajax_add_address_to_policy_yaml() {
+    var thisParent = this
 
-        if (this.obj.direction === 'from') {
-            var otherZone = $('#added-zone-body-to').html()
-            var objUsed = currentPolicy.from.includes(this.obj.name)
-        } else if (this.obj.direction === 'to') {
-            var otherZone = $('#added-zone-body-from').html()
-            var objUsed = currentPolicy.to.includes(this.obj.name)
-        }
-
-        if (this.obj.zone === otherZone) {
-            swal(errorZone)
-        } else if (!thisZoneContainerCard.hasClass('d-none') &&
-                  (this.obj.zone != presentZone)) {
-            swal(errorDifferent)
-        } else if (objUsed === true) {
-            swal(errorUsed)
+    $.post("/ajax/policy/add/address/", {
+      policyname: currentPolicy.policyname,
+      direction: this.obj.direction,
+      objname: this.obj.name,
+      zone: this.obj.zone,
+    })
+      .done(function(response) {
+        if (response !== "p_exists") {
+          thisParent.blend_in_zone()
+          thisParent.add_object_to_list()
+          check_response_backend_error(response)
+          updateYaml(response.yamlconfig)
         } else {
-            return true;
+          swal({
+            title: "Policy already exists",
+            text: "Loading the existing policy for editing...",
+            icon: "warning",
+          }).then(() => {
+            window.location.replace("/?loadpolicy")
+          })
         }
+      })
+      .fail(function(errorThrown) {
+        console.log(errorThrown.toString())
+      })
+  }
+
+  blend_in_zone() {
+    var zoneContainerCard = $("#added-zone-" + this.obj.direction)
+    var zoneBody = $("#added-zone-body-" + this.obj.direction)
+
+    if (zoneContainerCard.hasClass("d-none")) {
+      zoneContainerCard.removeClass("d-none").show()
+      zoneBody.html(this.obj.zone)
+    } else {
+      return
+    }
+  }
+
+  add_object_to_list() {
+    var addedObj = {
+      obj: this.obj,
+      container: $("#added-obj-" + this.obj.direction),
+      list: $("#added-list-" + this.obj.direction),
+      id:
+        this.obj.direction +
+        "_" +
+        this.obj.oid +
+        "_" +
+        this.obj.type +
+        "_added",
+      zone: this.obj.zone,
     }
 
-    ajax_add_address_to_policy_yaml() {
-        var thisParent = this
+    objectlist_append_html(addedObj)
 
-        $.post('/ajax/policy/add/address/', {
-            policyname: currentPolicy.policyname,
-            direction: this.obj.direction,
-            objname: this.obj.name,
-            zone: this.obj.zone,
-        })
-        .done(function(response) {
-            if (response !== 'p_exists') {
-                thisParent.blend_in_zone()
-                thisParent.add_object_to_list()
-                check_response_backend_error(response)
-                updateYaml(response.yamlconfig)
-            } else {
-                swal({
-                    title: 'Policy already exists',
-                    text: 'Loading the existing policy for editing...',
-                    icon: 'warning',
-                })
-                .then(() => {
-                    window.location.replace('/?loadpolicy')
-                })
-            }
-        })
-        .fail(function(errorThrown) {
-            console.log(errorThrown.toString())
-        })
+    if (this.obj.direction === "from") {
+      currentPolicy.from.push(this.obj.name)
+    } else if (this.obj.direction === "to") {
+      currentPolicy.to.push(this.obj.name)
     }
-
-    blend_in_zone() {
-        var zoneContainerCard = $('#added-zone-'+this.obj.direction)
-        var zoneBody = $('#added-zone-body-'+this.obj.direction)
-
-        if (zoneContainerCard.hasClass('d-none')) {
-            zoneContainerCard.removeClass('d-none').show()
-            zoneBody.html(this.obj.zone)
-        } else {
-            return;
-        }
-    }
-
-    add_object_to_list() {
-        var addedObj = {
-            obj: this.obj,
-            container: $('#added-obj-'+this.obj.direction),
-            list: $('#added-list-'+this.obj.direction),
-            id: this.obj.direction+'_'+this.obj.oid+'_'+this.obj.type+'_added',
-            zone: this.obj.zone,
-        }
-
-        objectlist_append_html(addedObj)
-
-        if (this.obj.direction === 'from') {
-            currentPolicy.from.push(this.obj.name)
-        } else if (this.obj.direction === 'to') {
-            currentPolicy.to.push(this.obj.name)
-        }
-    }
+  }
 }
 
 class AppObj {
-    constructor(obj) {
-        this.obj = obj
+  constructor(obj) {
+    this.obj = obj
+  }
+
+  validate_application_use() {
+    if (currentPolicy.app.includes(this.obj.name)) {
+      swal("Object already in use!")
+    } else {
+      return true
+    }
+  }
+
+  ajax_add_application_to_policy_yaml() {
+    var thisParent = this
+    $.post("/ajax/policy/add/application/", {
+      policyname: currentPolicy.policyname,
+      objname: this.obj.name,
+    })
+      .done(function(response) {
+        thisParent.add_object_to_list()
+        check_response_backend_error(response)
+        updateYaml(response.yamlconfig)
+      })
+      .fail(function(errorThrown) {
+        console.log(errorThrown.toString())
+      })
+  }
+
+  add_object_to_list() {
+    var addedObj = {
+      obj: this.obj,
+      container: $("#added-obj-app"),
+      list: $("#added-list-app"),
+      id: "app_" + this.obj.oid + "_" + this.obj.type + "_added",
     }
 
-    validate_application_use() {
-        if (currentPolicy.app.includes(this.obj.name)) {
-            swal("Object already in use!")
-        } else {
-            return true;
-        }
-    }
-
-    ajax_add_application_to_policy_yaml() {
-        var thisParent = this
-        $.post('/ajax/policy/add/application/', {
-            policyname: currentPolicy.policyname,
-            objname: this.obj.name,
-        })
-        .done(function(response) {
-            thisParent.add_object_to_list()
-            check_response_backend_error(response)
-            updateYaml(response.yamlconfig)
-        })
-        .fail(function(errorThrown) {
-            console.log(errorThrown.toString())
-        })
-    }
-
-    add_object_to_list() {
-        var addedObj = {
-            obj: this.obj,
-            container: $('#added-obj-app'),
-            list: $('#added-list-app'),
-            id: 'app_'+this.obj.oid+'_'+this.obj.type+'_added',
-        }
-
-        objectlist_append_html(addedObj)
-        currentPolicy.app.push(this.obj.name)
-    }
+    objectlist_append_html(addedObj)
+    currentPolicy.app.push(this.obj.name)
+  }
 }
-
 
 function listObjectHandler(htmlObj) {
-    var objtype = htmlObj.id.split('_', 3).pop()
+  var objtype = htmlObj.id.split("_", 3).pop()
 
-    if (objtype === 'address' || objtype === 'addrset') {
-        const listAddrObj = new ListAddrObj(htmlObj)
-        listAddrObj.ajax_delete_address_from_policy_yaml()
-        listAddrObj.delete_object_from_list()
-    } else if (objtype === 'application' || objtype === 'appset') {
-        const listAppObj = new ListAppObj(htmlObj)
-        listAppObj.ajax_delete_application_from_policy_yaml()
-        listAppObj.delete_object_from_list()
-    }
+  if (objtype === "address" || objtype === "addrset") {
+    const listAddrObj = new ListAddrObj(htmlObj)
+    listAddrObj.ajax_delete_address_from_policy_yaml()
+    listAddrObj.delete_object_from_list()
+  } else if (objtype === "application" || objtype === "appset") {
+    const listAppObj = new ListAppObj(htmlObj)
+    listAppObj.ajax_delete_application_from_policy_yaml()
+    listAppObj.delete_object_from_list()
+  }
 }
-
 
 class ListAddrObj {
-    constructor(list_item) {
-        this.obj = list_item
-        this.direction = list_item.id.split('_').shift()
-        this.name = $(list_item).find('.lgi-name').html()
-        this.zone = $(list_item).find('.lgi-zone').html()
+  constructor(list_item) {
+    this.obj = list_item
+    this.direction = list_item.id.split("_").shift()
+    this.name = $(list_item)
+      .find(".lgi-name")
+      .html()
+    this.zone = $(list_item)
+      .find(".lgi-zone")
+      .html()
+  }
+
+  ajax_delete_address_from_policy_yaml() {
+    $.post("/ajax/policy/delete/address/", {
+      policyname: currentPolicy.policyname,
+      direction: this.direction,
+      objname: this.name,
+      zone: this.zone,
+    })
+      .done(function(response) {
+        check_response_backend_error(response)
+        updateYaml(response.yamlconfig)
+      })
+      .fail(function(errorThrown) {
+        console.log(errorThrown.toString())
+      })
+  }
+
+  delete_object_from_list() {
+    var zoneContainerCard = $("#added-zone-" + this.direction)
+    var zoneBody = $("#added-zone-body-" + this.direction)
+    var objectContainer = $("#added-obj-" + this.direction)
+    var objectList = $("#added-list-" + this.direction)
+
+    $("#" + this.obj.id).remove()
+
+    if (!objectList.has("li").length) {
+      objectContainer.addClass("d-none")
+      zoneContainerCard.fadeOut("fast")
+      setTimeout(function() {
+        zoneContainerCard.addClass("d-none")
+        zoneBody.html("")
+      }, 200)
     }
 
-    ajax_delete_address_from_policy_yaml() {
-        $.post('/ajax/policy/delete/address/', {
-            policyname: currentPolicy.policyname,
-            direction: this.direction,
-            objname: this.name,
-            zone: this.zone,
-        })
-        .done(function(response) {
-            check_response_backend_error(response)
-            updateYaml(response.yamlconfig)
-        })
-        .fail(function(errorThrown) {
-            console.log(errorThrown.toString())
-        })
+    if (this.direction === "from") {
+      var index = currentPolicy.from.indexOf(this.name)
+      if (index > -1) {
+        currentPolicy.from.splice(index, 1)
+      }
+    } else if (this.direction === "to") {
+      var index = currentPolicy.to.indexOf(this.name)
+      if (index > -1) {
+        currentPolicy.to.splice(index, 1)
+      }
     }
-
-    delete_object_from_list() {
-        var zoneContainerCard = $('#added-zone-'+this.direction)
-        var zoneBody = $('#added-zone-body-'+this.direction)
-        var objectContainer = $('#added-obj-'+this.direction)
-        var objectList = $('#added-list-'+this.direction)
-
-        $('#'+this.obj.id).remove()
-
-        if (!objectList.has('li').length) {
-            objectContainer.addClass('d-none')
-            zoneContainerCard.fadeOut('fast')
-            setTimeout(function(){
-                zoneContainerCard.addClass('d-none')
-                zoneBody.html('')
-            }, 200)
-        }
-
-        if (this.direction === 'from') {
-            var index = currentPolicy.from.indexOf(this.name)
-            if (index > -1) {
-                currentPolicy.from.splice(index, 1)
-            }
-        } else if (this.direction === 'to') {
-            var index = currentPolicy.to.indexOf(this.name)
-            if (index > -1) {
-                currentPolicy.to.splice(index, 1)
-            }
-        }
-    }
+  }
 }
-
 
 class ListAppObj {
-    constructor(list_item) {
-        this.obj = list_item
-        this.objectid = list_item.id.split('_', 2).pop()
-        this.name = $(list_item).find('.lgi-name').html()
+  constructor(list_item) {
+    this.obj = list_item
+    this.objectid = list_item.id.split("_", 2).pop()
+    this.name = $(list_item)
+      .find(".lgi-name")
+      .html()
+  }
+
+  ajax_delete_application_from_policy_yaml() {
+    $.post("/ajax/policy/delete/application/", {
+      policyname: currentPolicy.policyname,
+      objname: this.name,
+    })
+      .done(function(response) {
+        check_response_backend_error(response)
+        updateYaml(response.yamlconfig)
+      })
+      .fail(function(errorThrown) {
+        console.log(errorThrown.toString())
+      })
+  }
+
+  delete_object_from_list() {
+    $("#" + this.obj.id).remove()
+    if (!$("#added-list-app").has("li").length) {
+      $("#added-obj-app").addClass("d-none")
     }
 
-    ajax_delete_application_from_policy_yaml() {
-        $.post('/ajax/policy/delete/application/', {
-            policyname: currentPolicy.policyname,
-            objname: this.name,
-        })
-        .done(function(response) {
-            check_response_backend_error(response)
-            updateYaml(response.yamlconfig)
-        })
-        .fail(function(errorThrown) {
-            console.log(errorThrown.toString())
-        })
+    var index = currentPolicy.app.indexOf(this.name)
+    if (index > -1) {
+      currentPolicy.app.splice(index, 1)
     }
-
-    delete_object_from_list() {
-        $('#'+this.obj.id).remove()
-        if (!$('#added-list-app').has('li').length) {
-            $('#added-obj-app').addClass('d-none')
-        }
-
-        var index = currentPolicy.app.indexOf(this.name)
-        if (index > -1) {
-            currentPolicy.app.splice(index, 1)
-        }
-    }
+  }
 }
 
-
 function objectlist_append_html(addedObj) {
-    addedObj.container.removeClass('d-none')
-    addedObj.list.append(
-        `<li class="list-group-item" id="${addedObj.id}">
+  addedObj.container.removeClass("d-none")
+  addedObj.list.append(
+    `<li class="list-group-item" id="${addedObj.id}">
           <div class="row">
             <div class="col-auto mr-auto lgi-name">${addedObj.obj.name}</div>
             <div class="lgi-icon-close pr-2">
@@ -465,415 +465,404 @@ function objectlist_append_html(addedObj) {
             </div>
           </div>
         </li>`
-    )
-    if (addedObj.zone !== null) {
-        $('#'+addedObj.id).find('.lgi-icon-close').after(
-            `<div class="d-none lgi-zone">${addedObj.zone}</div>`
-        )
-    }
-    $('#'+addedObj.id).hide().fadeIn('fast')
+  )
+  if (addedObj.zone !== null) {
+    $("#" + addedObj.id)
+      .find(".lgi-icon-close")
+      .after(`<div class="d-none lgi-zone">${addedObj.zone}</div>`)
+  }
+  $("#" + addedObj.id)
+    .hide()
+    .fadeIn("fast")
 }
-
 
 function check_response_backend_error(response) {
-    if (response.error != null) {
-        alert('Policy update failed because of the following error:\n\n'
-            + JSON.parse(response.error)
-        )
-    }
+  if (response.error != null) {
+    alert(
+      "Policy update failed because of the following error:\n\n" +
+        JSON.parse(response.error)
+    )
+  }
 }
-
 
 function updateYaml(yamlconfig) {
-    $('#yamlcontainer').html(yamlconfig)
-    $('#yamlcard').removeClass('d-none')
-    if (yamlconfig === '{}\n') {
-        $('#yamlcard').addClass('d-none')
-    }
-    $('#yamlcard-tab').tab('show')
-    $('#diffcard').addClass('d-none')
-    $('#commit-config').prop('disabled', true)
+  $("#yamlcontainer").html(yamlconfig)
+  $("#yamlcard").removeClass("d-none")
+  if (yamlconfig === "{}\n") {
+    $("#yamlcard").addClass("d-none")
+  }
+  $("#yamlcard-tab").tab("show")
+  $("#diffcard").addClass("d-none")
+  $("#commit-config").prop("disabled", true)
 }
-
 
 function updateGitDiff(diff) {
-    $('#diffcontainer').html('')
-    var lines = diff.split('\n')
-    lines.splice(0,2)
+  $("#diffcontainer").html("")
+  var lines = diff.split("\n")
+  lines.splice(0, 2)
 
-    for (i = 0; i < lines.length; i++) {
-        var el = $('<div>'+lines[i]+'\n'+'</div>')
+  for (i = 0; i < lines.length; i++) {
+    var el = $("<div>" + lines[i] + "\n" + "</div>")
 
-        $('#diffcontainer').append(el)
-        if (lines[i].startsWith('+ ')) {
-            el.addClass('custom-diffgreen')
-        } else {
-            el.addClass('custom-diffgrey')
-        }
+    $("#diffcontainer").append(el)
+    if (lines[i].startsWith("+ ")) {
+      el.addClass("custom-diffgreen")
+    } else {
+      el.addClass("custom-diffgrey")
     }
+  }
 
-    $('#diffcard').removeClass('d-none')
-    $('#diffcard-tab').tab('show')
+  $("#diffcard").removeClass("d-none")
+  $("#diffcard-tab").tab("show")
 }
-
 
 function filterObjects(zoneselector) {
-    var selectedzone = $(zoneselector).val()
+  var selectedzone = $(zoneselector).val()
 
-    $.get({
-        url: '/ajax/filterobjects/',
-        data: { selectedzone: selectedzone },
-    })
+  $.get({
+    url: "/ajax/filterobjects/",
+    data: { selectedzone: selectedzone },
+  })
     .done(function(response) {
-        if (response === null) {
-            return;
-        }
-        if (Array.isArray(response.addresses) === true) {
-            $('#adrset-form-control-objects').html('')
-            $.each(response.addresses, function(key, value) {
-                $('#adrset-form-control-objects')
-                    .append($('<option class="small">', { value : key })
-                    .text(value))
-            })
-        } else {
-            $('#adrset-form-control-objects').html(
-                `<option class="small">${ response.addresses }</option>`
-            )
-        }
+      if (response === null) {
+        return
+      }
+      if (Array.isArray(response.addresses) === true) {
+        $("#adrset-form-control-objects").html("")
+        $.each(response.addresses, function(key, value) {
+          $("#adrset-form-control-objects").append(
+            $('<option class="small">', { value: key }).text(value)
+          )
+        })
+      } else {
+        $("#adrset-form-control-objects").html(
+          `<option class="small">${response.addresses}</option>`
+        )
+      }
     })
     .fail(function(errorThrown) {
-        console.log(errorThrown.toString())
+      console.log(errorThrown.toString())
     })
 }
-
 
 function showCreateObjectForm(dropdown) {
-    var selectedObj = $(dropdown).text()
+  var selectedObj = $(dropdown).text()
 
-    $('#create-form-container').find('form').addClass('d-none')
+  $("#create-form-container")
+    .find("form")
+    .addClass("d-none")
 
-    if (selectedObj === 'Address') {
-        $('#address-form').removeClass('d-none')
-    } else if (selectedObj === 'Address Set') {
-        $('#adrset-form').removeClass('d-none')
-    } else if (selectedObj === 'Application') {
-        $('#application-form').removeClass('d-none')
-    } else if (selectedObj === 'Application Set') {
-        $('#appset-form').removeClass('d-none')
-    }
+  if (selectedObj === "Address") {
+    $("#address-form").removeClass("d-none")
+  } else if (selectedObj === "Address Set") {
+    $("#adrset-form").removeClass("d-none")
+  } else if (selectedObj === "Application") {
+    $("#application-form").removeClass("d-none")
+  } else if (selectedObj === "Application Set") {
+    $("#appset-form").removeClass("d-none")
+  }
 }
-
 
 function createObjectHandler() {
-    var formContainer = document.getElementById('create-form-container')
-    var forms = formContainer.querySelectorAll('.form-class')
-    var formType
-    forms.forEach(function(element) {
-        if (element.classList.contains('d-none') == false) {
-            formType = element.id
-        }
-    })
-    if (formType === 'address-form') {
-        createAddress()
-    } else if (formType === 'adrset-form') {
-        createAddrset()
-    } else if (formType === 'application-form') {
-        createApplication()
-    } else if (formType === 'appset-form') {
-        createAppset()
+  var formContainer = document.getElementById("create-form-container")
+  var forms = formContainer.querySelectorAll(".form-class")
+  var formType
+  forms.forEach(function(element) {
+    if (element.classList.contains("d-none") == false) {
+      formType = element.id
     }
+  })
+  if (formType === "address-form") {
+    createAddress()
+  } else if (formType === "adrset-form") {
+    createAddrset()
+  } else if (formType === "application-form") {
+    createApplication()
+  } else if (formType === "appset-form") {
+    createAppset()
+  }
 }
-
 
 function createAddress() {
-    var zone = $("select#address-form-control-zone").val()
-    var name = $("input#address-form-control-name").val()
-    var value = $("input#address-form-control-ip").val()
+  var zone = $("select#address-form-control-zone").val()
+  var name = $("input#address-form-control-name").val()
+  var value = $("input#address-form-control-ip").val()
 
-    if (zone === 'Choose Zone...' || name === '' || value === '') {
-        showCreateFormError($('#address-form-alert'))
-        return false;
-    }
-    hideModalAndFadeInSpinner($('#create-object-modal'))
-    $.post({
-        url: '/ajax/object/create/address/',
-        data: {
-            zone: zone,
-            name: name,
-            value: value,
-        }
-    })
+  if (zone === "Choose Zone..." || name === "" || value === "") {
+    showCreateFormError($("#address-form-alert"))
+    return false
+  }
+  hideModalAndFadeInSpinner($("#create-object-modal"))
+  $.post({
+    url: "/ajax/object/create/address/",
+    data: {
+      zone: zone,
+      name: name,
+      value: value,
+    },
+  })
     .done(function(response) {
-        reloadAndFadeOutSpinner()
-        updateYaml(response.yamlconfig)
+      reloadAndFadeOutSpinner()
+      updateYaml(response.yamlconfig)
     })
     .fail(function(errorThrown) {
-        console.log(errorThrown.toString())
+      console.log(errorThrown.toString())
     })
 }
-
 
 function createAddrset() {
-    var zone = $("select#adrset-form-control-zone").val()
-    var name = $("input#adrset-form-control-name").val()
-    var valuelist = $("#adrset-form-control-objects").val()
+  var zone = $("select#adrset-form-control-zone").val()
+  var name = $("input#adrset-form-control-name").val()
+  var valuelist = $("#adrset-form-control-objects").val()
 
-    if (zone === 'Choose Zone...' || name === '' || valuelist === '') {
-        showCreateFormError($('#addrset-form-alert'))
-        return false;
-    }
-    hideModalAndFadeInSpinner($('#create-object-modal'))
-    $.post({
-        url: '/ajax/object/create/addrset/',
-        data: {
-            zone: zone,
-            name: name,
-            valuelist: valuelist,
-        }
-    })
+  if (zone === "Choose Zone..." || name === "" || valuelist === "") {
+    showCreateFormError($("#addrset-form-alert"))
+    return false
+  }
+  hideModalAndFadeInSpinner($("#create-object-modal"))
+  $.post({
+    url: "/ajax/object/create/addrset/",
+    data: {
+      zone: zone,
+      name: name,
+      valuelist: valuelist,
+    },
+  })
     .done(function(response) {
-        reloadAndFadeOutSpinner()
-        updateYaml(response.yamlconfig)
+      reloadAndFadeOutSpinner()
+      updateYaml(response.yamlconfig)
     })
     .fail(function(errorThrown) {
-        console.log(errorThrown.toString())
+      console.log(errorThrown.toString())
     })
 }
-
 
 function createApplication() {
-    var name = $("input#application-form-control-name").val()
-    var port = $("input#application-form-control-port").val()
-    var protocol = $("select#application-form-control-protocol").val()
+  var name = $("input#application-form-control-name").val()
+  var port = $("input#application-form-control-port").val()
+  var protocol = $("select#application-form-control-protocol").val()
 
-    if (protocol === 'Protocol' || name === '' || port === '') {
-        showCreateFormError($('#application-form-alert'))
-        return false;
-    }
-    hideModalAndFadeInSpinner($('#create-object-modal'))
-    $.post({
-        url: '/ajax/object/create/application/',
-        data: {
-            name: name,
-            port: port,
-            protocol: protocol,
-        }
-    })
+  if (protocol === "Protocol" || name === "" || port === "") {
+    showCreateFormError($("#application-form-alert"))
+    return false
+  }
+  hideModalAndFadeInSpinner($("#create-object-modal"))
+  $.post({
+    url: "/ajax/object/create/application/",
+    data: {
+      name: name,
+      port: port,
+      protocol: protocol,
+    },
+  })
     .done(function(response) {
-        reloadAndFadeOutSpinner()
-        updateYaml(response.yamlconfig)
+      reloadAndFadeOutSpinner()
+      updateYaml(response.yamlconfig)
     })
     .fail(function(errorThrown) {
-        console.log(errorThrown.toString())
+      console.log(errorThrown.toString())
     })
 }
-
 
 function createAppset() {
-    var name = $("input#appset-form-control-name").val()
-    var valuelist = $("#appset-form-control-objects").val()
+  var name = $("input#appset-form-control-name").val()
+  var valuelist = $("#appset-form-control-objects").val()
 
-    if (name === '' || valuelist === '') {
-        showCreateFormError($('#appset-form-alert'))
-        return false;
-    }
-    hideModalAndFadeInSpinner($('#create-object-modal'))
-    $.post({
-        url: '/ajax/object/create/appset/',
-        data: {
-            name: name,
-            valuelist: valuelist,
-        }
-    })
+  if (name === "" || valuelist === "") {
+    showCreateFormError($("#appset-form-alert"))
+    return false
+  }
+  hideModalAndFadeInSpinner($("#create-object-modal"))
+  $.post({
+    url: "/ajax/object/create/appset/",
+    data: {
+      name: name,
+      valuelist: valuelist,
+    },
+  })
     .done(function(response) {
-        reloadAndFadeOutSpinner()
-        updateYaml(response.yamlconfig)
+      reloadAndFadeOutSpinner()
+      updateYaml(response.yamlconfig)
     })
     .fail(function(errorThrown) {
-        console.log(errorThrown.toString())
+      console.log(errorThrown.toString())
     })
 }
-
 
 function renamePolicyFormSetup() {
-    var policyNameInput = $('#input-policy-name')
-    var policyNameModal = $('#rename-policy-modal')
+  var policyNameInput = $("#input-policy-name")
+  var policyNameModal = $("#rename-policy-modal")
 
-    policyNameInput.val(currentPolicy.policyname)
-    policyNameModal.on('shown.bs.modal', function() {
-        policyNameInput.focus()
-    })
+  policyNameInput.val(currentPolicy.policyname)
+  policyNameModal.on("shown.bs.modal", function() {
+    policyNameInput.focus()
+  })
 }
-
 
 function renamePolicy() {
-    var previousName = currentPolicy.policyname
-    currentPolicy.policyname = $('#input-policy-name').val()
-    $('#rename-policy-modal').modal('toggle')
+  var previousName = currentPolicy.policyname
+  currentPolicy.policyname = $("#input-policy-name").val()
+  $("#rename-policy-modal").modal("toggle")
 
-    $.post('/ajax/policy/rename/', {
-        previousname: previousName,
-        policyname: currentPolicy.policyname,
-    })
+  $.post("/ajax/policy/rename/", {
+    previousname: previousName,
+    policyname: currentPolicy.policyname,
+  })
     .done(function(response) {
-        check_response_backend_error(response)
-        updateYaml(response.yamlconfig)
+      check_response_backend_error(response)
+      updateYaml(response.yamlconfig)
     })
     .fail(function(errorThrown) {
-        console.log(errorThrown.toString())
+      console.log(errorThrown.toString())
     })
 }
-
 
 function writeYamlConfig(writeButton) {
-    $(writeButton).prop('disabled', true)
-    $(writeButton).html(`<i class="spinner-border spinner-border-sm"></i>`)
+  $(writeButton).prop("disabled", true)
+  $(writeButton).html(`<i class="spinner-border spinner-border-sm"></i>`)
 
-    $.post('/ajax/writeyamlconfig/')
+  $.post("/ajax/writeyamlconfig/")
     .done(function(response) {
-        updateGitDiff(response)
-        $(writeButton).prop('disabled', false)
-        $(writeButton).html(`<i class="fas fa-check"></i>`)
-        enableCommitButton()
+      updateGitDiff(response)
+      $(writeButton).prop("disabled", false)
+      $(writeButton).html(`<i class="fas fa-check"></i>`)
+      enableCommitButton()
     })
     .fail(function(errorThrown) {
-        console.log(errorThrown.toString())
+      console.log(errorThrown.toString())
     })
 }
-
 
 function commitConfig(commitButton) {
-    $(commitButton).prop('disabled', true)
-    $(commitButton).html(`<i class="spinner-border spinner-border-sm"></i>`)
+  $(commitButton).prop("disabled", true)
+  $(commitButton).html(`<i class="spinner-border spinner-border-sm"></i>`)
 
-    $.post('/ajax/commitconfig/')
+  $.post("/ajax/commitconfig/")
     .done(function(response) {
-        if (response === 'success') {
-            $('#diffcard').addClass('d-none')
-            $('#yamlcard-tab').tab('show')
-            swal({
-                title: 'Success',
-                text: 'Configuration has been committed to Git',
-                icon: 'success',
-            })
-            .then(() => {
-                window.location.replace('/')
-            })
-        } else {
-            alert('Git commit failed because of the following error:\n\n'
-                + JSON.parse(response.error)
-            )
-        }
-        $(commitButton).prop('disabled', false)
-        $(commitButton).html(`<i class="fas fa-angle-double-right"></i>`)
+      if (response === "success") {
+        $("#diffcard").addClass("d-none")
+        $("#yamlcard-tab").tab("show")
+        swal({
+          title: "Success",
+          text: "Configuration has been committed to Git",
+          icon: "success",
+        }).then(() => {
+          window.location.replace("/")
+        })
+      } else {
+        alert(
+          "Git commit failed because of the following error:\n\n" +
+            JSON.parse(response.error)
+        )
+      }
+      $(commitButton).prop("disabled", false)
+      $(commitButton).html(`<i class="fas fa-angle-double-right"></i>`)
     })
     .fail(function(errorThrown) {
-        console.log(errorThrown.toString())
+      console.log(errorThrown.toString())
     })
 }
-
 
 function settingsHandler() {
-    var gogsToken = $('input#gogs-token').val()
-    if (gogsToken !== '') {
-        var url = '/ajax/settings/token/gogs/'
-        setToken(gogsToken, url)
-    }
+  var gogsToken = $("input#gogs-token").val()
+  if (gogsToken !== "") {
+    var url = "/ajax/settings/token/gogs/"
+    setToken(gogsToken, url)
+  }
 }
-
 
 function setToken(token, url) {
-    $('.spinner-container').fadeIn()
-    $.post({
-        url: url,
-        data: {
-            token: token,
-        }
-    })
+  $(".spinner-container").fadeIn()
+  $.post({
+    url: url,
+    data: {
+      token: token,
+    },
+  })
     .done(function(response) {
-        $('.spinner-container').fadeOut()
+      $(".spinner-container").fadeOut()
 
-        if (response.return_value === 0) {
-            $('#token-set-check').html(
-                `<i class="fas fa-circle mr-2 custom-green"></i>`+
-                `<small>Token has been set</small>`
-            )
-        }
-        if ($('#yamlcard').hasClass('d-none') === false) {
-            window.location.replace('/')
-        }
+      if (response.return_value === 0) {
+        $("#token-set-check").html(
+          `<i class="fas fa-circle mr-2 custom-green"></i>` +
+            `<small>Token has been set</small>`
+        )
+      }
+      if ($("#yamlcard").hasClass("d-none") === false) {
+        window.location.replace("/")
+      }
     })
     .fail(function(errorThrown) {
-        console.log(errorThrown.toString())
+      console.log(errorThrown.toString())
     })
 }
-
 
 function enableCommitButton() {
-    $.post({
-        url: 'ajax/checktoken/gogs/',
-    })
+  $.post({
+    url: "ajax/checktoken/gogs/",
+  })
     .done(function(response) {
-        if (response === true) {
-            $('#commit-config').prop('disabled', false)
-        } else {
-            swal("To commit the change, please set your Git token first")
-        }
+      if (response === true) {
+        $("#commit-config").prop("disabled", false)
+      } else {
+        swal("To commit the change, please set your Git token first")
+      }
     })
     .fail(function(errorThrown) {
-        console.log(errorThrown.toString())
+      console.log(errorThrown.toString())
     })
 }
 
-
 function hideModalAndFadeInSpinner(Modal) {
-    Modal.modal('toggle')
-    $('.spinner-container').fadeIn()
+  Modal.modal("toggle")
+  $(".spinner-container").fadeIn()
 }
 
 function reloadAndFadeOutSpinner() {
-    // reload only specific div of index.html
-    $('#search-forms').load('/ #search-forms');
-    $('.spinner-container').delay(400).fadeOut()
+  // reload only specific div of index.html
+  $("#search-forms").load("/ #search-forms")
+  $(".spinner-container")
+    .delay(400)
+    .fadeOut()
 }
 
 function showCreateFormError(element) {
-    var temp = document.getElementsByTagName('template')[0]
-    var clone = temp.content.cloneNode(true)
-    element.append(clone)
+  var temp = document.getElementsByTagName("template")[0]
+  var clone = temp.content.cloneNode(true)
+  element.append(clone)
 }
-
 
 function objectSearch(e) {
-    var input, filter, ul, li, a, a0, a1, i
-    input = document.getElementById(e.id)
-    filter = input.value.toUpperCase()
-    ul = document.getElementById(e.id + '-ul')
-    li = ul.getElementsByTagName('li')
+  var input, filter, ul, li, a, a0, a1, i
+  input = document.getElementById(e.id)
+  filter = input.value.toUpperCase()
+  ul = document.getElementById(e.id + "-ul")
+  li = ul.getElementsByTagName("li")
 
-    for (i = 0; i < li.length; i++) {
-        a0 = li[i].getElementsByTagName('a')[0]
-        a1 = li[i].getElementsByTagName('a')[1]
-        a = a0.innerHTML.toUpperCase() + ' ' + a1.innerHTML.toUpperCase()
-        if (a.indexOf(filter) > -1 && filter.length >= 1) {
-            ul.classList.remove('d-none')
-            li[i].style.display = ''
-        } else {
-            li[i].style.display = 'none'
-        }
+  for (i = 0; i < li.length; i++) {
+    a0 = li[i].getElementsByTagName("a")[0]
+    a1 = li[i].getElementsByTagName("a")[1]
+    a = a0.innerHTML.toUpperCase() + " " + a1.innerHTML.toUpperCase()
+    if (a.indexOf(filter) > -1 && filter.length >= 1) {
+      ul.classList.remove("d-none")
+      li[i].style.display = ""
+    } else {
+      li[i].style.display = "none"
     }
+  }
 }
-
 
 function resetSearch(item) {
-    var searchForm = item.closest('.col-sm').querySelector('.searchform')
-    var resultList = item.closest('.list-inline')
+  var searchForm = item.closest(".col-sm").querySelector(".searchform")
+  var resultList = item.closest(".list-inline")
 
-    resultList.classList.add('d-none')
-    searchForm.value = ''
+  resultList.classList.add("d-none")
+  searchForm.value = ""
 }
 
-
 function generateId() {
-    return Math.random().toString(36).substr(2, 9).toUpperCase()
+  return Math.random()
+    .toString(36)
+    .substr(2, 9)
+    .toUpperCase()
 }
