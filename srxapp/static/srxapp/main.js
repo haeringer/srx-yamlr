@@ -423,9 +423,7 @@ class ListAppObj {
     ajax_delete_application_from_policy_yaml() {
         $.post('/ajax/policy/delete/application/', {
             policyname: currentPolicy.policyname,
-            direction: this.direction,
             objname: this.name,
-            zone: this.zone,
         })
         .done(function(response) {
             check_response_backend_error(response)
