@@ -13,51 +13,55 @@ class Tests(TestCase):
         user.set_password(password)
         user.save()
 
-        client = self.client = Client()
-        client.login(username=username, password=password)
-        client.get('/ajax/loadobjects/')
-        client.get('/')
+        self.client = Client()
+        self.client.login(username=username, password=password)
+        self.client.get('/ajax/loadobjects/')
+        self.client.get('/')
 
-        # Add new test objects to database
         zones = self.client.session['workingdict']['zones']
-        zone_a = zones[0]['name']
-        zone_b = zones[1]['name']
-        self.testzone = zone_a
+        self.zone_a = zones[0]['name']
+        self.zone_b = zones[1]['name']
+        self.testzone = self.zone_a
 
         for i in range(2):
-            client.post('/ajax/object/create/address/', {
-                'zone': zone_a,
+            self.client.post('/ajax/object/create/address/', {
+                'zone': self.zone_a,
                 'name': 'TEST_ADDRESS_{}'.format(i),
                 'value': '10.20.30.{}/32'.format(i),
                 },
             )
-        client.post('/ajax/object/create/addrset/', {
-            'zone': zone_a,
+        self.client.post('/ajax/object/create/addrset/', {
+            'zone': self.zone_a,
             'name': 'TEST_ADDRSET',
             'valuelist[]': ['TEST_ADDRESS_0', 'TEST_ADDRESS_1'],
             },
         )
-        client.post('/ajax/object/create/address/', {
-            'zone': zone_b,
+        self.client.post('/ajax/object/create/address/', {
+            'zone': self.zone_b,
             'name': 'TEST_ADDRESS_3',
             'value': '10.20.30.3/32',
             },
         )
         for i in range(2):
-            client.post('/ajax/object/create/application/', {
+            self.client.post('/ajax/object/create/application/', {
                 'name': 'TEST_APPLICATION_{}'.format(i),
                 'port': '123{}'.format(i),
                 'protocol': 'tcp',
                 },
             )
-        client.post('/ajax/object/create/appset/', {
+        self.client.post('/ajax/object/create/appset/', {
             'name': 'TEST_APPSET',
             'valuelist[]': ['TEST_APPLICATION_0', 'TEST_APPLICATION_1'],
             },
         )
 
     def test_created_objects(self):
-        self.assertIn('TEST_ADDRESS_0', str(self.client.session['configdict']))
+        configdict_str = str(self.client.session['configdict'])
+        obj_list = ['TEST_ADDRESS_0', 'TEST_ADDRESS_3', 'TEST_ADDRSET',
+                    'TEST_APPLICATION_0', 'TEST_APPSET']
+
+        for obj in obj_list:
+            self.assertIn(obj, configdict_str)
 
     def test_session_logged_in_user(self):
         self.assertEqual(self.client.session['_auth_user_id'], '1')
@@ -65,34 +69,67 @@ class Tests(TestCase):
     def test_session_imported_data(self):
         self.assertIn('zones', self.client.session['workingdict'])
 
-    # def test_build_policy(self):
-    #     self.policyid = '123456789'
-    #     client = self.client
+    def test_build_policy(self):
+        self.policyname = 'allow-123456789-to-123456789'
 
-    #     obj_a = SrxAddrSet.objects.get(name='TEST_ADDRSET')
-    #     obj_b = SrxAddress.objects.get(name='TEST_ADDRESS_3')
-    #     obj_c = SrxApplication.objects.get(name='TEST_APPLICATION_0')
-    #     obj_d = SrxAppSet.objects.get(name='TEST_APPSET')
+        def post_address(direction, objname, zone):
+            self.client.post('/ajax/policy/add/address/', {
+                'policyname': self.policyname,
+                'direction': direction,
+                'objname': objname,
+                'zone': zone,
+                },
+            )
 
-    #     client.post('/ajax/policy/add/address/', {
-    #         'policyid': self.policyid,
-    #         'objectid': obj_a.id,
-    #         'direction': 'from',
-    #         },
-    #     )
-    #     client.post('/ajax/policy/add/address/', {
-    #         'policyid': self.policyid,
-    #         'objectid': obj_b.id,
-    #         'direction': 'to',
-    #         },
-    #     )
-    #     client.post('/ajax/policy/add/application/', {
-    #         'policyid': self.policyid,
-    #         'objectid': obj_c.id,
-    #         },
-    #     )
-    #     client.post('/ajax/policy/add/application/', {
-    #         'policyid': self.policyid,
-    #         'objectid': obj_d.id,
-    #         },
-    #     )
+        def post_application(objname):
+            self.client.post('/ajax/policy/add/application/', {
+                'policyname': self.policyname,
+                'objname': objname,
+                },
+            )
+
+        post_address('from', 'TEST_ADDRESS_0', self.zone_a)
+        post_address('from', 'TEST_ADDRSET', self.zone_a)
+        post_address('to', 'TEST_ADDRESS_3', self.zone_b)
+        post_application('TEST_APPLICATION_0')
+        post_application('TEST_APPSET')
+
+        policy = self.client.session['configdict']['policies'][self.policyname]
+        self.assertIn(self.zone_a, policy['fromzone'])
+        self.assertIn(self.zone_b, policy['tozone'])
+        self.assertIn('TEST_ADDRSET', policy['source'])
+        self.assertIn('TEST_ADDRESS_3', policy['destination'])
+        self.assertIn('TEST_APPLICATION_0', policy['application'])
+        self.assertIn('TEST_APPSET', policy['application'])
+
+    def test_rename_policy(self):
+        self.test_build_policy()
+
+        self.client.post('/ajax/policy/rename/', {
+                'previousname': 'allow-123456789-to-123456789',
+                'policyname': 'allow-TEST_ADDRESS_3-to-TEST_ADDRSET',
+            },
+        )
+
+        self.assertIn('allow-TEST_ADDRESS_3-to-TEST_ADDRSET',
+                      self.client.session['configdict']['policies'])
+
+    def test_delete_objects_from_policy(self):
+        self.test_build_policy()
+
+        self.client.post('/ajax/policy/delete/address/', {
+            'policyname': self.policyname,
+            'direction': 'from',
+            'objname': 'TEST_ADDRSET',
+            'zone': self.zone_a,
+            },
+        )
+        self.client.post('/ajax/policy/delete/application/', {
+            'policyname': self.policyname,
+            'objname': 'TEST_APPSET',
+            },
+        )
+
+        policy = self.client.session['configdict']['policies'][self.policyname]
+        self.assertNotIn('TEST_ADDRSET', policy)
+        self.assertNotIn('TEST_APPSET', policy)
