@@ -33,15 +33,20 @@ class sourceData:
 
         def update_simple_dict(vartype):
             if vartype in self.configdict:
-                sourcedict[vartype].update(self.configdict[vartype])
+                vals = self.configdict[vartype]
+                sourcedict[vartype].update(vals)
 
         def update_zone_dict(vartype):
             if "zones" in self.configdict:
-                for zone, values in self.configdict["zones"].items():
-                    if vartype in values:
-                        sourcedict["zones"][zone][vartype].update(
-                            self.configdict["zones"][zone][vartype]
-                        )
+                for zone, items in self.configdict["zones"].items():
+                    if vartype in items:
+                        vals = self.configdict["zones"][zone][vartype]
+                        source = sourcedict["zones"][zone][vartype]
+                        if isinstance(vals, list):
+                            for v in vals:
+                                source.update(v)
+                        else:
+                            source.update(vals)
 
         update_simple_dict("policies")
         update_simple_dict("applications")
