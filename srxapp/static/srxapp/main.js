@@ -589,7 +589,7 @@ function createAddress() {
   var value = $("input#address-form-control-ip").val()
 
   if (zone === "Choose Zone..." || name === "" || value === "") {
-    showCreateFormError($("#address-form-alert"))
+    showCreateFormError("address-form-alert", 0)
     return false
   }
   hideModalAndFadeInSpinner($("#create-object-modal"))
@@ -616,7 +616,7 @@ function createAddrset() {
   var valuelist = $("#adrset-form-control-objects").val()
 
   if (zone === "Choose Zone..." || name === "" || valuelist === "") {
-    showCreateFormError($("#addrset-form-alert"))
+    showCreateFormError("addrset-form-alert", 0)
     return false
   }
   hideModalAndFadeInSpinner($("#create-object-modal"))
@@ -643,7 +643,7 @@ function createApplication() {
   var protocol = $("select#application-form-control-protocol").val()
 
   if (protocol === "Protocol" || name === "" || port === "") {
-    showCreateFormError($("#application-form-alert"))
+    showCreateFormError("application-form-alert", 0)
     return false
   }
   hideModalAndFadeInSpinner($("#create-object-modal"))
@@ -669,7 +669,7 @@ function createAppset() {
   var valuelist = $("#appset-form-control-objects").val()
 
   if (name === "" || valuelist === "") {
-    showCreateFormError($("#appset-form-alert"))
+    showCreateFormError("appset-form-alert", 0)
     return false
   }
   hideModalAndFadeInSpinner($("#create-object-modal"))
@@ -765,16 +765,25 @@ function commitConfig(commitButton) {
 
 function settingsHandler() {
   var gogsToken = $("input#gogs-token").val()
+  var pwNew = $("input#pw-new").val()
+  var pwNewConfirm = $("input#pw-new-confirm").val()
+
   if (gogsToken !== "") {
-    var url = "/ajax/settings/token/gogs/"
-    setToken(gogsToken, url)
+    setToken(gogsToken)
+  }
+  if (pwNew !== "") {
+    if (pwNew !== pwNewConfirm) {
+      showCreateFormError("password-form-alert", 1)
+    } else {
+      changePassword(pwNew)
+    }
   }
 }
 
-function setToken(token, url) {
+function setToken(token) {
   $(".spinner-container").fadeIn()
   $.post({
-    url: url,
+    url: "/ajax/settings/token/gogs/",
     data: {
       token: token,
     },
@@ -791,6 +800,22 @@ function setToken(token, url) {
       if ($("#yamlcard").hasClass("d-none") === false) {
         window.location.replace("/")
       }
+    })
+    .fail(function(errorThrown) {
+      console.log(errorThrown.toString())
+    })
+}
+
+function changePassword(pwNew) {
+  $(".spinner-container").fadeIn()
+  $.post({
+    url: "/ajax/settings/password/change/",
+    data: {
+      password: pwNew,
+    },
+  })
+    .done(function(response) {
+      $(".spinner-container").fadeOut()
     })
     .fail(function(errorThrown) {
       console.log(errorThrown.toString())
@@ -826,10 +851,15 @@ function reloadAndFadeOutSpinner() {
     .fadeOut()
 }
 
-function showCreateFormError(element) {
-  var temp = document.getElementsByTagName("template")[0]
-  var clone = temp.content.cloneNode(true)
-  element.append(clone)
+function showCreateFormError(elementName, templateNumber) {
+  var tmplt = document.getElementsByTagName("template")[templateNumber]
+  var clone = tmplt.content.cloneNode(true)
+  var elementToAppendTo = $("#" + elementName)
+
+  var appendedItems = $("#" + elementName + " div").length
+  if (appendedItems === 0) {
+    elementToAppendTo.append(clone)
+  }
 }
 
 function objectSearch(e) {

@@ -48,4 +48,6 @@ urlpatterns = [
          name="check_token_gogs"),
     path("ajax/settings/token/gogs/", views.set_token_gogs,
          name="set_token_gogs"),
+    path("ajax/settings/password/change/", views.set_new_password,
+         name="set_new_password"),
 ]

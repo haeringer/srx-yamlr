@@ -69,6 +69,22 @@ class Tests(TestCase):
             {"token": token},
         )
 
+    def test_check_git_token(self):
+        self.test_set_git_token()
+
+        response = self.client.post("/ajax/checktoken/gogs/")
+
+        response_string = response.content.decode("utf-8")
+        self.assertEqual(response_string, "true")
+
+    def test_set_new_password(self):
+        response = self.client.post(
+            "/ajax/settings/password/change/",
+            {"password": "234567"},
+        )
+        response_string = response.content.decode("utf-8")
+        self.assertEqual(response_string, '{"return_value": 0}')
+
     def test_created_objects(self):
         configdict_str = str(self.client.session["configdict"])
         obj_list = [

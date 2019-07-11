@@ -235,3 +235,15 @@ def check_token_gogs(request):
     except Exception:
         response = helpers.view_exception(Exception)
     return JsonResponse(response, safe=False)
+
+
+def set_new_password(request):
+    try:
+        user = User.objects.get(username=request.user.username)
+        password = request.POST.get("password")
+        user.set_password(password)
+        user.save()
+        response = dict(return_value=0)
+    except Exception:
+        response = helpers.view_exception(Exception)
+    return JsonResponse(response, safe=False)
