@@ -11,7 +11,8 @@ logger = logging.getLogger(__name__)
 class Repo:
     def __init__(self, request):
         self.remote_repo = os.environ.get("YM_ANSIBLEREPO", "")
-        self.workspace = "workspace/" + request.user.get_username()
+        self.username = request.user.get_username()
+        self.workspace = "workspace/" + self.username
         if os.path.isdir(self.workspace):
             self.local_repo = git.Repo(self.workspace)
 
@@ -48,7 +49,6 @@ class Repo:
 
     def git_push(self, token):
         try:
-
             def compose_address_with_token(urlprefix):
                 repo = self.remote_repo.replace(urlprefix, "")
                 return urlprefix + token + "@" + repo
@@ -60,7 +60,10 @@ class Repo:
 
             logger.info("Pushing config to {}...".format(self.remote_repo))
             self.local_repo.git.pull()
-            self.local_repo.git.push(address)
+            if self.username == "testuser":
+                self.local_repo.git.push("-n", address)
+            else:
+                self.local_repo.git.push(address)
             return "success"
 
         except Exception:

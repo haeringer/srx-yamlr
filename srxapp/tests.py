@@ -1,3 +1,5 @@
+import git
+
 from django.test import TestCase
 from django.test import Client
 from django.contrib.auth.models import User
@@ -58,6 +60,13 @@ class Tests(TestCase):
                 "name": "TEST_APPSET",
                 "valuelist[]": ["TEST_APPLICATION_0", "TEST_APPLICATION_1"],
             },
+        )
+
+    def test_set_git_token(self):
+        token = "ka2bjlhPlVnATs2OrcAB8mg1JeRXBDO03yxZlz3c"
+        self.client.post(
+            "/ajax/settings/token/gogs/",
+            {"token": token},
         )
 
     def test_created_objects(self):
@@ -149,3 +158,24 @@ class Tests(TestCase):
         policy = self.client.session["configdict"]["policies"][self.policyname]
         self.assertNotIn("TEST_ADDRSET", policy)
         self.assertNotIn("TEST_APPSET", policy)
+
+    def test_write_yamlconfig(self):
+        self.test_build_policy()
+        self.client.post("/ajax/writeyamlconfig/")
+
+        local_repo = git.Repo("workspace/testuser")
+        diff = local_repo.git.diff()
+
+        self.assertIn("TEST_ADDRSET", diff)
+        self.assertIn("TEST_APPLICATION_0", diff)
+
+    def test_commit_config(self):
+        self.test_set_git_token()
+        self.test_build_policy()
+        self.test_write_yamlconfig()
+        self.client.post("/ajax/commitconfig/")
+
+        local_repo = git.Repo("workspace/testuser")
+        diff = local_repo.git.diff()
+
+        self.assertEqual(diff, "")
