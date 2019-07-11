@@ -74,6 +74,6 @@ Access the application via http://localhost:8000. The admin page can be reached 
 
 Use coverage.py to check test coverage of the project:
 
-    coverage run --source='.' manage.py test srxapp
+    coverage run manage.py test srxapp
     coverage html
     # then visit srx-yamlr/htmlcov/index.html

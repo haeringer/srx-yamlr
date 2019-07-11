@@ -1,0 +1,7 @@
+[run]
+source =
+    srxapp/
+omit =
+    srxapp/migrations/*
+    srxapp/apps.py
+    */__init__.py
