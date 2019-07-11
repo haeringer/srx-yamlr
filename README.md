@@ -10,10 +10,12 @@ MacOS:
 
 CentOS:
 
-    curl https://pyenv.run | bash
     sudo yum install epel-release
     sudo yum install python-pip
-    sudo -H pip install -U pipenv
+    sudo adduser srx-yamlr
+    sudo su srx-yamlr
+    curl https://pyenv.run | bash
+    pip install pipenv
 
 ## Project installation
 
@@ -69,3 +71,9 @@ Access the application via http://localhost:8000. The admin page can be reached 
 ### Run unit tests
 
     python manage.py test srxapp
+
+Use coverage.py to check test coverage of the project:
+
+    coverage run --source='.' manage.py test srxapp
+    coverage html
+    # then visit srx-yamlr/htmlcov/index.html
