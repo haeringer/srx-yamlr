@@ -237,6 +237,23 @@ def check_token_gogs(request):
     return JsonResponse(response, safe=False)
 
 
+def check_session_status(request):
+    try:
+        response = 0 if request.session._get_session_key() else 1
+    except Exception:
+        response = helpers.view_exception(Exception)
+    return JsonResponse(response, safe=False)
+
+
+def extend_session(request):
+    try:
+        request.session.set_expiry(900)
+        response = 0
+    except Exception:
+        response = helpers.view_exception(Exception)
+    return JsonResponse(response, safe=False)
+
+
 def set_new_password(request):
     try:
         user = User.objects.get(username=request.user.username)

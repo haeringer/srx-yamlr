@@ -198,3 +198,15 @@ class Tests(TestCase):
         diff = local_repo.git.diff()
 
         self.assertEqual(diff, "")
+
+    def test_check_session_status(self):
+        response = self.client.get("/ajax/session/status/")
+
+        response_val = response.content.decode("utf-8")
+        self.assertEqual(response_val, "0")
+
+    def test_extend_session(self):
+        response = self.client.post("/ajax/session/extend/")
+
+        response_val = response.content.decode("utf-8")
+        self.assertEqual(response_val, "0")

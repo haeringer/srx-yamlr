@@ -18,6 +18,9 @@ $(window).on("load", function() {
     currentPolicy.policyname = "allow-" + nameId + "-to-" + nameId
     getYamlConfig()
   }
+  setInterval(function() {
+    checkSessionStatus()
+  }, 10000)
 })
 
 // Make ajax POST requests work with Django's CSRF protection
@@ -47,6 +50,10 @@ $.ajaxSetup({
  * Event listeners etc. - run once DOM is ready
  */
 $(function() {
+  document.onclick= function() {
+    extendSession()
+  }
+
   // Search Forms - use .on 'click' with parent selected to recognize
   // events also on dynamically added items
   $("#search-forms").on("click", ".search-results-item", function() {
@@ -104,6 +111,27 @@ $(function() {
     $(this).find("input").val("")
   })
 })
+
+function checkSessionStatus() {
+  $.get("/ajax/session/status/")
+    .done(function(response) {
+      if (response === 1) {
+        window.location.replace("/auth/logout/")
+      }
+    })
+    .fail(function(errorThrown) {
+      console.log(errorThrown.toString())
+    })
+}
+
+function extendSession () {
+  setTimeout(function(){
+    $.post("/ajax/session/extend/")
+      .fail(function(errorThrown) {
+        console.log(errorThrown.toString())
+      })
+  }, 1000)
+}
 
 function getYamlConfig() {
   $.post("/ajax/getyamlconfig/")
