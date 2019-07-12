@@ -807,7 +807,7 @@ function setToken(token) {
 }
 
 function changePassword(pwNew) {
-  $(".spinner-container").fadeIn()
+  hideModalAndFadeInSpinner($("#settings-modal"))
   $.post({
     url: "/ajax/settings/password/change/",
     data: {
@@ -816,6 +816,13 @@ function changePassword(pwNew) {
   })
     .done(function(response) {
       $(".spinner-container").fadeOut()
+      swal({
+        title: "Password changed",
+        text: "Please log in again",
+        icon: "success",
+      }).then(() => {
+        window.location.replace("/auth/logout/")
+      })
     })
     .fail(function(errorThrown) {
       console.log(errorThrown.toString())
