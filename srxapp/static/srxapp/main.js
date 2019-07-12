@@ -97,12 +97,11 @@ $(function() {
     editYaml()
   })
 
-  $("#output-close").on("click", function() {
-    $("#output-modal").modal("toggle")
-  })
-
   $('[data-toggle="tooltip"]').tooltip({
     trigger: "hover",
+  })
+  $("#settings-modal").on("hidden.bs.modal", function () {
+    $(this).find("input").val("")
   })
 })
 
