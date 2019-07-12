@@ -64,10 +64,13 @@ class Tests(TestCase):
 
     def test_set_git_token(self):
         token = "ka2bjlhPlVnATs2OrcAB8mg1JeRXBDO03yxZlz3c"
-        self.client.post(
+        response = self.client.post(
             "/ajax/settings/token/gogs/",
             {"token": token},
         )
+
+        response_val = response.content.decode("utf-8")
+        self.assertEqual(response_val, "0")
 
     def test_check_git_token(self):
         self.test_set_git_token()
@@ -82,8 +85,8 @@ class Tests(TestCase):
             "/ajax/settings/password/change/",
             {"password": "234567"},
         )
-        response_string = response.content.decode("utf-8")
-        self.assertEqual(response_string, '{"return_value": 0}')
+        response_val = response.content.decode("utf-8")
+        self.assertEqual(response_val, "0")
 
     def test_created_objects(self):
         configdict_str = str(self.client.session["configdict"])

@@ -790,7 +790,7 @@ function setToken(token) {
     .done(function(response) {
       $(".spinner-container").fadeOut()
 
-      if (response.return_value === 0) {
+      if (response === 0) {
         $("#token-set-check").html(
           `<i class="fas fa-circle mr-2 custom-green"></i>` +
             `<small>Token has been set</small>`

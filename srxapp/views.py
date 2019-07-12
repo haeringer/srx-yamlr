@@ -222,7 +222,7 @@ def set_token_gogs(request):
         token_encrypted = helpers.encrypt_string(token)
         user.usersettings.gogs_tkn = token_encrypted
         user.save()
-        response = dict(return_value=0)
+        response = 0
     except Exception:
         response = helpers.view_exception(Exception)
     return JsonResponse(response, safe=False)
@@ -243,7 +243,7 @@ def set_new_password(request):
         password = request.POST.get("password")
         user.set_password(password)
         user.save()
-        response = dict(return_value=0)
+        response = 0
     except Exception:
         response = helpers.view_exception(Exception)
     return JsonResponse(response, safe=False)
