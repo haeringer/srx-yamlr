@@ -11,3 +11,4 @@ workspace
 .vscode/settings.json
 .coverage
 htmlcov
+.venv
