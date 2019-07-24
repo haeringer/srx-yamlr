@@ -2,15 +2,21 @@ import os
 import shutil
 import git
 import logging
+import requests
+import urllib3
 
 from srxapp.utils import helpers
 
+urllib3.disable_warnings()
 logger = logging.getLogger(__name__)
 
 
 class Repo:
     def __init__(self, request):
+        git_server = os.environ.get("YM_GITSERVER", "")
+        self.git_server = git_server if git_server.endswith("/") else git_server + "/"
         self.remote_repo = os.environ.get("YM_ANSIBLEREPO", "")
+        self.remote_repo_url = self.git_server + self.remote_repo
         self.username = request.user.username
         self.useremail = request.user.email
         self.workspace = "workspace/" + self.username
@@ -28,7 +34,7 @@ class Repo:
                 shutil.rmtree(self.workspace)
 
             logger.info("Cloning git repository...")
-            git.Repo.clone_from(self.remote_repo, self.workspace)
+            git.Repo.clone_from(self.remote_repo_url, self.workspace)
             return "success"
 
         except Exception:
@@ -56,21 +62,30 @@ class Repo:
     def git_push(self, token):
         try:
             def compose_address_with_token(urlprefix):
-                repo = self.remote_repo.replace(urlprefix, "")
+                repo = self.remote_repo_url.replace(urlprefix, "")
                 return urlprefix + token + "@" + repo
 
-            if self.remote_repo.startswith("https"):
+            if self.remote_repo_url.startswith("https"):
                 address = compose_address_with_token("https://")
             else:
                 address = compose_address_with_token("http://")
 
-            logger.info("Pushing config to {}...".format(self.remote_repo))
+            logger.info("Pushing config to {}...".format(self.remote_repo_url))
+
             self.local_repo.git.pull()
-            if self.username == "testuser":
-                self.local_repo.git.push("-n", address)
+
+            api_url = self.git_server + "api/v1/repos/" + self.remote_repo
+            headers = {"Authorization": "token {}".format(token)}
+            response = requests.get(api_url, headers=headers, verify=False)
+
+            if response.status_code == 200:
+                if self.username == "testuser":
+                    self.local_repo.git.push("-n", address)
+                else:
+                    self.local_repo.git.push(address)
+                return "success"
             else:
-                self.local_repo.git.push(address)
-            return "success"
+                raise Exception(response.status_code, response.reason)
 
         except Exception:
             return helpers.view_exception(Exception)
