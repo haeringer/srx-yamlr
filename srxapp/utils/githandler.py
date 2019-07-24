@@ -11,10 +11,16 @@ logger = logging.getLogger(__name__)
 class Repo:
     def __init__(self, request):
         self.remote_repo = os.environ.get("YM_ANSIBLEREPO", "")
-        self.username = request.user.get_username()
+        self.username = request.user.username
+        self.useremail = request.user.email
         self.workspace = "workspace/" + self.username
+
         if os.path.isdir(self.workspace):
             self.local_repo = git.Repo(self.workspace)
+
+            with self.local_repo.config_writer() as cw:
+                cw.set_value("user", "name", self.username).release()
+                cw.set_value("user", "email", self.useremail).release()
 
     def git_clone(self):
         try:
