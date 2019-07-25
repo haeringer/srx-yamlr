@@ -14,7 +14,7 @@ gitpython = "==2.1.*"
 simple-crypt = "==4.1.*"
 ruamel-yaml = "==0.15.*"
 gunicorn = "==19.9.*"
-requests = "*"
+requests = "==2.22.*"
 
 [requires]
 python_version = "3.7"
