@@ -5,6 +5,7 @@ import traceback
 
 from ruamel.yaml import YAML
 from django.utils.encoding import force_text
+from django.contrib.auth.models import User
 from simplecrypt import encrypt, decrypt
 from base64 import b64encode, b64decode
 
@@ -72,3 +73,10 @@ def check_if_token_set(user):
         return False
     else:
         return True
+
+
+def get_token(request):
+    user = User.objects.get(username=request.user.username)
+    token_encrypted = user.usersettings.gogs_tkn
+    token = decrypt_string(token_encrypted)
+    return token

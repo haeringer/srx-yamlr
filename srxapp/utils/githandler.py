@@ -13,6 +13,7 @@ logger = logging.getLogger(__name__)
 
 class Repo:
     def __init__(self, request):
+        self.request = request
         git_server = os.environ.get("YM_GITSERVER", "")
         self.git_server = git_server if git_server.endswith("/") else git_server + "/"
         self.remote_repo = os.environ.get("YM_ANSIBLEREPO", "")
@@ -59,26 +60,35 @@ class Repo:
         except Exception:
             helpers.view_exception(Exception)
 
-    def git_push(self, token):
+    def get_git_push_address(self):
         try:
-            def compose_address_with_token(urlprefix):
-                repo = self.remote_repo_url.replace(urlprefix, "")
-                return urlprefix + token + "@" + repo
+            token = helpers.get_token(self.request)
+            prfx = "https://" if self.remote_repo_url.startswith("https") else "http://"
+            repo = self.remote_repo_url.replace(prfx, "")
+            return prfx + token + "@" + repo
 
-            if self.remote_repo_url.startswith("https"):
-                address = compose_address_with_token("https://")
-            else:
-                address = compose_address_with_token("http://")
+        except Exception:
+            helpers.view_exception(Exception)
 
-            logger.info("Pushing config to {}...".format(self.remote_repo_url))
-
-            self.local_repo.git.pull()
-
+    def validate_git_authorization(self):
+        try:
+            token = helpers.get_token(self.request)
             api_url = self.git_server + "api/v1/repos/" + self.remote_repo
             headers = {"Authorization": "token {}".format(token)}
-            response = requests.get(api_url, headers=headers, verify=False)
+            return requests.get(api_url, headers=headers, verify=False)
+
+        except Exception:
+            helpers.view_exception(Exception)
+
+    def git_push(self):
+        try:
+            address = self.get_git_push_address()
+            response = self.validate_git_authorization()
 
             if response.status_code == 200:
+                self.local_repo.git.pull()
+                logger.info("Pushing config to {}...".format(self.remote_repo_url))
+
                 if self.username == "testuser":
                     self.local_repo.git.push("-n", address)
                 else:

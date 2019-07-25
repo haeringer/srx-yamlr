@@ -190,13 +190,9 @@ def write_yamlconfig(request):
 
 def commit_config(request):
     try:
-        user = User.objects.get(username=request.user.username)
-        token_encrypted = user.usersettings.gogs_tkn
-        token = helpers.decrypt_string(token_encrypted)
-
         repo = githandler.Repo(request)
         repo.git_commit()
-        response = repo.git_push(token)
+        response = repo.git_push()
         if response == "success":
             request.session["configdict"] = {}
 
