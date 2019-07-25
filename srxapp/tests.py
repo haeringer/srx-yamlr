@@ -222,3 +222,21 @@ class Tests(TestCase):
 
         response_val = response.content.decode("utf-8")
         self.assertEqual(response_val, "0")
+
+    def test_change_password(self):
+        response = client_glob.post(
+            "/ajax/settings/password/change/",
+            {"password": "654321"},
+        )
+        response_val = response.content.decode("utf-8")
+        self.assertEqual(response_val, "0")
+
+    def test_filter_object_list(self):
+        response = client_glob.get(
+            "/ajax/filterobjects/",
+            {"selectedzone": self.zone_a},
+        )
+        response_val = response.content.decode("utf-8")
+
+        self.assertIn("TEST_ADDRESS_0", response_val)
+        self.assertNotIn("TEST_ADDRESS_3", response_val)
