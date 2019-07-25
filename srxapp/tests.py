@@ -1,52 +1,63 @@
 import git
+import copy
 
 from django.test import TestCase
 from django.test import Client
 from django.contrib.auth.models import User
 
+client_glob = None
+
+
+def create_client_session():
+    username = "testuser"
+    password = "123456"
+
+    user = User.objects.create(username=username)
+    user.set_password(password)
+    user.save()
+
+    client = Client()
+    client.login(username=username, password=password)
+    client.get("/ajax/loadobjects/")
+    client.get("/")
+
+    global client_glob
+    client_glob = client
+
 
 class Tests(TestCase):
-    def setUp(self):
-        username = "testuser"
-        password = "123456"
+    @classmethod
+    def setUpTestData(cls):
+        create_client_session()
 
-        user = User.objects.create(username=username)
-        user.set_password(password)
-        user.save()
-
-        self.client = Client()
-        self.client.login(username=username, password=password)
-        self.client.get("/ajax/loadobjects/")
-        self.client.get("/")
-
-        zones = self.client.session["workingdict"]["zones"]
-        self.zone_a = zones[0]["name"]
-        self.zone_b = zones[1]["name"]
-        self.testzone = self.zone_a
+        zones = client_glob.session["workingdict"]["zones"]
+        cls.zone_a = zones[0]["name"]
+        cls.zone_b = zones[1]["name"]
+        cls.testzone = cls.zone_a
 
         for i in range(2):
-            self.client.post(
+            client_glob.post(
                 "/ajax/object/create/address/",
                 {
-                    "zone": self.zone_a,
+                    "zone": cls.zone_a,
                     "name": "TEST_ADDRESS_{}".format(i),
                     "value": "10.20.30.{}/32".format(i),
                 },
             )
-        self.client.post(
+        client_glob.post(
             "/ajax/object/create/addrset/",
             {
-                "zone": self.zone_a,
+                "zone": cls.zone_a,
                 "name": "TEST_ADDRSET",
                 "valuelist[]": ["TEST_ADDRESS_0", "TEST_ADDRESS_1"],
             },
         )
-        self.client.post(
+        client_glob.post(
             "/ajax/object/create/address/",
-            {"zone": self.zone_b, "name": "TEST_ADDRESS_3", "value": "10.20.30.3/32"},
+            {"zone": cls.zone_b, "name": "TEST_ADDRESS_3", "value": "10.20.30.3/32"},
         )
         for i in range(2):
-            self.client.post(
+            client_glob.post(
                 "/ajax/object/create/application/",
                 {
                     "name": "TEST_APPLICATION_{}".format(i),
@@ -54,7 +65,7 @@ class Tests(TestCase):
                     "protocol": "tcp",
                 },
             )
-        self.client.post(
+        client_glob.post(
             "/ajax/object/create/appset/",
             {
                 "name": "TEST_APPSET",
@@ -64,7 +75,7 @@ class Tests(TestCase):
 
     def test_set_git_token(self):
         token = "ka2bjlhPlVnATs2OrcAB8mg1JeRXBDO03yxZlz3c"
-        response = self.client.post(
+        response = client_glob.post(
             "/ajax/settings/token/gogs/",
             {"token": token},
         )
@@ -75,13 +86,13 @@ class Tests(TestCase):
     def test_check_git_token(self):
         self.test_set_git_token()
 
-        response = self.client.post("/ajax/checktoken/gogs/")
+        response = client_glob.post("/ajax/checktoken/gogs/")
 
         response_string = response.content.decode("utf-8")
         self.assertEqual(response_string, "true")
 
     def test_set_new_password(self):
-        response = self.client.post(
+        response = client_glob.post(
             "/ajax/settings/password/change/",
             {"password": "234567"},
         )
@@ -89,7 +100,7 @@ class Tests(TestCase):
         self.assertEqual(response_val, "0")
 
     def test_created_objects(self):
-        configdict_str = str(self.client.session["configdict"])
+        configdict_str = str(client_glob.session["configdict"])
         obj_list = [
             "TEST_ADDRESS_0",
             "TEST_ADDRESS_3",
@@ -102,16 +113,16 @@ class Tests(TestCase):
             self.assertIn(obj, configdict_str)
 
     def test_session_logged_in_user(self):
-        self.assertEqual(self.client.session["_auth_user_id"], "1")
+        self.assertEqual(client_glob.session["_auth_user_id"], "1")
 
     def test_session_imported_data(self):
-        self.assertIn("zones", self.client.session["workingdict"])
+        self.assertIn("zones", client_glob.session["workingdict"])
 
     def test_build_policy(self):
         self.policyname = "allow-123456789-to-123456789"
 
         def post_address(direction, objname, zone):
-            self.client.post(
+            client_glob.post(
                 "/ajax/policy/add/address/",
                 {
                     "policyname": self.policyname,
@@ -122,7 +133,7 @@ class Tests(TestCase):
             )
 
         def post_application(objname):
-            self.client.post(
+            client_glob.post(
                 "/ajax/policy/add/application/",
                 {"policyname": self.policyname, "objname": objname},
             )
@@ -133,7 +144,7 @@ class Tests(TestCase):
         post_application("TEST_APPLICATION_0")
         post_application("TEST_APPSET")
 
-        policy = self.client.session["configdict"]["policies"][self.policyname]
+        policy = client_glob.session["configdict"]["policies"][self.policyname]
         self.assertIn(self.zone_a, policy["fromzone"])
         self.assertIn(self.zone_b, policy["tozone"])
         self.assertIn("TEST_ADDRSET", policy["source"])
@@ -144,7 +155,7 @@ class Tests(TestCase):
     def test_rename_policy(self):
         self.test_build_policy()
 
-        self.client.post(
+        client_glob.post(
             "/ajax/policy/rename/",
             {
                 "previousname": "allow-123456789-to-123456789",
@@ -154,13 +165,14 @@ class Tests(TestCase):
 
         self.assertIn(
             "allow-TEST_ADDRESS_3-to-TEST_ADDRSET",
-            self.client.session["configdict"]["policies"],
+            client_glob.session["configdict"]["policies"],
         )
 
     def test_delete_objects_from_policy(self):
+        client = copy.deepcopy(client_glob)
         self.test_build_policy()
 
-        self.client.post(
+        client.post(
             "/ajax/policy/delete/address/",
             {
                 "policyname": self.policyname,
@@ -169,18 +181,18 @@ class Tests(TestCase):
                 "zone": self.zone_a,
             },
         )
-        self.client.post(
+        client.post(
             "/ajax/policy/delete/application/",
             {"policyname": self.policyname, "objname": "TEST_APPSET"},
         )
 
-        policy = self.client.session["configdict"]["policies"][self.policyname]
+        policy = client.session["configdict"]["policies"][self.policyname]
         self.assertNotIn("TEST_ADDRSET", policy)
         self.assertNotIn("TEST_APPSET", policy)
 
     def test_write_yamlconfig(self):
         self.test_build_policy()
-        self.client.post("/ajax/writeyamlconfig/")
+        client_glob.post("/ajax/writeyamlconfig/")
 
         local_repo = git.Repo("workspace/testuser")
         diff = local_repo.git.diff()
@@ -192,7 +204,7 @@ class Tests(TestCase):
         self.test_set_git_token()
         self.test_build_policy()
         self.test_write_yamlconfig()
-        self.client.post("/ajax/commitconfig/")
+        client_glob.post("/ajax/commitconfig/")
 
         local_repo = git.Repo("workspace/testuser")
         diff = local_repo.git.diff()
@@ -200,13 +212,13 @@ class Tests(TestCase):
         self.assertEqual(diff, "")
 
     def test_check_session_status(self):
-        response = self.client.get("/ajax/session/status/")
+        response = client_glob.get("/ajax/session/status/")
 
         response_val = response.content.decode("utf-8")
         self.assertEqual(response_val, "0")
 
     def test_extend_session(self):
-        response = self.client.post("/ajax/session/extend/")
+        response = client_glob.post("/ajax/session/extend/")
 
         response_val = response.content.decode("utf-8")
         self.assertEqual(response_val, "0")
