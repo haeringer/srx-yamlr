@@ -4,4 +4,5 @@ source =
 omit =
     srxapp/migrations/*
     srxapp/apps.py
+    srxapp/tests.py
     */__init__.py
