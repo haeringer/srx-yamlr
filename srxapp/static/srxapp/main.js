@@ -147,9 +147,7 @@ function getYamlConfig() {
 function getExistingPolicyDetails() {
   $.post("/ajax/loadpolicy/")
     .done(function(response) {
-      currentPolicy.policyname = response.pname
       loadExistingPolicy(response)
-      console.log(currentPolicy)
       console.log(response)
     })
     .fail(function(errorThrown) {
@@ -165,6 +163,9 @@ function loadExistingPolicy(pe_detail) {
       if (direction !== null) {
         obj.direction = direction
       }
+      if (Array.isArray(obj.val) === true) {
+        obj.val = obj.val.join("<br>")
+      }
       addObjExisting(obj)
     }
   }
@@ -174,6 +175,18 @@ function loadExistingPolicy(pe_detail) {
   addObjFromExistingPolicy(pe_detail.destaddrsets, "addrset", "to")
   addObjFromExistingPolicy(pe_detail.applications, "application")
   addObjFromExistingPolicy(pe_detail.appsets, "appset")
+  currentPolicy.policyname = pe_detail.pname
+}
+
+function addObjExisting(obj) {
+  if (obj.type === "address" || obj.type === "addrset") {
+    const addrObj = new AddrObj(obj)
+    addrObj.blend_in_zone()
+    addrObj.add_object_to_list()
+  } else if (obj.type === "application" || obj.type === "appset") {
+    const appObj = new AppObj(obj)
+    appObj.add_object_to_list()
+  }
 }
 
 function addObjPreBuild(searchResultElement) {
@@ -194,17 +207,6 @@ function addObjPreBuild(searchResultElement) {
 
   resetSearch(searchResultElement)
   addObj(searchResultObj, true)
-}
-
-function addObjExisting(obj) {
-  if (obj.type === "address" || obj.type === "addrset") {
-    const addrObj = new AddrObj(obj)
-    addrObj.blend_in_zone()
-    addrObj.add_object_to_list()
-  } else if (obj.type === "application" || obj.type === "appset") {
-    const appObj = new AppObj(obj)
-    appObj.add_object_to_list()
-  }
 }
 
 function addObj(obj) {
