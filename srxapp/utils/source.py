@@ -131,5 +131,6 @@ class sourceData:
                     "source": values["source"],
                     "destination": values["destination"],
                     "application": values["application"],
+                    "action": values["action"],
                 }
             )

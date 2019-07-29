@@ -66,6 +66,7 @@ class srxPolicy:
             destaddrsets=[],
             applications=[],
             appsets=[],
+            action=[],
         )
 
         def get_policy_objects(workingdict, p_part):
@@ -82,17 +83,18 @@ class srxPolicy:
 
         pe_detail["pname"] = p_existing["name"]
 
-        sd = self.workingdict
+        wd = self.workingdict
         src = p_existing["source"]
         dest = p_existing["destination"]
         app = p_existing["application"]
 
-        pe_detail["srcaddresses"] = get_policy_objects(sd["addresses"], src)
-        pe_detail["destaddresses"] = get_policy_objects(sd["addresses"], dest)
-        pe_detail["srcaddrsets"] = get_policy_objects(sd["addrsets"], src)
-        pe_detail["destaddrsets"] = get_policy_objects(sd["addrsets"], dest)
-        pe_detail["applications"] = get_policy_objects(sd["applications"], app)
-        pe_detail["appsets"] = get_policy_objects(sd["appsets"], app)
+        pe_detail["srcaddresses"] = get_policy_objects(wd["addresses"], src)
+        pe_detail["destaddresses"] = get_policy_objects(wd["addresses"], dest)
+        pe_detail["srcaddrsets"] = get_policy_objects(wd["addrsets"], src)
+        pe_detail["destaddrsets"] = get_policy_objects(wd["addrsets"], dest)
+        pe_detail["applications"] = get_policy_objects(wd["applications"], app)
+        pe_detail["appsets"] = get_policy_objects(wd["appsets"], app)
+        pe_detail["action"] = p_existing["action"]
 
         return pe_detail
 
