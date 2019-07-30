@@ -1,4 +1,5 @@
 import os
+import re
 import json
 import logging
 import traceback
@@ -80,3 +81,14 @@ def get_token(request):
     token_encrypted = user.usersettings.gogs_tkn
     token = decrypt_string(token_encrypted)
     return token
+
+
+def in_string(word):
+    """
+    Check if string_a matches whole word in string_b, not only sequence of
+    characters as if using 'if string_a in string_b'.
+
+        >>> in_string('word')('one word of many')  ## return 'word'
+        >>> in_string('word')('swordsmith')        ## return None
+    """
+    return re.compile(r'\b({0})\b'.format(word), flags=re.IGNORECASE).search

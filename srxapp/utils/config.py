@@ -58,7 +58,7 @@ class srxPolicy:
 
         return p_existing
 
-    def get_existing_policy_details(self, p_existing):
+    def get_existing_policy_subvalues(self, p_existing):
         pe_detail = dict(
             srcaddresses=[],
             srcaddrsets=[],
@@ -69,31 +69,29 @@ class srxPolicy:
             action=[],
         )
 
-        def get_policy_objects(workingdict, p_part):
+        def get_objects(workingdict, obj_type):
             objects = []
+            p_part = p_existing[obj_type]
 
             for obj in workingdict:
-                if isinstance(p_part, list):
-                    if obj["name"] in p_part:
-                        objects.append(obj)
-                else:
-                    if obj["name"] in [p_part]:
+                if ((isinstance(p_part, list) and obj["name"] in p_part)
+                        or (isinstance(p_part, str)
+                            and helpers.in_string(obj["name"])(p_part))):
+                    if ((obj_type == "source" and obj["zone"] == p_existing["fromzone"])
+                        or (obj_type == "destination"
+                            and obj["zone"] == p_existing["tozone"])
+                            or (obj_type == "application")):
                         objects.append(obj)
             return objects
 
-        pe_detail["pname"] = p_existing["name"]
-
         wd = self.workingdict
-        src = p_existing["source"]
-        dest = p_existing["destination"]
-        app = p_existing["application"]
-
-        pe_detail["srcaddresses"] = get_policy_objects(wd["addresses"], src)
-        pe_detail["destaddresses"] = get_policy_objects(wd["addresses"], dest)
-        pe_detail["srcaddrsets"] = get_policy_objects(wd["addrsets"], src)
-        pe_detail["destaddrsets"] = get_policy_objects(wd["addrsets"], dest)
-        pe_detail["applications"] = get_policy_objects(wd["applications"], app)
-        pe_detail["appsets"] = get_policy_objects(wd["appsets"], app)
+        pe_detail["srcaddresses"] = get_objects(wd["addresses"], "source")
+        pe_detail["srcaddrsets"] = get_objects(wd["addrsets"], "source")
+        pe_detail["destaddresses"] = get_objects(wd["addresses"], "destination")
+        pe_detail["destaddrsets"] = get_objects(wd["addrsets"], "destination")
+        pe_detail["applications"] = get_objects(wd["applications"], "application")
+        pe_detail["appsets"] = get_objects(wd["appsets"], "application")
+        pe_detail["pname"] = p_existing["name"]
         pe_detail["action"] = p_existing["action"]
 
         return pe_detail
@@ -127,7 +125,7 @@ class srxPolicy:
 
         p_existing = self.check_for_policy_existing(p)
         if p_existing:
-            pe_detail = self.get_existing_policy_details(p_existing)
+            pe_detail = self.get_existing_policy_subvalues(p_existing)
             pe_fmt = self.format_existing_policy(p_existing)
 
             return dict(p_exists=True, pe_detail=pe_detail, p_existing=pe_fmt)
