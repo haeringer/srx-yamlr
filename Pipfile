@@ -11,10 +11,10 @@ black = "*"
 [packages]
 django = "==2.1.*"
 gitpython = "==2.1.*"
-simple-crypt = "==4.1.*"
 ruamel-yaml = "==0.15.*"
 gunicorn = "==19.9.*"
 requests = "==2.22.*"
+pycryptodome = "*"
 
 [requires]
 python_version = "3.7"

@@ -1,13 +1,15 @@
 import os
 import re
 import json
+import hashlib
 import logging
 import traceback
 
 from ruamel.yaml import YAML
 from django.utils.encoding import force_text
 from django.contrib.auth.models import User
-from simplecrypt import encrypt, decrypt
+from Crypto.Cipher import AES
+from Crypto import Random
 from base64 import b64encode, b64decode
 
 logger = logging.getLogger(__name__)
@@ -51,22 +53,6 @@ def get_django_secret():
     return force_text(secret)
 
 
-def encrypt_string(string):
-    key = get_django_secret()
-
-    cipher = encrypt(key, string)
-    encoded_cipher = b64encode(cipher)
-    return encoded_cipher.decode("utf-8")
-
-
-def decrypt_string(string):
-    key = get_django_secret()
-
-    cipher = b64decode(string)
-    plain_text = decrypt(key, cipher)
-    return plain_text.decode("utf-8")
-
-
 def check_if_token_set(user):
     dbstring = user.usersettings.gogs_tkn
 
@@ -92,3 +78,31 @@ def in_string(word):
         >>> in_string('word')('swordsmith')        ## return None
     """
     return re.compile(r'\b({0})\b'.format(word), flags=re.IGNORECASE).search
+
+
+def pad(string, size):
+    return string + (size - len(string) % size) * chr(size - len(string) % size)
+
+
+def unpad(string):
+    return string[:-ord(string[len(string) - 1:])]
+
+
+def encrypt_string(string):
+    password = get_django_secret()
+    private_key = hashlib.sha256(password.encode("utf-8")).digest()
+    str_padded = pad(string, 16).encode("utf8")
+    iv = Random.new().read(AES.block_size)
+    cipher = AES.new(private_key, AES.MODE_CBC, iv)
+    encoded_cipher = b64encode(iv + cipher.encrypt(str_padded))
+    return encoded_cipher.decode("utf-8")
+
+
+def decrypt_string(encrypted):
+    password = get_django_secret()
+    private_key = hashlib.sha256(password.encode("utf-8")).digest()
+    enc_decoded = b64decode(encrypted)
+    iv = enc_decoded[:16]
+    cipher = AES.new(private_key, AES.MODE_CBC, iv)
+    decrypted = unpad(cipher.decrypt(enc_decoded[16:]))
+    return bytes.decode(decrypted)
