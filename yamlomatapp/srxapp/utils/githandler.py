@@ -14,10 +14,9 @@ logger = logging.getLogger(__name__)
 class Repo:
     def __init__(self, request):
         self.request = request
-        git_server = os.environ.get("YM_GITSERVER", "")
-        self.git_server = git_server if git_server.endswith("/") else git_server + "/"
+        self.git_server = os.environ.get("YM_GITSERVER", "")
         self.remote_repo = os.environ.get("YM_ANSIBLEREPO", "")
-        self.remote_repo_url = self.git_server + self.remote_repo
+        self.remote_repo_url = os.path.join(self.git_server, self.remote_repo)
         self.username = request.user.username
         self.useremail = request.user.email
         self.workspace = "workspace/" + self.username
@@ -76,7 +75,7 @@ class Repo:
     def validate_git_authorization(self):
         try:
             token = helpers.get_token(self.request)
-            api_url = self.git_server + "api/v1/repos/" + self.remote_repo
+            api_url = os.path.join(self.git_server, "api/v1/repos/", self.remote_repo)
             headers = {"Authorization": "token {}".format(token)}
             return requests.get(api_url, headers=headers, verify=False)
 
