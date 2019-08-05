@@ -35,7 +35,10 @@ class Repo:
                 shutil.rmtree(self.workspace)
 
             logger.info("Cloning git repository...")
-            git.Repo.clone_from(self.remote_repo_url, self.workspace)
+            git.Repo.clone_from(
+                self.remote_repo_url, self.workspace,
+                config='http.sslVerify=false',
+            )
             return "success"
 
         except Exception:
