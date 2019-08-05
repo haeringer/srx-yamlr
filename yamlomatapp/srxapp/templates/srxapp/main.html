@@ -5,19 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="description" content="SRX YAMLr">
     <meta name="author" content="bhaeringer">
-    <link rel="shortcut icon" href="/static/favicon.ico?v=1" type="image/x-icon">
+
+    {% load static %}
+
+    <link rel="shortcut icon" href="{% static 'favicon.ico' %}" type="image/x-icon">
 
     <title>SRX YAMLr</title>
 
     <!-- Bootstrap core CSS + other libraries -->
-    <link rel="stylesheet" href="/static/bootstrap.min.css">
-    <link rel="stylesheet" href="/static/fontawesome-all.min.css">
+    <link rel="stylesheet" href="{% static 'bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'fontawesome-all.min.css' %}">
 
     <!-- Google Font for Logo -->
     <link href="https://fonts.googleapis.com/css?family=Comfortaa" rel="stylesheet">
 
     <!-- Custom CSS -->
-    <link rel="stylesheet" type="text/css" href="/static/srxapp/main.css">
+    <link rel="stylesheet" type="text/css" href="{% static 'srxapp/main.css' %}">
   </head>
 
   <body>
@@ -302,15 +305,14 @@
 
     <!-- Bootstrap core JavaScript + dependencies
     ================================================== -->
-    <script src="/static/jquery.min.js"></script>
-    <script>window.jQuery || document.write('<script src="/static/jquery.min.js"><\/script>')</script>
-    <script src="/static/bootstrap.bundle.min.js"></script>
+    <script src="{% static 'jquery.min.js' %}"></script>
+    <script src="{% static 'bootstrap.bundle.min.js' %}"></script>
 
     <!-- Other plug ins -->
-    <script src="/static/sweetalert.min.js"></script>
+    <script src="{% static 'sweetalert.min.js' %}"></script>
 
     <!-- ConfigGen JavaScript -->
-    <script src="/static/srxapp/main.js"></script>
+    <script src="{% static 'srxapp/main.js' %}"></script>
 
   </body>
 </html>

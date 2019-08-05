@@ -6,16 +6,23 @@
     <meta name="description" content="SRX YAMLr Login">
     <meta name="author" content="bhaeringer">
 
+    {% load static %}
+
+    <link rel="shortcut icon" href="{% static 'favicon.ico' %}" type="image/x-icon">
+
     <title>SRX YAMLr - Login</title>
 
+    {% load static %}
+
     <!-- Bootstrap core CSS -->
-    <link rel="stylesheet" href="/static/bootstrap.min.css">
+    <link rel="stylesheet" href="{% static 'bootstrap.min.css' %}">
+    <!-- <link rel="stylesheet" href="/static/bootstrap.min.css"> -->
 
     <!-- Google Font for Logo -->
     <link href="https://fonts.googleapis.com/css?family=Comfortaa" rel="stylesheet">
 
     <!-- Custom CSS for this template -->
-    <link rel="stylesheet" type="text/css" href="/static/srxapp/login.css">
+    <link rel="stylesheet" type="text/css" href="{% static 'srxapp/login.css' %}">
   </head>
 
   <body class="text-center">
