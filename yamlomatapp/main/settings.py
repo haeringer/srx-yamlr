@@ -23,7 +23,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = os.environ.get("YM_DJANGOSECRET")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get("YM_DEBUG") == "True"
+DEBUG = os.environ.get("YM_DEBUG")
 
 ALLOWED_HOSTS = ["*"]
 
@@ -77,7 +77,7 @@ WSGI_APPLICATION = "main.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
-        "NAME": os.path.join(BASE_DIR, "db.sqlite3"),
+        "NAME": os.path.join(os.environ.get("HOME"), "srx-yamlrdb.sqlite3"),
     }
 }
 
@@ -123,6 +123,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
 
+STATIC_ROOT = "/var/www/srx-yamlr/static/"
 STATIC_URL = "/static/"
 STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static'), )
 
@@ -147,7 +148,7 @@ LOGGING = {
         "logfile": {
             "level": "DEBUG",
             "class": "logging.handlers.RotatingFileHandler",
-            "filename": "srx-yamlr.log",
+            "filename": os.path.join(os.environ.get("HOME"), "srx-yamlr.log"),
             "maxBytes": 100000,
             "backupCount": 5,
             "formatter": "standard",
