@@ -1,0 +1,14 @@
+.git
+.gitignore
+Dockerfile*
+docker-compose*
+.dockerignore
+.env*
+.venv
+*/.DS_Store
+README.md
+LICENSE
+.vscode
+*/workspace
+*/htmlcov
+*/.coverage

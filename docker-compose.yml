@@ -1,0 +1,20 @@
+version: '3.7'
+
+services:
+  web:
+    build: .
+    volumes:
+      - type: volume
+        source: ym_persistent_dev
+        target: /home/srx-yamlr
+      - type: bind
+        source: ./
+        target: /opt/srx-yamlr
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    command: python manage.py runserver 0.0.0.0:8000
+
+volumes:
+  ym_persistent_dev:

@@ -1,0 +1,44 @@
+version: '3.7'
+
+services:
+  web:
+    build: .
+    volumes:
+      - type: volume
+        source: ym_persistent
+        target: /home/srx-yamlr
+      - type: volume
+        source: static_data
+        target: /var/www/srx-yamlr/static/
+    networks:
+      - nginx_network
+    expose:
+      - "8000"
+    env_file:
+      - ${ENV_FILE}
+    command: >
+      sh -c "python manage.py migrate &&
+             python manage.py collectstatic --noinput &&
+             gunicorn --bind :8000 main.wsgi:application"
+
+  nginx:
+    image: nginx:1.17.2-alpine
+    ports:
+      - "8001:8001"
+    volumes:
+      - ./config/nginx:/etc/nginx/conf.d/default.conf
+      - type: volume
+        source: static_data
+        target: /var/www/srx-yamlr/static/
+    networks:
+      - nginx_network
+    depends_on:
+      - web
+
+networks:
+  nginx_network:
+    driver: bridge
+
+volumes:
+  ym_persistent:
+  static_data:
