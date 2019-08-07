@@ -1,69 +1,36 @@
 # SRX YAMLr
 
-## Prerequisites
+## Development
 
-Install pyenv + pipenv for dependency management.
+Install Docker: https://docs.docker.com/install/
 
-MacOS:
+Clone the repository:
 
-    brew install python pyenv pipenv
+    git clone https://gogs.intern.example.com/noc/SRX YAMLr.git && cd SRX YAMLr
 
-CentOS:
+Run the development environment:
 
-    sudo yum install epel-release
-    sudo yum install python-pip
-    sudo adduser srx-yamlr
-    sudo su srx-yamlr
-    curl https://pyenv.run | bash
-    pip install pipenv
+    docker-compose build
+    docker-compose up
 
-## Project installation
+When running the application container for the first time with a fresh database / new docker volume:
 
-When having problems installing the appropriate Python version through pyenv, check the dependencies on https://github.com/pyenv/pyenv/wiki/common-build-problems.
-
-    git clone https://gogs.intern.example.com/noc/SRX YAMLr.git
-    cd SRX YAMLr
-    pyenv install 3.7.2
-    pipenv --python ~/.pyenv/versions/3.7.2/bin/python
-    pipenv install
-
-Activate the virtual environment:
-
-    pipenv shell
-
-
-### Set the environment variables for the application
-
-    vi ~/.bash_profile || ~/.bashrc
-
-    # SRX YAMLr configuration
-    YM_ANSIBLEREPO="https://git.intern.example.com/noc/ansible-junos"; export YM_ANSIBLEREPO
-    YM_YAMLFILE="host_vars/kami-kaze.yml"; export YM_YAMLFILE
-    YM_DJANGOSECRET="!7_k=@u=0fh$rxd#8e@w##eqed63fn%4ph!19+3e+se=-69x7%"; export YM_DJANGOSECRET
-    YM_DEBUG='True'; export YM_DEBUG
-
-    # Pipenv configuration
-    export PIPENV_VENV_IN_PROJECT=true
-
-
-### When running the application for the first time with a fresh database:
-
+    docker-compose exec web bash
     python manage.py migrate
     python manage.py createsuperuser
 
+Access the application via http://localhost:8000. The admin page can be reached at http://localhost:8000/admin.
+The dev environment uses the Django development server, which automatically
+reloads when changes are made to the python source code.
+
+## Configuration
+
+The app configuration is defined via environment variables in the container.
+While the development environment uses the .env file from the repository for configuration,
+the environment variables are handed over from the Jenkins credentials store in production (see Jenkinsfile), because they contain the Django secret.
+
 
 ## Appendix
-
-### Running the application in a development environment
-
-Activate the virtual environment and start the development server:
-
-    cd srx-yamlr
-    pipenv shell
-    python manage.py runserver 0.0.0.0:8000
-
-Access the application via http://localhost:8000. The admin page can be reached at http://localhost:8000/admin.
-
 
 ### Updating the database after a change to the models
 
@@ -71,12 +38,13 @@ Access the application via http://localhost:8000. The admin page can be reached 
     python manage.py sqlmigrate srxapp 00XX
     python manage.py migrate
 
-### Run unit tests
+### Running unit tests
 
     python manage.py test srxapp
 
 Use coverage.py to check test coverage of the project:
 
+    cd srx-yamlrapp
     coverage run manage.py test srxapp
     coverage html
     # then visit srx-yamlr/htmlcov/index.html
