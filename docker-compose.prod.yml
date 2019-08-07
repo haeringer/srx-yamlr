@@ -14,6 +14,7 @@ services:
       - nginx_network
     expose:
       - "8000"
+    restart: always
     env_file:
       - ${ENV_FILE}
     command: >
@@ -32,6 +33,7 @@ services:
         target: /var/www/srx-yamlr/static/
     networks:
       - nginx_network
+    restart: always
     depends_on:
       - web
 
