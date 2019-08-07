@@ -12,3 +12,5 @@ LICENSE
 */workspace
 */htmlcov
 */.coverage
+config/
+Jenkinsfile
