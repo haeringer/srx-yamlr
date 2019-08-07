@@ -16,7 +16,7 @@ services:
       - "8000"
     restart: always
     env_file:
-      - ${ENV_FILE}
+      - ${ENV_FILE:-.env}
     command: >
       sh -c "python manage.py migrate &&
              python manage.py collectstatic --noinput &&
