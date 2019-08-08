@@ -778,6 +778,8 @@ function commitConfig(commitButton) {
         }).then(() => {
           window.location.replace("/")
         })
+      } else if (response === "unauthorized") {
+        swal("Unauthorized", "Please verify your Git token", "error")
       } else {
         alert(
           "Git commit failed because of the following error:\n\n" +

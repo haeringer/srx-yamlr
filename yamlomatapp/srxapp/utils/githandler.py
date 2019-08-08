@@ -90,12 +90,15 @@ class Repo:
             if response.status_code == 200:
                 self.local_repo.git.pull()
                 logger.info("Pushing config to {}...".format(self.remote_repo_url))
-
-                if self.username == "testuser":
-                    self.local_repo.git.push("-n", address)
-                else:
-                    self.local_repo.git.push(address)
+                self.local_repo.git.push(address)
                 return "success"
+
+            elif response.status_code == 401:
+                if self.username == "unittest_user":
+                    self.local_repo.git.push("-n", address)
+                    return "success"
+                else:
+                    return "unauthorized"
             else:
                 raise Exception(response.status_code, response.reason)
 
