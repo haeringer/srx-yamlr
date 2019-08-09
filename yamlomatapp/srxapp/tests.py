@@ -9,7 +9,7 @@ client_glob = None
 
 
 def create_client_session():
-    username = "testuser"
+    username = "unittest_user"
     password = "123456"
 
     user = User.objects.create(username=username)
@@ -153,9 +153,10 @@ class Tests(TestCase):
         self.assertIn("TEST_APPSET", policy["application"])
 
     def test_rename_policy(self):
+        client = copy.deepcopy(client_glob)
         self.test_build_policy()
 
-        client_glob.post(
+        client.post(
             "/ajax/policy/rename/",
             {
                 "previousname": "allow-123456789-to-123456789",
@@ -165,7 +166,7 @@ class Tests(TestCase):
 
         self.assertIn(
             "allow-TEST_ADDRESS_3-to-TEST_ADDRSET",
-            client_glob.session["configdict"]["policies"],
+            client.session["configdict"]["policies"],
         )
 
     def test_delete_objects_from_policy(self):
@@ -190,23 +191,39 @@ class Tests(TestCase):
         self.assertNotIn("TEST_ADDRSET", policy)
         self.assertNotIn("TEST_APPSET", policy)
 
-    def test_write_yamlconfig(self):
-        self.test_build_policy()
-        client_glob.post("/ajax/writeyamlconfig/")
-
-        local_repo = git.Repo("workspace/testuser")
-        diff = local_repo.git.diff()
-
-        self.assertIn("TEST_ADDRSET", diff)
-        self.assertIn("TEST_APPLICATION_0", diff)
-
-    def test_commit_config(self):
+    def test_write_commit_yamlconfig(self):
         self.test_set_git_token()
         self.test_build_policy()
-        self.test_write_yamlconfig()
+
+        client_glob.post("/ajax/writeyamlconfig/")
+
+        local_repo = git.Repo("workspace/unittest_user")
+        diff = local_repo.git.diff()
+
+        lines = diff.split("\n")
+        count = 0
+        for line in lines:
+            if line.startswith("+ "):
+                count += 1
+
+        self.assertEqual(26, count)
+
+        self.assertIn("+    fromzone: untrust", diff)
+        self.assertIn(
+            "+    source:\n+      - TEST_ADDRESS_0\n+      - TEST_ADDRSET",
+            diff
+        )
+        self.assertIn("+    tozone: OfficeLAN", diff)
+        self.assertIn("+    destination: TEST_ADDRESS_3", diff)
+        self.assertIn(
+            "+    application:\n+      - TEST_APPLICATION_0\n+      - TEST_APPSET",
+            diff
+        )
+        self.assertIn("+    action: permit", diff)
+
         client_glob.post("/ajax/commitconfig/")
 
-        local_repo = git.Repo("workspace/testuser")
+        local_repo = git.Repo("workspace/unittest_user")
         diff = local_repo.git.diff()
 
         self.assertEqual(diff, "")
