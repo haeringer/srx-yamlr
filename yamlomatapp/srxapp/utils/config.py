@@ -6,6 +6,8 @@ from srxapp.utils import helpers
 class srxPolicy:
     def __init__(self, request):
         self.configdict = request.session["configdict"]
+        # Debug issue with disappearing config statements
+        helpers.log_config(self.configdict)
         self.workingdict = request.session["workingdict"]
         self.direction = request.POST.get("direction", None)
         self.name = request.POST.get("objname", None)
@@ -109,6 +111,7 @@ class srxPolicy:
     def update_policyname(self):
         cd = self.configdict
         cd["policies"][self.policyname] = cd["policies"].pop(self.previousname)
+        helpers.log_config(cd)
         return cd
 
     def add_address(self):
