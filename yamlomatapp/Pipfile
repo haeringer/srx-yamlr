@@ -6,7 +6,6 @@ verify_ssl = true
 [dev-packages]
 flake8 = "*"
 coverage = "*"
-black = "*"
 
 [packages]
 django = "==2.1.*"
@@ -14,7 +13,7 @@ gitpython = "==2.1.*"
 ruamel-yaml = "==0.15.*"
 gunicorn = "==19.9.*"
 requests = "==2.22.*"
-pycryptodome = "*"
+pycryptodome = "==3.8.*"
 
 [requires]
 python_version = "3.7"
