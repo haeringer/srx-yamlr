@@ -114,33 +114,7 @@
 
                     <input autofocus class="form-control searchform" type="text" id="search-from" onkeyup="objectSearch(this)" placeholder="Search IP address or object name" aria-label="Search" autocomplete="off">
 
-                    <ul class="list-inline d-none search-results-list shadow" id="search-from-ul">
-                    {% for adr in addresses %}
-                      <li class="search-results-item" id="from_{{ adr.id }}_address">
-                        <div class="row">
-                          <div class="col-auto mr-auto lgi-name"><a href="#" class="obj-name">{{ adr.name }}</a></div>
-                          <div class="d-none obj-zone">{{ adr.zone }}</div>
-                          <div class="w-100"></div>
-                          <div class="col-auto mr-auto lgi-name"><small><a href="#" class="text-black-50 obj-val">{{ adr.val }}</a></small></div>
-                        </div>
-                      </li>
-                    {% endfor %}
-                    {% for adrset in addrsets %}
-                      <li class="search-results-item" id="from_{{ adrset.id }}_addrset">
-                        <div class="row">
-                          <div class="col-auto mr-auto lgi-name"><a href="#" class="obj-name">{{ adrset.name }}</a></div>
-                          <div class="d-none obj-zone">{{ adrset.zone }}</div>
-                          <div class="w-100"></div>
-                          <div class="col-auto mr-auto lgi-name"><small><a href="#" class="text-black-50 obj-val">
-                            {% for a in adrset.val %}
-                              {{ a }}<br>
-                            {% endfor %}
-                            </a></small>
-                          </div>
-                        </div>
-                      </li>
-                    {% endfor %}
-                    </ul>
+                    <ul class="list-inline d-none search-results-list shadow" id="search-from-ul"></ul>
 
                   </div>
 
@@ -151,33 +125,7 @@
 
                     <input class="form-control searchform" type="text" id="search-to" onkeyup="objectSearch(this)" placeholder="Search IP address or object name" aria-label="Search" autocomplete="off">
 
-                    <ul class="list-inline d-none search-results-list shadow" id="search-to-ul">
-                    {% for adr in addresses %}
-                      <li class="search-results-item" id="to_{{ adr.id }}_address">
-                        <div class="row">
-                          <div class="col-auto mr-auto lgi-name"><a href="#" class="obj-name">{{ adr.name }}</a></div>
-                          <div class="d-none obj-zone">{{ adr.zone }}</div>
-                          <div class="w-100"></div>
-                          <div class="col-auto mr-auto lgi-name"><small><a href="#" class="text-black-50 obj-val">{{ adr.val }}</a></small></div>
-                        </div>
-                      </li>
-                    {% endfor %}
-                    {% for adrset in addrsets %}
-                      <li class="search-results-item" id="to_{{ adrset.id }}_addrset">
-                        <div class="row">
-                          <div class="col-auto mr-auto lgi-name"><a href="#" class="obj-name">{{ adrset.name }}</a></div>
-                          <div class="w-100"></div>
-                          <div class="d-none obj-zone">{{ adrset.zone }}</div>
-                          <div class="col-auto mr-auto lgi-name"><small><a href="#" class="text-black-50 obj-val">
-                            {% for a in adrset.val %}
-                              {{ a }}<br>
-                            {% endfor %}
-                            </a></small>
-                          </div>
-                        </div>
-                      </li>
-                    {% endfor %}
-                    </ul>
+                    <ul class="list-inline d-none search-results-list shadow" id="search-to-ul"></ul>
 
                   </div>
 
@@ -188,31 +136,7 @@
 
                     <input class="form-control searchform" type="text" id="search-app" onkeyup="objectSearch(this)" placeholder="Search application or protocol port" aria-label="Search" autocomplete="off">
 
-                    <ul class="list-inline d-none search-results-list shadow" id="search-app-ul">
-                    {% for app in applications %}
-                      <li class="search-results-item" id="app_{{ app.id }}_application">
-                        <div class="row">
-                          <div class="col-auto mr-auto lgi-name"><a href="#" class="obj-name">{{ app.name }}</a></div>
-                          <div class="w-100"></div>
-                          <div class="col-auto mr-auto lgi-name"><small><a href="#" class="text-black-50 obj-val">{{ app.val }}</a></small></div>
-                        </div>
-                      </li>
-                    {% endfor %}
-                    {% for appset in appsets %}
-                      <li class="search-results-item" id="app_{{ appset.id }}_appset">
-                        <div class="row">
-                          <div class="col-auto mr-auto lgi-name"><a href="#" class="obj-name">{{ appset.name }}</a></div>
-                          <div class="w-100"></div>
-                          <div class="col-auto mr-auto lgi-name"><small><a href="#" class="text-black-50 obj-val">
-                            {% for a in appset.val %}
-                              {{ a }}<br>
-                            {% endfor %}
-                            </a></small>
-                          </div>
-                        </div>
-                      </li>
-                    {% endfor %}
-                    </ul>
+                    <ul class="list-inline d-none search-results-list shadow" id="search-app-ul"></ul>
 
                   </div>
                 </div>

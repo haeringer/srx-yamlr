@@ -14,6 +14,8 @@ urlpatterns = [
          name="main_view"),
     path("load/", TemplateView.as_view(template_name="srxapp/load.html"),
          name="load"),
+    path("ajax/search/object/", views.search_object,
+         name="search_object"),
     path("ajax/loadobjects/", views.load_objects,
          name="load_objects"),
     path("ajax/loadpolicy/", views.get_existing_policy_details,

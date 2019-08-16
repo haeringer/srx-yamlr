@@ -36,6 +36,14 @@ def load_objects(request):
     return JsonResponse(response, safe=False)
 
 
+def search_object(request):
+    try:
+        response = helpers.search_object_in_workingdict(request)
+    except Exception:
+        response = helpers.view_exception(Exception)
+    return JsonResponse(response, safe=False)
+
+
 @login_required(redirect_field_name=None)
 def main_view(request):
     try:

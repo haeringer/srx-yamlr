@@ -257,3 +257,25 @@ class Tests(TestCase):
 
         self.assertIn("TEST_ADDRESS_0", response_val)
         self.assertNotIn("TEST_ADDRESS_3", response_val)
+
+    def test_search_address_object(self):
+        inputdata = "TEST_ADDRESS"
+        response = client_glob.get(
+            "/ajax/search/object/",
+            {"input": inputdata, "searchtype": "from"},
+        )
+        response_val = response.content.decode("utf-8")
+
+        self.assertIn("TEST_ADDRESS_0", response_val)
+        self.assertIn("TEST_ADDRESS_1", response_val)
+        self.assertIn("TEST_ADDRSET", response_val)
+
+    def test_search_application_object(self):
+        inputdata = "TEST_APPLICATION"
+        response = client_glob.get(
+            "/ajax/search/object/",
+            {"input": inputdata, "searchtype": "app"},
+        )
+        response_val = response.content.decode("utf-8")
+
+        self.assertIn("TEST_APPLICATION_0", response_val)
