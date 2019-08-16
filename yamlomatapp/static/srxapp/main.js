@@ -806,13 +806,18 @@ function settingsHandler() {
     if (pwNew !== pwNewConfirm) {
       showCreateFormError("password-form-alert", 1)
     } else {
-      changePassword(pwNew)
+      if (gogsToken !== "") {
+        setTimeout(function() {
+          changePassword(pwNew)
+        }, 1000)
+      } else {
+        changePassword(pwNew)
+      }
     }
   }
 }
 
 function setToken(token) {
-  $(".spinner-container").fadeIn()
   $.post({
     url: "/ajax/settings/token/gogs/",
     data: {
@@ -820,8 +825,6 @@ function setToken(token) {
     },
   })
     .done(function(response) {
-      $(".spinner-container").fadeOut()
-
       if (response === 0) {
         $("#token-set-check").html(
           `<i class="fas fa-circle mr-2 custom-green"></i>` +
