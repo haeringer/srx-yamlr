@@ -23,7 +23,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = os.environ.get("YM_DJANGOSECRET")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get("YM_DEBUG")
+DEBUG = os.environ.get("YM_DEBUG", False) == "True"
 
 ALLOWED_HOSTS = ["*"]
 
