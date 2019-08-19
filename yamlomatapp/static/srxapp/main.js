@@ -903,7 +903,7 @@ function showCreateFormError(elementName, templateNumber) {
   }
 }
 
-function objectSearch(e) {
+function policyObjectSearch(e) {
   var inputEl = document.getElementById(e.id)
   var input = inputEl.value.toUpperCase()
   var ul = document.getElementById(e.id + "-ul")
@@ -917,6 +917,56 @@ function objectSearch(e) {
     return
   }
 
+  objectSearch(input, searchType, policyObjectSearchCallback)
+
+  function policyObjectSearchCallback(searchResult) {
+    listElement.html("")
+    ul.classList.remove("d-none")
+
+    for (var i = 0; i < searchResult.length; i++) {
+      var obj = searchResult[i]
+      var val = obj.val
+
+      if (searchType === "from" || searchType === "to") {
+        var addrType = "address"
+
+        if (Array.isArray(val)) {
+          addrType = "addrset"
+          val = val.join("<br>")
+        }
+        listElement.append(
+         `<li class="search-results-item" id="${ searchType }_${ obj.id }_${ addrType }">
+            <div class="row">
+              <div class="col-auto mr-auto lgi-name"><a href="#" class="obj-name">${ obj.name }</a></div>
+              <div class="d-none obj-zone">${ obj.zone }</div>
+              <div class="w-100"></div>
+              <div class="col-auto mr-auto lgi-name"><small><a href="#" class="text-black-50 obj-val">${ val }</a></small></div>
+            </div>
+          </li>`
+        )
+      } else if (searchType === "app") {
+        var applType = "application"
+
+        if (Array.isArray(val)) {
+          applType = "appset"
+          val = val.join("<br>")
+        }
+        listElement.append(
+         `<li class="search-results-item" id="app_${ obj.id }_${ applType }">
+           <div class="row">
+             <div class="col-auto mr-auto lgi-name"><a href="#" class="obj-name">${ obj.name }</a></div>
+             <div class="w-100"></div>
+             <div class="col-auto mr-auto lgi-name"><small><a href="#" class="text-black-50 obj-val">${ val }</a></small></div>
+           </div>
+         </li>`
+         )
+       }
+    }
+  }
+}
+
+
+function objectSearch(input, searchType, callbackFunc) {
   $.get({
     url: "ajax/search/object/",
     data: {
@@ -925,53 +975,13 @@ function objectSearch(e) {
     },
   })
     .done(function(response) {
-      listElement.html("")
-      ul.classList.remove("d-none")
-
-      for (var i = 0; i < response.length; i++) {
-        var obj = response[i]
-        var val = obj.val
-
-        if (searchType === "from" || searchType === "to") {
-          var addrType = "address"
-
-          if (Array.isArray(val)) {
-            addrType = "addrset"
-            val = val.join("<br>")
-          }
-          listElement.append(
-           `<li class="search-results-item" id="${ searchType }_${ obj.id }_${ addrType }">
-              <div class="row">
-                <div class="col-auto mr-auto lgi-name"><a href="#" class="obj-name">${ obj.name }</a></div>
-                <div class="d-none obj-zone">${ obj.zone }</div>
-                <div class="w-100"></div>
-                <div class="col-auto mr-auto lgi-name"><small><a href="#" class="text-black-50 obj-val">${ val }</a></small></div>
-              </div>
-            </li>`
-          )
-        } else if (searchType === "app") {
-          var applType = "application"
-
-          if (Array.isArray(val)) {
-            applType = "appset"
-            val = val.join("<br>")
-          }
-          listElement.append(
-           `<li class="search-results-item" id="app_${ obj.id }_${ applType }">
-             <div class="row">
-               <div class="col-auto mr-auto lgi-name"><a href="#" class="obj-name">${ obj.name }</a></div>
-               <div class="w-100"></div>
-               <div class="col-auto mr-auto lgi-name"><small><a href="#" class="text-black-50 obj-val">${ val }</a></small></div>
-             </div>
-           </li>`
-           )
-         }
-      }
+      callbackFunc(response)
     })
     .fail(function(errorThrown) {
       console.log(errorThrown.toString())
     })
 }
+
 
 function resetSearch(item) {
   var searchForm = item.closest(".col-sm").querySelector(".searchform")
