@@ -2,7 +2,6 @@ from django.shortcuts import render
 from django.http import JsonResponse, Http404
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-from copy import deepcopy
 
 from srxapp.utils import config, helpers, source, githandler
 
@@ -36,18 +35,33 @@ def load_objects(request):
     return JsonResponse(response, safe=False)
 
 
+def load_modalcontent(request):
+    try:
+        workingdict = request.session["workingdict"]
+        context = {
+            "zones": workingdict["zones"],
+            "addresses": workingdict["addresses"],
+            "applications": workingdict["applications"],
+        }
+    except Exception:
+        raise Http404("HTTP 404 Error")
+    return render(request, "srxapp/modalcnt-create.html", context)
+
+
+def search_object(request):
+    try:
+        response = helpers.search_object_in_workingdict(request)
+    except Exception:
+        response = helpers.view_exception(Exception)
+    return JsonResponse(response, safe=False)
+
+
 @login_required(redirect_field_name=None)
 def main_view(request):
     try:
         user = User.objects.get(username=request.user.username)
         token_set = helpers.check_if_token_set(user)
-        workingdict = deepcopy(request.session["workingdict"])
         context = {
-            "zones": workingdict["zones"],
-            "addresses": workingdict["addresses"],
-            "addrsets": workingdict["addrsets"],
-            "applications": workingdict["applications"],
-            "appsets": workingdict["appsets"],
             "username": request.user.username,
             "token_set": token_set,
         }
@@ -166,7 +180,7 @@ def filter_objects(request):
     if selectedzone == "Choose Zone...":
         return JsonResponse(None, safe=False)
 
-    workingdict = deepcopy(request.session["workingdict"])
+    workingdict = request.session["workingdict"]
 
     addresses_filtered = []
     for address in workingdict["addresses"]:

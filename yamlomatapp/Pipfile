@@ -13,7 +13,7 @@ gitpython = "==2.1.*"
 ruamel-yaml = "==0.15.*"
 gunicorn = "==19.9.*"
 requests = "==2.22.*"
-pycryptodome = "*"
+pycryptodome = "==3.8.*"
 selenium = "*"
 
 [requires]

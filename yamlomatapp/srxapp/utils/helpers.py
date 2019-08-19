@@ -106,3 +106,31 @@ def decrypt_string(encrypted):
     cipher = AES.new(private_key, AES.MODE_CBC, iv)
     decrypted = unpad(cipher.decrypt(enc_decoded[16:]))
     return bytes.decode(decrypted)
+
+
+def search_object_in_workingdict(request):
+    searchtype = request.GET.get("searchtype", None)
+    inp = request.GET.get("input", None)
+    wd = request.session["workingdict"]
+    response = []
+
+    if searchtype == "from" or searchtype == "to":
+        singleobjects = "addresses"
+        setobjects = "addrsets"
+    elif searchtype == "app":
+        singleobjects = "applications"
+        setobjects = "appsets"
+
+    for obj in wd[singleobjects]:
+        if inp in obj["name"].upper() or inp in obj["val"].upper():
+            response.append(obj)
+
+    for obj in wd[setobjects]:
+        if inp in obj["name"].upper():
+            response.append(obj)
+        else:
+            for val in obj["val"]:
+                if inp in val.upper():
+                    response.append(obj)
+                    break
+    return response

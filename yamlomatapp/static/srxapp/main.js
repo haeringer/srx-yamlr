@@ -64,14 +64,21 @@ $(function() {
     listObjectHandler(list_item)
   })
 
-  // Create Object Modal related functions
-  $("#create-object-dropdown a").on("click", function() {
+  $('#create-object-modal').on('show.bs.modal', function(){
+    var modalContentDiv = $("#create-object-modal").find(".modal-content")
+    $(modalContentDiv).load("load/modalcontent", function(status, xhr ) {
+      if (status === "error") {
+        console.log(xhr.status + " " + xhr.statusText)
+      }
+    })
+  })
+  $("#create-object-modal").on("click", "#create-object-dropdown a", function() {
     showCreateObjectForm(this)
   })
-  $("#adrset-form-control-zone").on("click", function() {
+  $("#create-object-modal").on("click", "#adrset-form-control-zone", function() {
     filterObjects(this)
   })
-  $("button#create-object-save").click(function() {
+  $("#create-object-modal").on("click", "button#create-object-save", function() {
     createObjectHandler()
   })
 
@@ -806,13 +813,18 @@ function settingsHandler() {
     if (pwNew !== pwNewConfirm) {
       showCreateFormError("password-form-alert", 1)
     } else {
-      changePassword(pwNew)
+      if (gogsToken !== "") {
+        setTimeout(function() {
+          changePassword(pwNew)
+        }, 1000)
+      } else {
+        changePassword(pwNew)
+      }
     }
   }
 }
 
 function setToken(token) {
-  $(".spinner-container").fadeIn()
   $.post({
     url: "/ajax/settings/token/gogs/",
     data: {
@@ -820,8 +832,6 @@ function setToken(token) {
     },
   })
     .done(function(response) {
-      $(".spinner-container").fadeOut()
-
       if (response === 0) {
         $("#token-set-check").html(
           `<i class="fas fa-circle mr-2 custom-green"></i>` +
@@ -883,7 +893,6 @@ function hideModalAndFadeInSpinner(Modal) {
 
 function reloadAndFadeOutSpinner() {
   // reload only specific div of index.html
-  $("#search-forms").load("/ #search-forms")
   $("#create-form-container").load("/ #create-form-container")
   $(".spinner-container")
     .delay(400)
@@ -901,25 +910,85 @@ function showCreateFormError(elementName, templateNumber) {
   }
 }
 
-function objectSearch(e) {
-  var input, filter, ul, li, a, a0, a1, i
-  input = document.getElementById(e.id)
-  filter = input.value.toUpperCase()
-  ul = document.getElementById(e.id + "-ul")
-  li = ul.getElementsByTagName("li")
+function policyObjectSearch(e) {
+  var inputEl = document.getElementById(e.id)
+  var input = inputEl.value.toUpperCase()
+  var ul = document.getElementById(e.id + "-ul")
 
-  for (i = 0; i < li.length; i++) {
-    a0 = li[i].getElementsByTagName("a")[0]
-    a1 = li[i].getElementsByTagName("a")[1]
-    a = a0.innerHTML.toUpperCase() + " " + a1.innerHTML.toUpperCase()
-    if (a.indexOf(filter) > -1 && filter.length >= 1) {
-      ul.classList.remove("d-none")
-      li[i].style.display = ""
-    } else {
-      li[i].style.display = "none"
+  var searchType = e.id.split("-").pop()
+  var listElement = $("#search-" + searchType + "-ul")
+
+  if (input.length < 1) {
+    listElement.html("")
+    ul.classList.add("d-none")
+    return
+  }
+
+  objectSearch(input, searchType, policyObjectSearchCallback)
+
+  function policyObjectSearchCallback(searchResult) {
+    listElement.html("")
+    ul.classList.remove("d-none")
+
+    for (var i = 0; i < searchResult.length; i++) {
+      var obj = searchResult[i]
+      var val = obj.val
+
+      if (searchType === "from" || searchType === "to") {
+        var addrType = "address"
+
+        if (Array.isArray(val)) {
+          addrType = "addrset"
+          val = val.join("<br>")
+        }
+        listElement.append(
+         `<li class="search-results-item" id="${ searchType }_${ obj.id }_${ addrType }">
+            <div class="row">
+              <div class="col-auto mr-auto lgi-name"><a href="#" class="obj-name">${ obj.name }</a></div>
+              <div class="d-none obj-zone">${ obj.zone }</div>
+              <div class="w-100"></div>
+              <div class="col-auto mr-auto lgi-name"><small><a href="#" class="text-black-50 obj-val">${ val }</a></small></div>
+            </div>
+          </li>`
+        )
+      } else if (searchType === "app") {
+        var applType = "application"
+
+        if (Array.isArray(val)) {
+          applType = "appset"
+          val = val.join("<br>")
+        }
+        listElement.append(
+         `<li class="search-results-item" id="app_${ obj.id }_${ applType }">
+           <div class="row">
+             <div class="col-auto mr-auto lgi-name"><a href="#" class="obj-name">${ obj.name }</a></div>
+             <div class="w-100"></div>
+             <div class="col-auto mr-auto lgi-name"><small><a href="#" class="text-black-50 obj-val">${ val }</a></small></div>
+           </div>
+         </li>`
+         )
+       }
     }
   }
 }
+
+
+function objectSearch(input, searchType, callbackFunc) {
+  $.get({
+    url: "ajax/search/object/",
+    data: {
+      input: input,
+      searchtype: searchType,
+    },
+  })
+    .done(function(response) {
+      callbackFunc(response)
+    })
+    .fail(function(errorThrown) {
+      console.log(errorThrown.toString())
+    })
+}
+
 
 function resetSearch(item) {
   var searchForm = item.closest(".col-sm").querySelector(".searchform")
