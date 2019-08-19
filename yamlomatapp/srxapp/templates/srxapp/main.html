@@ -235,8 +235,13 @@
     <!-- Other plug ins -->
     <script src="{% static 'sweetalert.min.js' %}"></script>
 
-    <!-- ConfigGen JavaScript -->
-    <script src="{% static 'srxapp/main.js' %}"></script>
+    <!-- SRX YAMLr JavaScript -->
+    <script>
+    var static = "{% static . %}"
+    document.write("<script src='" + static + "srxapp/main.js?v="
+      + Date.now() + "'><\/script>")
+    </script>
+
 
   </body>
 </html>
