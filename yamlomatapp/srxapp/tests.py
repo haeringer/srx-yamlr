@@ -279,3 +279,14 @@ class Tests(TestCase):
         response_val = response.content.decode("utf-8")
 
         self.assertIn("TEST_APPLICATION_0", response_val)
+
+    def test_load_modalcontent(self):
+        response = client_glob.get("/load/modalcontent/")
+        response_val = response.content.decode("utf-8")
+
+        self.assertIn('<option class="small">TEST_ADDRESS_0</option>', response_val)
+        self.assertIn('<option class="small">TEST_APPLICATION_0</option>', response_val)
+        self.assertIn(
+            '<option value="{0}">{0}</option>'.format(self.zone_a),
+            response_val
+        )

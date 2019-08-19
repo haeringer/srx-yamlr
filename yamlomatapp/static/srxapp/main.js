@@ -64,14 +64,21 @@ $(function() {
     listObjectHandler(list_item)
   })
 
-  // Create Object Modal related functions
-  $("#create-object-dropdown a").on("click", function() {
+  $('#create-object-modal').on('show.bs.modal', function(){
+    var modalContentDiv = $("#create-object-modal").find(".modal-content")
+    $(modalContentDiv).load("load/modalcontent", function(status, xhr ) {
+      if (status === "error") {
+        console.log(xhr.status + " " + xhr.statusText)
+      }
+    })
+  })
+  $("#create-object-modal").on("click", "#create-object-dropdown a", function() {
     showCreateObjectForm(this)
   })
-  $("#adrset-form-control-zone").on("click", function() {
+  $("#create-object-modal").on("click", "#adrset-form-control-zone", function() {
     filterObjects(this)
   })
-  $("button#create-object-save").click(function() {
+  $("#create-object-modal").on("click", "button#create-object-save", function() {
     createObjectHandler()
   })
 
