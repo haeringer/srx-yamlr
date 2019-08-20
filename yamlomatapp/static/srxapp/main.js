@@ -628,7 +628,7 @@ function createAddress() {
     showCreateFormError("address-form-alert", 0)
     return false
   }
-  hideModalAndFadeInSpinner($("#create-object-modal"))
+  $("#create-object-modal").modal("toggle")
   $.post({
     url: "/ajax/object/create/address/",
     data: {
@@ -638,7 +638,6 @@ function createAddress() {
     },
   })
     .done(function(response) {
-      reloadAndFadeOutSpinner()
       updateYaml(response.yamlconfig)
     })
     .fail(function(errorThrown) {
@@ -655,7 +654,7 @@ function createAddrset() {
     showCreateFormError("addrset-form-alert", 0)
     return false
   }
-  hideModalAndFadeInSpinner($("#create-object-modal"))
+  h$("#create-object-modal").modal("toggle")
   $.post({
     url: "/ajax/object/create/addrset/",
     data: {
@@ -665,7 +664,6 @@ function createAddrset() {
     },
   })
     .done(function(response) {
-      reloadAndFadeOutSpinner()
       updateYaml(response.yamlconfig)
     })
     .fail(function(errorThrown) {
@@ -682,7 +680,7 @@ function createApplication() {
     showCreateFormError("application-form-alert", 0)
     return false
   }
-  hideModalAndFadeInSpinner($("#create-object-modal"))
+  $("#create-object-modal").modal("toggle")
   $.post({
     url: "/ajax/object/create/application/",
     data: {
@@ -692,7 +690,6 @@ function createApplication() {
     },
   })
     .done(function(response) {
-      reloadAndFadeOutSpinner()
       updateYaml(response.yamlconfig)
     })
     .fail(function(errorThrown) {
@@ -708,7 +705,7 @@ function createAppset() {
     showCreateFormError("appset-form-alert", 0)
     return false
   }
-  hideModalAndFadeInSpinner($("#create-object-modal"))
+  $("#create-object-modal").modal("toggle")
   $.post({
     url: "/ajax/object/create/appset/",
     data: {
@@ -717,7 +714,6 @@ function createAppset() {
     },
   })
     .done(function(response) {
-      reloadAndFadeOutSpinner()
       updateYaml(response.yamlconfig)
     })
     .fail(function(errorThrown) {
@@ -848,7 +844,7 @@ function setToken(token) {
 }
 
 function changePassword(pwNew) {
-  hideModalAndFadeInSpinner($("#settings-modal"))
+  $("#settings-modal").modal("toggle")
   $.post({
     url: "/ajax/settings/password/change/",
     data: {
@@ -856,7 +852,6 @@ function changePassword(pwNew) {
     },
   })
     .done(function(response) {
-      $(".spinner-container").fadeOut()
       swal({
         title: "Password changed",
         text: "Please log in again",
@@ -884,19 +879,6 @@ function enableCommitButton() {
     .fail(function(errorThrown) {
       console.log(errorThrown.toString())
     })
-}
-
-function hideModalAndFadeInSpinner(Modal) {
-  Modal.modal("toggle")
-  $(".spinner-container").fadeIn()
-}
-
-function reloadAndFadeOutSpinner() {
-  // reload only specific div of index.html
-  $("#create-form-container").load("/ #create-form-container")
-  $(".spinner-container")
-    .delay(400)
-    .fadeOut()
 }
 
 function showCreateFormError(elementName, templateNumber) {
