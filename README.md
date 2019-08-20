@@ -38,13 +38,20 @@ the environment variables are handed over from the Jenkins credentials store in 
     python manage.py sqlmigrate srxapp 00XX
     python manage.py migrate
 
-### Running unit tests
+### Running tests
+
+    python manage.py test
+
+Run unit or functional tests separately:
 
     python manage.py test srxapp
+    python manage.py test tests_functional
 
-Use coverage.py to check test coverage of the project:
+The functional tests are made with Selenium, which can be accessed at vnc://localhost:5900 for debugging purposes.
+
+Use coverage.py to check backend test coverage of the project:
 
     cd srx-yamlrapp
-    coverage run manage.py test srxapp
+    coverage run manage.py test
     coverage html
     # then visit srx-yamlr/htmlcov/index.html
