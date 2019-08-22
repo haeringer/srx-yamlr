@@ -14,8 +14,6 @@ urlpatterns = [
          name="main_view"),
     path("load/modalcontent/", views.load_modalcontent,
          name="modalcontent"),
-    path("load/", TemplateView.as_view(template_name="srxapp/load.html"),
-         name="load"),
     path("ajax/search/object/", views.search_object,
          name="search_object"),
     path("ajax/loadobjects/", views.load_objects,

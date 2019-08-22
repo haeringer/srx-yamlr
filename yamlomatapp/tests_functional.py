@@ -43,3 +43,5 @@ class MySeleniumTests(StaticLiveServerTestCase):
         self.browser.find_element_by_id("id_username").send_keys('functest_user')
         self.browser.find_element_by_id("id_password").send_keys('123456')
         self.browser.find_element_by_class_name("btn-block").click()
+        search_el = self.browser.find_element_by_id("search-from")
+        self.assertIsNotNone(search_el)
