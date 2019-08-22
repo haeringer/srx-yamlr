@@ -111,8 +111,8 @@ $(function() {
   $("#commit-config").on("click", function() {
     commitConfig(this)
   })
-  $("#edit-yaml").on("click", function() {
-    editYaml()
+  $("#update-cache").on("click", function() {
+    loadObjects("manual")
   })
 
   $('[data-toggle="tooltip"]').tooltip({

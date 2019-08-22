@@ -48,28 +48,53 @@
                 </button>
               </div>
               <div class="modal-body">
-                <div class="form-group" id="settings-modal-form">
-                  <div class="row">
-                    <div class="col-4">
-                      <h6>Git Access Token</h6>
-                    </div>
-                    <div class="col-8" id="token-set-check">
-                      {% if token_set %}
-                      <i class="fas fa-circle mr-2 custom-green"></i><small>Token has been set</small>
-                      {% else %}
-                      <i class="fas fa-circle mr-2 custom-red"></i><small>Token not set</small>
-                      {% endif %}
+                <ul class="nav nav-tabs" id="myTab" role="tablist">
+                  <li class="nav-item">
+                    <a class="nav-link active" id="settings-user-tab" data-toggle="tab" href="#settings-user" role="tab">User</a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link" id="settings-about-tab" data-toggle="tab" href="#settings-about" role="tab">About</a>
+                  </li>
+                </ul>
+                <div class="tab-content" id="myTabContent">
+                  <div class="tab-pane fade show active" id="settings-user" role="tabpanel">
+                    <br>
+                    <div class="form-group" id="settings-modal-form">
+                      <div class="row">
+                        <div class="col-4">
+                          <h6>Git Access Token</h6>
+                        </div>
+                        <div class="col-8" id="token-set-check">
+                          {% if token_set %}
+                          <i class="fas fa-circle mr-2 custom-green"></i><small>Token has been set</small>
+                          {% else %}
+                          <i class="fas fa-circle mr-2 custom-red"></i><small>Token not set</small>
+                          {% endif %}
+                        </div>
+                      </div>
+                      <div class="form-group">
+                        <input type="password" class="form-control" id="gogs-token" autocomplete="new-password">
+                      </div>
+                      <br>
+                      <h6>Change Password</h6>
+                      <div id="password-form-alert"></div>
+                      <div class="form-group">
+                        <input type="password" class="form-control" placeholder="New password" id="pw-new" autocomplete="new-password">
+                        <input type="password" class="form-control mt-2" placeholder="Confirm password" id="pw-new-confirm" autocomplete="new-password">
+                      </div>
                     </div>
                   </div>
-                  <div class="form-group">
-                    <input type="password" class="form-control" id="gogs-token" autocomplete="new-password">
-                  </div>
-                  <br>
-                  <h6>Change Password</h6>
-                  <div id="password-form-alert"></div>
-                  <div class="form-group">
-                    <input type="password" class="form-control" placeholder="New password" id="pw-new" autocomplete="new-password">
-                    <input type="password" class="form-control mt-2" placeholder="Confirm password" id="pw-new-confirm" autocomplete="new-password">
+                  <div class="tab-pane fade" id="settings-about" role="tabpanel" aria-labelledby="settings-about-tab">
+                    <br>
+                    <h6>Application Version</h6>
+                    <div>
+                      {{ version }}
+                    </div>
+                    <br>
+                    <h6>Update Cache</h6>
+                    <div>
+                      <a href="#" class="small" id="update-cache">Perform a manual cache clean + reload</a>
+                    </div>
                   </div>
                 </div>
               </div>

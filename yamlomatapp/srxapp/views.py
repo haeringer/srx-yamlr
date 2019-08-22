@@ -12,9 +12,12 @@ def main_view(request):
     try:
         user = User.objects.get(username=request.user.username)
         token_set = helpers.check_if_token_set(user)
+        with open("version") as vfile:
+            version = vfile.read()
         context = {
             "username": request.user.username,
             "token_set": token_set,
+            "version": version,
         }
     except Exception:
         helpers.view_exception(Exception)
