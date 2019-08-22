@@ -102,10 +102,6 @@ body {
     opacity: 0.5;
   }
 
-  #edit-yaml a:link, a:visited {
-    color: rgb(100, 100, 100);
-  }
-
   #output-log {
     font-size: 80%;
   }
@@ -200,8 +196,7 @@ body {
     width: 95%;
   }
 
-
-  /* PACE.js */
+/* Progress bar */
 
   .pace {
     -webkit-pointer-events: none;
@@ -226,19 +221,6 @@ body {
     height: 2px;
   }
 
-
-  #loadingtext{
-    font-family: Arial, Helvetica, sans-serif;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    font-size: 12px;
-    color: #007bff;
-    transform: translate(-100px,-25px);
-    -ms-transform: translate(-100px,-25px);
-  }
-
-
 /* Loading spinner */
 
   .spinner-container {
@@ -255,44 +237,9 @@ body {
     cursor: pointer;
   }
 
-  .spinner {
-    margin: 100px auto 0;
-    width: 70px;
-    text-align: center;
-  }
-
-  .spinner > div {
-    width: 18px;
-    height: 18px;
-    background-color: #444;
-
-    border-radius: 100%;
-    display: inline-block;
-    -webkit-animation: sk-bouncedelay 1.4s infinite ease-in-out both;
-    animation: sk-bouncedelay 1.4s infinite ease-in-out both;
-  }
-
-  .spinner .bounce1 {
-    -webkit-animation-delay: -0.32s;
-    animation-delay: -0.32s;
-  }
-
-  .spinner .bounce2 {
-    -webkit-animation-delay: -0.16s;
-    animation-delay: -0.16s;
-  }
-
-  @-webkit-keyframes sk-bouncedelay {
-    0%, 80%, 100% { -webkit-transform: scale(0) }
-    40% { -webkit-transform: scale(1.0) }
-  }
-
-  @keyframes sk-bouncedelay {
-    0%, 80%, 100% {
-      -webkit-transform: scale(0);
-      transform: scale(0);
-    } 40% {
-      -webkit-transform: scale(1.0);
-      transform: scale(1.0);
-    }
+  .spinner-border {
+    border-radius: 50% !important;
+    position: absolute;
+    top: 50%;
+    left: 50%;
   }
