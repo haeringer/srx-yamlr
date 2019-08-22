@@ -1,5 +1,6 @@
 import os
 import logging
+import time
 from ruamel.yaml import YAML
 from uuid import uuid4
 from django.core.cache import cache
@@ -16,14 +17,22 @@ class sourceData:
         workspace = "workspace/" + request.user.get_username()
         yamlfile = os.environ.get("YM_YAMLFILE", "")
         self.filepath = workspace + "/" + yamlfile
-        self.workingdict = request.session["workingdict"]
         self.configdict = request.session["configdict"]
+        self.workingdict = {}
+
+    def save_dict_to_cache(self):
+        cache.set("workingdict_origin", self.workingdict)
 
     def read_source_file(self):
-        logger.info("Importing YAML source data...")
-        with open(self.filepath, "r") as sourcefile:
-            self.sourcedict = yaml.load(sourcefile)
-            cache.set("sourcedict", self.sourcedict)
+        sourcefile = None
+        while sourcefile is None:
+            try:
+                with open(self.filepath, "r") as sourcefile:
+                    logger.info("Importing YAML source data...")
+                    self.sourcedict = yaml.load(sourcefile)
+                    cache.set("sourcedict", self.sourcedict)
+            except Exception:
+                time.sleep(1)
 
     def update_source_file(self):
         sourcedict = cache.get("sourcedict")

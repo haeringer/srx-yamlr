@@ -43,6 +43,17 @@ class Repo:
         except Exception:
             return helpers.view_exception(Exception)
 
+    def get_file_commit_hash(self):
+        try:
+            yamlfile = os.environ.get("YM_YAMLFILE", "")
+            commit_hash = self.local_repo.git.log(
+                "-n 1", "--pretty=format:%H", "--", yamlfile
+            )
+            return commit_hash
+
+        except Exception:
+            helpers.view_exception(Exception)
+
     def git_get_diff(self):
         try:
             return self.local_repo.git.diff()

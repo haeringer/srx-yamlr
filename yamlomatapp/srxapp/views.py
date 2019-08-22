@@ -2,34 +2,74 @@ from django.shortcuts import render
 from django.http import JsonResponse, Http404
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
+from django.core.cache import cache
 
 from srxapp.utils import config, helpers, source, githandler
 
 
 @login_required(redirect_field_name=None)
-def load_objects(request):
+def main_view(request):
     try:
-        response = {}
-        # Initialize empty dictionaries for user session
-        request.session["workingdict"] = {}
+        user = User.objects.get(username=request.user.username)
+        token_set = helpers.check_if_token_set(user)
+        context = {
+            "username": request.user.username,
+            "token_set": token_set,
+        }
+    except Exception:
+        helpers.view_exception(Exception)
+        raise Http404("HTTP 404 Error")
+    return render(request, "srxapp/main.html", context)
+
+
+def create_session_stores(request):
+    try:
+        workingdict_origin = cache.get("workingdict_origin")
+        commithash_cached_data = cache.get("commithash_cached_data")
+        if workingdict_origin and commithash_cached_data:
+            request.session["workingdict"] = workingdict_origin
+            commithash_current_data = cache.get("commithash_current_data")
+            if commithash_cached_data == commithash_current_data:
+                response = "cache_ok"
+            else:
+                response = "cache_update"
+        else:
+            response = "cache_update"
         request.session["configdict"] = {}
         request.session["pe_detail"] = {}
+    except Exception:
+        response = helpers.view_exception(Exception)
+    return JsonResponse(response, safe=False)
 
+
+def load_objects(request):
+    try:
+        src = source.sourceData(request)
+        src.read_source_file()
+        src.import_zones()
+        src.import_addresses()
+        src.import_addrsets()
+        src.import_applications()
+        src.import_appsets()
+        src.import_policies()
+        src.save_dict_to_cache()
+        request.session["workingdict"] = cache.get("workingdict_origin")
+
+        commithash_current_data = cache.get("commithash_current_data")
+        cache.set("commithash_cached_data", commithash_current_data)
+        response = "success"
+    except Exception:
+        response = helpers.view_exception(Exception)
+    return JsonResponse(response, safe=False)
+
+
+def clone_repo(request):
+    try:
         repo = githandler.Repo(request)
-        clone_result = repo.git_clone()
+        response = repo.git_clone()
 
-        if clone_result == "success":
-            src = source.sourceData(request)
-            src.read_source_file()
-            src.import_zones()
-            src.import_addresses()
-            src.import_addrsets()
-            src.import_applications()
-            src.import_appsets()
-            src.import_policies()
-        else:
-            response = clone_result
-
+        commithash_current_data = repo.get_file_commit_hash()
+        cache.set("commithash_current_data", commithash_current_data)
     except Exception:
         response = helpers.view_exception(Exception)
     return JsonResponse(response, safe=False)
@@ -54,21 +94,6 @@ def search_object(request):
     except Exception:
         response = helpers.view_exception(Exception)
     return JsonResponse(response, safe=False)
-
-
-@login_required(redirect_field_name=None)
-def main_view(request):
-    try:
-        user = User.objects.get(username=request.user.username)
-        token_set = helpers.check_if_token_set(user)
-        context = {
-            "username": request.user.username,
-            "token_set": token_set,
-        }
-    except Exception:
-        helpers.view_exception(Exception)
-        raise Http404("HTTP 404 Error")
-    return render(request, "srxapp/main.html", context)
 
 
 def policy_add_address(request):

@@ -10,12 +10,16 @@ var currentPolicy = {
  */
 $(window).on("load", function() {
   var url = new URL(window.location.href)
-  if (url.search === "?loadpolicy") {
+
+  if (url.search === "") {
+    generateNewPolicyName()
+    cloneGitRepo()
+    createSessionStores()
+  } else if (url.search === "?loadpolicy") {
     getExistingPolicyDetails()
     getYamlConfig()
-  } else {
-    var nameId = generateId()
-    currentPolicy.policyname = "allow-" + nameId + "-to-" + nameId
+  } else if (url.search === "?addpolicy") {
+    generateNewPolicyName()
     getYamlConfig()
   }
   setInterval(function() {
@@ -96,10 +100,10 @@ $(function() {
     renamePolicyFormSetup()
   })
   $("#add-policy").on("click", function() {
-    window.location.replace("/")
+    window.location.replace("/?addpolicy")
   })
   $("#clear-config").on("click", function() {
-    window.location.replace("/load")
+    window.location.replace("/")
   })
   $("#write-config").on("click", function() {
     writeYamlConfig(this)
@@ -140,8 +144,68 @@ function extendSession () {
   }, 1000)
 }
 
+function cloneGitRepo() {
+  $("#write-config").prop("disabled", true)
+  console.log("Cloning Ansible Git repository...")
+
+  $.get("/ajax/clonerepo/")
+    .done(function(response) {
+      if (response === "success") {
+        console.log("Finished Git clone")
+        $("#write-config").prop("disabled", false)
+      } else {
+        alert(response)
+      }
+    })
+    .fail(function(errorThrown) {
+      console.log(errorThrown.toString())
+    })
+}
+
+function loadObjects(mode) {
+  if (mode === "auto") {
+    swal("Cache Update", "Updating cache to latest configuration \
+      revision...", "info")
+  } else if (mode === "manual") {
+    $("#settings-modal").modal("toggle")
+  }
+  $(".spinner-container").fadeIn()
+  $.get({
+    url: "/ajax/loadobjects/",
+  })
+    .done(function(response) {
+      $(".spinner-container").fadeOut()
+      if (response === "success") {
+        console.log("Finished importing config data from YAML")
+      }
+      if (response.error != null) {
+        alert(
+          "YAML import failed because of the following error:\n\n" +
+            JSON.parse(response.error)
+        )
+      }
+    })
+    .fail(function(errorThrown) {
+      console.log(errorThrown.toString())
+    })
+}
+
+function createSessionStores() {
+  $.post("/ajax/session/stores/create/")
+    .done(function(response) {
+      if (response === "cache_update") {
+        loadObjects("auto")
+      } else if (response === "cache_ok") {
+        console.log("Configuration cache is up to date")
+      }
+    })
+    .fail(function(errorThrown) {
+      console.log(errorThrown.toString())
+    })
+}
+
 function getYamlConfig() {
-  $.post("/ajax/getyamlconfig/")
+  $.get("/ajax/getyamlconfig/")
     .done(function(response) {
       check_response_backend_error(response)
       updateYaml(response.yamlconfig)
@@ -654,7 +718,7 @@ function createAddrset() {
     showCreateFormError("addrset-form-alert", 0)
     return false
   }
-  h$("#create-object-modal").modal("toggle")
+  $("#create-object-modal").modal("toggle")
   $.post({
     url: "/ajax/object/create/addrset/",
     data: {
@@ -985,4 +1049,9 @@ function generateId() {
     .toString(36)
     .substr(2, 9)
     .toUpperCase()
+}
+
+function generateNewPolicyName() {
+  var nameId = generateId()
+  currentPolicy.policyname = "allow-" + nameId + "-to-" + nameId
 }

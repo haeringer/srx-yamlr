@@ -1,5 +1,4 @@
 from django.urls import path, include
-from django.views.generic import TemplateView
 from django.contrib.auth import views as auth_views
 from srxapp import views
 from srxapp import forms
@@ -18,6 +17,8 @@ urlpatterns = [
          name="search_object"),
     path("ajax/loadobjects/", views.load_objects,
          name="load_objects"),
+    path("ajax/clonerepo/", views.clone_repo,
+         name="clone_repo"),
     path("ajax/loadpolicy/", views.get_existing_policy_details,
          name="get_existing_policy_details"),
     path("ajax/getyamlconfig/", views.get_yamlconfig,
@@ -46,6 +47,8 @@ urlpatterns = [
          name="write_yamlconfig"),
     path("ajax/commitconfig/", views.commit_config,
          name="commit_config"),
+    path("ajax/session/stores/create/", views.create_session_stores,
+         name="create_session_stores"),
     path("ajax/session/status/", views.check_session_status,
          name="check_session_status"),
     path("ajax/session/extend/", views.extend_session,

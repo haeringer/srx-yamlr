@@ -18,8 +18,10 @@ def create_client_session():
 
     client = Client()
     client.login(username=username, password=password)
-    client.get("/ajax/loadobjects/")
     client.get("/")
+    client.get("/ajax/clonerepo/")
+    client.post("/ajax/session/stores/create/")
+    client.get("/ajax/loadobjects/")
 
     global client_glob
     client_glob = client
