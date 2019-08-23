@@ -24,10 +24,6 @@ class Repo:
         if os.path.isdir(self.workspace):
             self.local_repo = git.Repo(self.workspace)
 
-            with self.local_repo.config_writer() as cw:
-                cw.set_value("user", "name", self.username).release()
-                cw.set_value("user", "email", self.useremail).release()
-
     def git_clone(self):
         try:
             if os.path.isdir(self.workspace):
@@ -39,6 +35,15 @@ class Repo:
                 config='http.sslVerify=false',
             )
             return "success"
+
+        except Exception:
+            return helpers.view_exception(Exception)
+
+    def git_config(self):
+        try:
+            with self.local_repo.config_writer() as cw:
+                cw.set_value("user", "name", self.username).release()
+                cw.set_value("user", "email", self.useremail).release()
 
         except Exception:
             return helpers.view_exception(Exception)
