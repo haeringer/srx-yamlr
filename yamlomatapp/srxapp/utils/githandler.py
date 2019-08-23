@@ -20,7 +20,6 @@ class Repo:
         self.username = request.user.username
         self.useremail = request.user.email
         self.workspace = "workspace/" + self.username
-
         if os.path.isdir(self.workspace):
             self.local_repo = git.Repo(self.workspace)
 
@@ -32,8 +31,9 @@ class Repo:
             logger.info("Cloning git repository...")
             git.Repo.clone_from(
                 self.remote_repo_url, self.workspace,
-                config='http.sslVerify=false',
+                config="http.sslVerify=false",
             )
+            self.local_repo = git.Repo(self.workspace)
             return "success"
 
         except Exception:

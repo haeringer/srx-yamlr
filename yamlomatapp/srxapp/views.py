@@ -71,7 +71,6 @@ def clone_repo(request):
         repo = githandler.Repo(request)
         response = repo.git_clone()
         repo.git_config()
-
         commithash_current_data = repo.get_file_commit_hash()
         cache.set("commithash_current_data", commithash_current_data)
     except Exception:
