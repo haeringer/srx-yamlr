@@ -237,7 +237,7 @@ body {
     cursor: pointer;
   }
 
-  .spinner-border {
+  .spinner-custom {
     border-radius: 50% !important;
     position: absolute;
     top: 50%;
