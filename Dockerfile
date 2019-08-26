@@ -14,7 +14,7 @@ RUN apt-get install -y vim git
 # Create project directories and copy project files
 RUN mkdir -p $PROJECT_DIR $STATIC_DIR
 ADD . $PROJECT_DIR
-WORKDIR $PROJECT_DIR/srx-yamlrapp
+WORKDIR $PROJECT_DIR/django
 
 # Install project dependencies
 RUN pip install --upgrade pip

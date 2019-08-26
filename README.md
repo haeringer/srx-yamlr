@@ -51,7 +51,7 @@ The functional tests are made with Selenium, which can be accessed at vnc://loca
 
 Use coverage.py to check backend test coverage of the project:
 
-    cd srx-yamlrapp
+    cd django
     coverage run manage.py test
     coverage html
-    # then visit srx-yamlrapp/htmlcov/index.html
+    # then visit django/htmlcov/index.html
