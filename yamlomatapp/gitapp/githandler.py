@@ -5,7 +5,7 @@ import logging
 import requests
 import urllib3
 
-from srxapp.utils import helpers
+from baseapp import helpers
 
 urllib3.disable_warnings()
 logger = logging.getLogger(__name__)

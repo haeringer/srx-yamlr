@@ -1,6 +1,7 @@
 from copy import deepcopy
 from uuid import uuid4
-from srxapp.utils import helpers
+
+from baseapp import helpers
 
 
 class srxPolicy:

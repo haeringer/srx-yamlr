@@ -34,8 +34,8 @@ the environment variables are handed over from the Jenkins credentials store in 
 
 ### Updating the database after a change to the models
 
-    python manage.py makemigrations srxapp
-    python manage.py sqlmigrate srxapp 00XX
+    python manage.py makemigrations baseapp
+    python manage.py sqlmigrate baseapp 00XX
     python manage.py migrate
 
 ### Running tests
@@ -44,7 +44,7 @@ the environment variables are handed over from the Jenkins credentials store in 
 
 Run unit or functional tests separately:
 
-    python manage.py test srxapp
+    python manage.py test tests_units
     python manage.py test tests_functional
 
 The functional tests are made with Selenium, which can be accessed at vnc://localhost:5900 for debugging purposes.
@@ -54,4 +54,4 @@ Use coverage.py to check backend test coverage of the project:
     cd srx-yamlrapp
     coverage run manage.py test
     coverage html
-    # then visit srx-yamlr/htmlcov/index.html
+    # then visit srx-yamlrapp/htmlcov/index.html

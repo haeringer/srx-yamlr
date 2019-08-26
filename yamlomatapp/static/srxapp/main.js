@@ -14,7 +14,7 @@ $(window).on("load", function() {
   if (url.search === "") {
     generateNewPolicyName()
     cloneGitRepo()
-    createSessionStores()
+    createConfigSession()
   } else if (url.search === "?loadpolicy") {
     getExistingPolicyDetails()
     getYamlConfig()
@@ -70,7 +70,7 @@ $(function() {
 
   $('#create-object-modal').on('show.bs.modal', function(){
     var modalContentDiv = $("#create-object-modal").find(".modal-content")
-    $(modalContentDiv).load("load/modalcontent", function(status, xhr ) {
+    $(modalContentDiv).load("loadcontent/createmodal", function(status, xhr ) {
       if (status === "error") {
         console.log(xhr.status + " " + xhr.statusText)
       }
@@ -100,10 +100,10 @@ $(function() {
     renamePolicyFormSetup()
   })
   $("#add-policy").on("click", function() {
-    window.location.replace("/?addpolicy")
+    window.location.replace("/srx/?addpolicy")
   })
   $("#clear-config").on("click", function() {
-    window.location.replace("/")
+    window.location.replace("/srx/")
   })
   $("#write-config").on("click", function() {
     writeYamlConfig(this)
@@ -124,7 +124,7 @@ $(function() {
 })
 
 function checkSessionStatus() {
-  $.get("/ajax/session/status/")
+  $.get("/session/status/")
     .done(function(response) {
       if (response === 1) {
         window.location.replace("/auth/logout/")
@@ -137,7 +137,7 @@ function checkSessionStatus() {
 
 function extendSession () {
   setTimeout(function(){
-    $.post("/ajax/session/extend/")
+    $.post("/session/extend/")
       .fail(function(errorThrown) {
         console.log(errorThrown.toString())
       })
@@ -148,7 +148,7 @@ function cloneGitRepo() {
   $("#write-config").prop("disabled", true)
   console.log("Cloning Ansible Git repository...")
 
-  $.get("/ajax/clonerepo/")
+  $.get("/git/clonerepo/")
     .done(function(response) {
       if (response === "success") {
         console.log("Finished Git clone")
@@ -171,7 +171,7 @@ function loadObjects(mode) {
   }
   $(".spinner-container").fadeIn()
   $.get({
-    url: "/ajax/loadobjects/",
+    url: "/srx/loadobjects/",
   })
     .done(function(response) {
       $(".spinner-container").fadeOut()
@@ -190,8 +190,8 @@ function loadObjects(mode) {
     })
 }
 
-function createSessionStores() {
-  $.post("/ajax/session/stores/create/")
+function createConfigSession() {
+  $.post("/srx/createconfigsession/")
     .done(function(response) {
       if (response === "cache_update") {
         loadObjects("auto")
@@ -205,7 +205,7 @@ function createSessionStores() {
 }
 
 function getYamlConfig() {
-  $.get("/ajax/getyamlconfig/")
+  $.get("/srx/getyamlconfig/")
     .done(function(response) {
       check_response_backend_error(response)
       updateYaml(response.yamlconfig)
@@ -216,7 +216,7 @@ function getYamlConfig() {
 }
 
 function getExistingPolicyDetails() {
-  $.post("/ajax/loadpolicy/")
+  $.post("/srx/loadpolicy/")
     .done(function(response) {
       loadExistingPolicy(response)
       console.log(response)
@@ -333,7 +333,7 @@ class AddrObj {
   ajax_add_address_to_policy_yaml() {
     var thisParent = this
 
-    $.post("/ajax/policy/add/address/", {
+    $.post("/srx/policy/add/address/", {
       policyname: currentPolicy.policyname,
       direction: this.obj.direction,
       objname: this.obj.name,
@@ -351,7 +351,7 @@ class AddrObj {
             text: "Loading the existing policy for editing...",
             icon: "warning",
           }).then(() => {
-            window.location.replace("/?loadpolicy")
+            window.location.replace("/srx/?loadpolicy")
           })
         }
       })
@@ -412,7 +412,7 @@ class AppObj {
 
   ajax_add_application_to_policy_yaml() {
     var thisParent = this
-    $.post("/ajax/policy/add/application/", {
+    $.post("/srx/policy/add/application/", {
       policyname: currentPolicy.policyname,
       objname: this.obj.name,
     })
@@ -466,7 +466,7 @@ class ListAddrObj {
   }
 
   ajax_delete_address_from_policy_yaml() {
-    $.post("/ajax/policy/delete/address/", {
+    $.post("/srx/policy/delete/address/", {
       policyname: currentPolicy.policyname,
       direction: this.direction,
       objname: this.name,
@@ -522,7 +522,7 @@ class ListAppObj {
   }
 
   ajax_delete_application_from_policy_yaml() {
-    $.post("/ajax/policy/delete/application/", {
+    $.post("/srx/policy/delete/application/", {
       policyname: currentPolicy.policyname,
       objname: this.name,
     })
@@ -620,7 +620,7 @@ function filterObjects(zoneselector) {
   var selectedzone = $(zoneselector).val()
 
   $.get({
-    url: "/ajax/filterobjects/",
+    url: "/srx/filterobjects/",
     data: { selectedzone: selectedzone },
   })
     .done(function(response) {
@@ -694,7 +694,7 @@ function createAddress() {
   }
   $("#create-object-modal").modal("toggle")
   $.post({
-    url: "/ajax/object/create/address/",
+    url: "/srx/object/create/address/",
     data: {
       zone: zone,
       name: name,
@@ -720,7 +720,7 @@ function createAddrset() {
   }
   $("#create-object-modal").modal("toggle")
   $.post({
-    url: "/ajax/object/create/addrset/",
+    url: "/srx/object/create/addrset/",
     data: {
       zone: zone,
       name: name,
@@ -746,7 +746,7 @@ function createApplication() {
   }
   $("#create-object-modal").modal("toggle")
   $.post({
-    url: "/ajax/object/create/application/",
+    url: "/srx/object/create/application/",
     data: {
       name: name,
       port: port,
@@ -771,7 +771,7 @@ function createAppset() {
   }
   $("#create-object-modal").modal("toggle")
   $.post({
-    url: "/ajax/object/create/appset/",
+    url: "/srx/object/create/appset/",
     data: {
       name: name,
       valuelist: valuelist,
@@ -800,7 +800,7 @@ function renamePolicy() {
   currentPolicy.policyname = $("#input-policy-name").val()
   $("#rename-policy-modal").modal("toggle")
 
-  $.post("/ajax/policy/rename/", {
+  $.post("/srx/policy/rename/", {
     previousname: previousName,
     policyname: currentPolicy.policyname,
   })
@@ -817,7 +817,7 @@ function writeYamlConfig(writeButton) {
   $(writeButton).prop("disabled", true)
   $(writeButton).html(`<i class="spinner-border spinner-border-sm"></i>`)
 
-  $.post("/ajax/writeyamlconfig/")
+  $.post("/srx/writeconfig/")
     .done(function(response) {
       updateGitDiff(response)
       $(writeButton).prop("disabled", false)
@@ -833,7 +833,7 @@ function commitConfig(commitButton) {
   $(commitButton).prop("disabled", true)
   $(commitButton).html(`<i class="spinner-border spinner-border-sm"></i>`)
 
-  $.post("/ajax/commitconfig/")
+  $.post("/git/commitconfig/")
     .done(function(response) {
       if (response === "success") {
         $("#diffcard").addClass("d-none")
@@ -843,7 +843,7 @@ function commitConfig(commitButton) {
           text: "Configuration has been committed to Git",
           icon: "success",
         }).then(() => {
-          window.location.replace("/")
+          window.location.replace("/srx/")
         })
       } else if (response === "unauthorized") {
         swal("Unauthorized", "Please verify your Git token", "error")
@@ -886,7 +886,7 @@ function settingsHandler() {
 
 function setToken(token) {
   $.post({
-    url: "/ajax/settings/token/gogs/",
+    url: "/settings/token/gogs/",
     data: {
       token: token,
     },
@@ -899,7 +899,7 @@ function setToken(token) {
         )
       }
       if ($("#yamlcard").hasClass("d-none") === false) {
-        window.location.replace("/")
+        window.location.replace("/srx/")
       }
     })
     .fail(function(errorThrown) {
@@ -910,7 +910,7 @@ function setToken(token) {
 function changePassword(pwNew) {
   $("#settings-modal").modal("toggle")
   $.post({
-    url: "/ajax/settings/password/change/",
+    url: "/settings/password/change/",
     data: {
       password: pwNew,
     },
@@ -931,7 +931,7 @@ function changePassword(pwNew) {
 
 function enableCommitButton() {
   $.post({
-    url: "ajax/checktoken/gogs/",
+    url: "/checktoken/gogs/",
   })
     .done(function(response) {
       if (response === true) {
@@ -1021,7 +1021,7 @@ function policyObjectSearch(e) {
 
 function objectSearch(input, searchType, callbackFunc) {
   $.get({
-    url: "ajax/search/object/",
+    url: "/srx/search/object/",
     data: {
       input: input,
       searchtype: searchType,

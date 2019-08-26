@@ -1,5 +1,6 @@
 import socket
 
+from time import sleep
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from selenium import webdriver
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
@@ -25,23 +26,23 @@ class MySeleniumTests(StaticLiveServerTestCase):
             password="123456"
         )
 
+        cls.browser.get('%s%s' % (cls.live_server_url, ''))
+        cls.browser.find_element_by_id("id_username").send_keys('functest_user')
+        cls.browser.find_element_by_id("id_password").send_keys('123456')
+        cls.browser.find_element_by_class_name("btn-block").click()
+
+        try:
+            cls.browser.find_element_by_class_name("swal-button--confirm").click()
+            sleep(20)
+        except Exception:
+            pass
+
     @classmethod
     def tearDownClass(cls):
         cls.browser.quit()
         super().tearDownClass()
 
-    def test_login_fail(self):
-        self.browser.get('%s%s' % (self.live_server_url, ''))
-        self.browser.find_element_by_id("id_username").send_keys('functest_user')
-        self.browser.find_element_by_id("id_password").send_keys('invalid')
-        self.browser.find_element_by_class_name("btn-block").click()
-        error_class = self.browser.find_element_by_class_name("errorlist")
-        self.assertIn("Please enter a correct username and password", error_class.text)
-
-    def test_login(self):
-        self.browser.get('%s%s' % (self.live_server_url, ''))
-        self.browser.find_element_by_id("id_username").send_keys('functest_user')
-        self.browser.find_element_by_id("id_password").send_keys('123456')
-        self.browser.find_element_by_class_name("btn-block").click()
+    def test_srxapp_is_present(self):
+        self.browser.get('%s%s' % (self.live_server_url, '/srx'))
         search_el = self.browser.find_element_by_id("search-from")
         self.assertIsNotNone(search_el)

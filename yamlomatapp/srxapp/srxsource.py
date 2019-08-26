@@ -5,7 +5,7 @@ from ruamel.yaml import YAML
 from uuid import uuid4
 from django.core.cache import cache
 
-from srxapp.utils import helpers
+from baseapp import helpers
 
 logger = logging.getLogger(__name__)
 yaml = YAML()

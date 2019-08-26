@@ -18,10 +18,10 @@ def create_client_session():
 
     client = Client()
     client.login(username=username, password=password)
-    client.get("/")
-    client.get("/ajax/clonerepo/")
-    client.post("/ajax/session/stores/create/")
-    client.get("/ajax/loadobjects/")
+    client.get("/srx/")
+    client.get("/git/clonerepo/")
+    client.post("/srx/createconfigsession/")
+    client.get("/srx/loadobjects/")
 
     global client_glob
     client_glob = client
@@ -39,7 +39,7 @@ class Tests(TestCase):
 
         for i in range(2):
             client_glob.post(
-                "/ajax/object/create/address/",
+                "/srx/object/create/address/",
                 {
                     "zone": cls.zone_a,
                     "name": "TEST_ADDRESS_{}".format(i),
@@ -47,7 +47,7 @@ class Tests(TestCase):
                 },
             )
         client_glob.post(
-            "/ajax/object/create/addrset/",
+            "/srx/object/create/addrset/",
             {
                 "zone": cls.zone_a,
                 "name": "TEST_ADDRSET",
@@ -55,12 +55,12 @@ class Tests(TestCase):
             },
         )
         client_glob.post(
-            "/ajax/object/create/address/",
+            "/srx/object/create/address/",
             {"zone": cls.zone_b, "name": "TEST_ADDRESS_3", "value": "10.20.30.3/32"},
         )
         for i in range(2):
             client_glob.post(
-                "/ajax/object/create/application/",
+                "/srx/object/create/application/",
                 {
                     "name": "TEST_APPLICATION_{}".format(i),
                     "port": "123{}".format(i),
@@ -68,7 +68,7 @@ class Tests(TestCase):
                 },
             )
         client_glob.post(
-            "/ajax/object/create/appset/",
+            "/srx/object/create/appset/",
             {
                 "name": "TEST_APPSET",
                 "valuelist[]": ["TEST_APPLICATION_0", "TEST_APPLICATION_1"],
@@ -78,7 +78,7 @@ class Tests(TestCase):
     def test_set_git_token(self):
         token = "ka2bjlhPlVnATs2OrcAB8mg1JeRXBDO03yxZlz3c"
         response = client_glob.post(
-            "/ajax/settings/token/gogs/",
+            "/settings/token/gogs/",
             {"token": token},
         )
 
@@ -88,14 +88,14 @@ class Tests(TestCase):
     def test_check_git_token(self):
         self.test_set_git_token()
 
-        response = client_glob.post("/ajax/checktoken/gogs/")
+        response = client_glob.post("/checktoken/gogs/")
 
         response_string = response.content.decode("utf-8")
         self.assertEqual(response_string, "true")
 
     def test_set_new_password(self):
         response = client_glob.post(
-            "/ajax/settings/password/change/",
+            "/settings/password/change/",
             {"password": "234567"},
         )
         response_val = response.content.decode("utf-8")
@@ -125,7 +125,7 @@ class Tests(TestCase):
 
         def post_address(direction, objname, zone):
             client_glob.post(
-                "/ajax/policy/add/address/",
+                "/srx/policy/add/address/",
                 {
                     "policyname": self.policyname,
                     "direction": direction,
@@ -136,7 +136,7 @@ class Tests(TestCase):
 
         def post_application(objname):
             client_glob.post(
-                "/ajax/policy/add/application/",
+                "/srx/policy/add/application/",
                 {"policyname": self.policyname, "objname": objname},
             )
 
@@ -159,7 +159,7 @@ class Tests(TestCase):
         self.test_build_policy()
 
         client.post(
-            "/ajax/policy/rename/",
+            "/srx/policy/rename/",
             {
                 "previousname": "allow-123456789-to-123456789",
                 "policyname": "allow-TEST_ADDRESS_3-to-TEST_ADDRSET",
@@ -176,7 +176,7 @@ class Tests(TestCase):
         self.test_build_policy()
 
         client.post(
-            "/ajax/policy/delete/address/",
+            "/srx/policy/delete/address/",
             {
                 "policyname": self.policyname,
                 "direction": "from",
@@ -185,7 +185,7 @@ class Tests(TestCase):
             },
         )
         client.post(
-            "/ajax/policy/delete/application/",
+            "/srx/policy/delete/application/",
             {"policyname": self.policyname, "objname": "TEST_APPSET"},
         )
 
@@ -197,7 +197,7 @@ class Tests(TestCase):
         self.test_set_git_token()
         self.test_build_policy()
 
-        client_glob.post("/ajax/writeyamlconfig/")
+        client_glob.post("/srx/writeconfig/")
 
         local_repo = git.Repo("workspace/unittest_user")
         diff = local_repo.git.diff()
@@ -223,7 +223,7 @@ class Tests(TestCase):
         )
         self.assertIn("+    action: permit", diff)
 
-        client_glob.post("/ajax/commitconfig/")
+        client_glob.post("/git/commitconfig/")
 
         local_repo = git.Repo("workspace/unittest_user")
         diff = local_repo.git.diff()
@@ -231,20 +231,20 @@ class Tests(TestCase):
         self.assertEqual(diff, "")
 
     def test_check_session_status(self):
-        response = client_glob.get("/ajax/session/status/")
+        response = client_glob.get("/session/status/")
 
         response_val = response.content.decode("utf-8")
         self.assertEqual(response_val, "0")
 
     def test_extend_session(self):
-        response = client_glob.post("/ajax/session/extend/")
+        response = client_glob.post("/session/extend/")
 
         response_val = response.content.decode("utf-8")
         self.assertEqual(response_val, "0")
 
     def test_change_password(self):
         response = client_glob.post(
-            "/ajax/settings/password/change/",
+            "/settings/password/change/",
             {"password": "654321"},
         )
         response_val = response.content.decode("utf-8")
@@ -252,7 +252,7 @@ class Tests(TestCase):
 
     def test_filter_object_list(self):
         response = client_glob.get(
-            "/ajax/filterobjects/",
+            "/srx/filterobjects/",
             {"selectedzone": self.zone_a},
         )
         response_val = response.content.decode("utf-8")
@@ -263,7 +263,7 @@ class Tests(TestCase):
     def test_search_address_object(self):
         inputdata = "TEST_ADDRESS"
         response = client_glob.get(
-            "/ajax/search/object/",
+            "/srx/search/object/",
             {"input": inputdata, "searchtype": "from"},
         )
         response_val = response.content.decode("utf-8")
@@ -275,7 +275,7 @@ class Tests(TestCase):
     def test_search_application_object(self):
         inputdata = "TEST_APPLICATION"
         response = client_glob.get(
-            "/ajax/search/object/",
+            "/srx/search/object/",
             {"input": inputdata, "searchtype": "app"},
         )
         response_val = response.content.decode("utf-8")
@@ -283,7 +283,7 @@ class Tests(TestCase):
         self.assertIn("TEST_APPLICATION_0", response_val)
 
     def test_load_modalcontent(self):
-        response = client_glob.get("/load/modalcontent/")
+        response = client_glob.get("/srx/loadcontent/createmodal/")
         response_val = response.content.decode("utf-8")
 
         self.assertIn('<option class="small">TEST_ADDRESS_0</option>', response_val)

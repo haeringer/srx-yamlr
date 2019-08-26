@@ -4,7 +4,9 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.core.cache import cache
 
-from srxapp.utils import config, helpers, source, githandler
+from . import srxconfig, srxsource
+from baseapp import helpers
+from gitapp import githandler
 
 
 @login_required(redirect_field_name=None)
@@ -15,7 +17,7 @@ def main_view(request):
         with open("version") as vfile:
             version = vfile.read()
         context = {
-            "username": request.user.username,
+            "username": user,
             "token_set": token_set,
             "version": version,
         }
@@ -25,7 +27,7 @@ def main_view(request):
     return render(request, "srxapp/main.html", context)
 
 
-def create_session_stores(request):
+def create_config_session(request):
     try:
         workingdict_origin = cache.get("workingdict_origin")
         commithash_cached_data = cache.get("commithash_cached_data")
@@ -47,7 +49,7 @@ def create_session_stores(request):
 
 def load_objects(request):
     try:
-        src = source.sourceData(request)
+        src = srxsource.sourceData(request)
         src.read_source_file()
         src.import_zones()
         src.import_addresses()
@@ -66,19 +68,7 @@ def load_objects(request):
     return JsonResponse(response, safe=False)
 
 
-def clone_repo(request):
-    try:
-        repo = githandler.Repo(request)
-        response = repo.git_clone()
-        repo.git_config()
-        commithash_current_data = repo.get_file_commit_hash()
-        cache.set("commithash_current_data", commithash_current_data)
-    except Exception:
-        response = helpers.view_exception(Exception)
-    return JsonResponse(response, safe=False)
-
-
-def load_modalcontent(request):
+def loadcontent_createmodal(request):
     try:
         workingdict = request.session["workingdict"]
         context = {
@@ -88,7 +78,7 @@ def load_modalcontent(request):
         }
     except Exception:
         raise Http404("HTTP 404 Error")
-    return render(request, "srxapp/modalcnt-create.html", context)
+    return render(request, "srxapp/cnt-createmodal.html", context)
 
 
 def search_object(request):
@@ -101,7 +91,7 @@ def search_object(request):
 
 def policy_add_address(request):
     try:
-        srxpolicy = config.srxPolicy(request)
+        srxpolicy = srxconfig.srxPolicy(request)
         result = srxpolicy.add_address()
         if "p_exists" not in result:
             request.session["configdict"] = result
@@ -117,7 +107,7 @@ def policy_add_address(request):
 
 def policy_delete_address(request):
     try:
-        srxpolicy = config.srxPolicy(request)
+        srxpolicy = srxconfig.srxPolicy(request)
         result = srxpolicy.delete_address()
         request.session["configdict"] = result
         response = helpers.convert_dict_to_yaml(result)
@@ -128,7 +118,7 @@ def policy_delete_address(request):
 
 def policy_add_application(request):
     try:
-        srxpolicy = config.srxPolicy(request)
+        srxpolicy = srxconfig.srxPolicy(request)
         result = srxpolicy.add_application()
         request.session["configdict"] = result
         response = helpers.convert_dict_to_yaml(result)
@@ -139,7 +129,7 @@ def policy_add_application(request):
 
 def policy_delete_application(request):
     try:
-        srxpolicy = config.srxPolicy(request)
+        srxpolicy = srxconfig.srxPolicy(request)
         result = srxpolicy.delete_application()
         request.session["configdict"] = result
         response = helpers.convert_dict_to_yaml(result)
@@ -150,7 +140,7 @@ def policy_delete_application(request):
 
 def object_create_address(request):
     try:
-        srxobject = config.srxObject(request)
+        srxobject = srxconfig.srxObject(request)
         result = srxobject.create_address()
         request.session["configdict"] = result
         response = helpers.convert_dict_to_yaml(result)
@@ -161,7 +151,7 @@ def object_create_address(request):
 
 def object_create_addrset(request):
     try:
-        srxobject = config.srxObject(request)
+        srxobject = srxconfig.srxObject(request)
         result = srxobject.create_addrset()
         request.session["configdict"] = result
         response = helpers.convert_dict_to_yaml(result)
@@ -172,7 +162,7 @@ def object_create_addrset(request):
 
 def object_create_application(request):
     try:
-        srxobject = config.srxObject(request)
+        srxobject = srxconfig.srxObject(request)
         result = srxobject.create_application()
         request.session["configdict"] = result
         response = helpers.convert_dict_to_yaml(result)
@@ -183,7 +173,7 @@ def object_create_application(request):
 
 def object_create_appset(request):
     try:
-        srxobject = config.srxObject(request)
+        srxobject = srxconfig.srxObject(request)
         result = srxobject.create_appset()
         request.session["configdict"] = result
         response = helpers.convert_dict_to_yaml(result)
@@ -194,7 +184,7 @@ def object_create_appset(request):
 
 def policy_rename(request):
     try:
-        srxpolicy = config.srxPolicy(request)
+        srxpolicy = srxconfig.srxPolicy(request)
         result = srxpolicy.update_policyname()
         request.session["configdict"] = result
         response = helpers.convert_dict_to_yaml(result)
@@ -219,32 +209,19 @@ def filter_objects(request):
     return JsonResponse(response, safe=False)
 
 
-def write_yamlconfig(request):
+def get_yamlconfig(request):
+    response = helpers.convert_dict_to_yaml(request.session["configdict"])
+    return JsonResponse(response, safe=False)
+
+
+def write_config(request):
     try:
-        src = source.sourceData(request)
+        src = srxsource.sourceData(request)
         src.update_source_file()
         repo = githandler.Repo(request)
         response = repo.git_get_diff()
     except Exception:
         response = helpers.view_exception(Exception)
-    return JsonResponse(response, safe=False)
-
-
-def commit_config(request):
-    try:
-        repo = githandler.Repo(request)
-        repo.git_commit()
-        response = repo.git_push()
-        if response == "success":
-            request.session["configdict"] = {}
-
-    except Exception:
-        response = helpers.view_exception(Exception)
-    return JsonResponse(response, safe=False)
-
-
-def get_yamlconfig(request):
-    response = helpers.convert_dict_to_yaml(request.session["configdict"])
     return JsonResponse(response, safe=False)
 
 
