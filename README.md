@@ -47,7 +47,7 @@ Run unit or functional tests separately:
     python manage.py test tests_units
     python manage.py test tests_functional
 
-The functional tests are made with Selenium, which can be accessed at vnc://localhost:5900 for debugging purposes.
+The functional tests are made with Selenium, which can be accessed at vnc://localhost:5900 (password "secret") for debugging purposes.
 
 Use coverage.py to check backend test coverage of the project:
 
