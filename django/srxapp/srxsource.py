@@ -1,11 +1,13 @@
 import os
 import logging
 import time
+import json
 from ruamel.yaml import YAML
 from uuid import uuid4
 from django.core.cache import cache
 
 from baseapp import helpers
+from . import models
 
 logger = logging.getLogger(__name__)
 yaml = YAML()
@@ -14,14 +16,35 @@ yaml.indent(mapping=2, sequence=4, offset=2)
 
 class sourceData:
     def __init__(self, request):
+        self.srcfile_commithash = request.GET.get("srcfile_commithash", None)
+        self.request = request
         workspace = "workspace/" + request.user.get_username()
         yamlfile = os.environ.get("YM_YAMLFILE", "")
         self.filepath = workspace + "/" + yamlfile
-        self.configdict = request.session["configdict"]
+        self.configdict = {}
         self.workingdict = {}
 
-    def save_dict_to_cache(self):
-        cache.set("workingdict_origin", self.workingdict)
+    def save_import_to_cache(self):
+
+        wd_serialized = json.dumps(self.workingdict)
+
+        obj, created = models.Cache.objects.update_or_create(
+            name="workingdict",
+            defaults={
+                "workingdict_origin": wd_serialized,
+                "srcfile_commithash": self.srcfile_commithash
+            },
+        )
+
+    def set_configdict(self):
+        self.configdict = self.request.session["configdict"]
+
+    def check_if_source_file_exists(self):
+        try:
+            open(self.filepath, "r")
+            return True
+        except Exception:
+            return False
 
     def read_source_file(self):
         sourcefile = None

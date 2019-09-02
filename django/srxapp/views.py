@@ -1,10 +1,11 @@
+import json
+
 from django.shortcuts import render
 from django.http import JsonResponse, Http404
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-from django.core.cache import cache
 
-from . import srxconfig, srxsource
+from . import srxconfig, srxsource, models
 from baseapp import helpers
 from gitapp import githandler
 
@@ -29,25 +30,58 @@ def main_view(request):
 
 def create_config_session(request):
     try:
-        workingdict_origin = cache.get("workingdict_origin")
-        commithash_cached_data = cache.get("commithash_cached_data")
-        if workingdict_origin and commithash_cached_data:
-            request.session["workingdict"] = workingdict_origin
-            commithash_current_data = cache.get("commithash_current_data")
-            if commithash_cached_data == commithash_current_data:
-                response = "cache_ok"
+        configdict = request.session.get("configdict")
+
+        if not configdict:
+            request.session["configdict"] = {}
+            request.session["pe_detail"] = {}
+
+            try:
+                wd_cache = models.Cache.objects.get(name="workingdict")
+                wdo_serialized = wd_cache.workingdict_origin
+            except Exception:
+                wdo_serialized = None
+
+            if wdo_serialized:
+                request.session["workingdict"] = json.loads(wdo_serialized)
+                response = "cache_loaded"
             else:
-                response = "cache_update"
+                response = "cache_empty"
         else:
-            response = "cache_update"
-        request.session["configdict"] = {}
-        request.session["pe_detail"] = {}
+            response = "config_session_exists"
+
     except Exception:
         response = helpers.view_exception(Exception)
     return JsonResponse(response, safe=False)
 
 
-def load_objects(request):
+def reset_config_session(request):
+    try:
+        request.session["configdict"] = None
+        response = 0
+    except Exception:
+        response = helpers.view_exception(Exception)
+    return JsonResponse(response, safe=False)
+
+
+def validate_cache(request):
+    try:
+        srcfile_commithash = request.GET.get("srcfile_commithash")
+        try:
+            wd_cache = models.Cache.objects.get(name="workingdict")
+            cached_commithash = wd_cache.srcfile_commithash
+        except models.Cache.DoesNotExist:
+            cached_commithash = None
+        if srcfile_commithash == cached_commithash:
+            response = "cache_valid"
+        else:
+            response = "cache_invalid"
+    except Exception:
+        response = helpers.view_exception(Exception)
+    return JsonResponse(response, safe=False)
+
+
+def import_objects(request):
     try:
         src = srxsource.sourceData(request)
         src.read_source_file()
@@ -57,11 +91,12 @@ def load_objects(request):
         src.import_applications()
         src.import_appsets()
         src.import_policies()
-        src.save_dict_to_cache()
-        request.session["workingdict"] = cache.get("workingdict_origin")
+        src.save_import_to_cache()
 
-        commithash_current_data = cache.get("commithash_current_data")
-        cache.set("commithash_cached_data", commithash_current_data)
+        wd_cache = models.Cache.objects.get(name="workingdict")
+        workingdict_origin = json.loads(wd_cache.workingdict_origin)
+        request.session["workingdict"] = workingdict_origin
+
         response = "success"
     except Exception:
         response = helpers.view_exception(Exception)
@@ -217,6 +252,7 @@ def get_yamlconfig(request):
 def write_config(request):
     try:
         src = srxsource.sourceData(request)
+        src.set_configdict()
         src.update_source_file()
         repo = githandler.Repo(request)
         response = repo.git_get_diff()

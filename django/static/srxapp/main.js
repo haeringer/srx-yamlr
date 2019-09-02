@@ -103,7 +103,7 @@ $(function() {
     window.location.replace("/srx/?addpolicy")
   })
   $("#clear-config").on("click", function() {
-    window.location.replace("/srx/")
+    resetConfigSession()
   })
   $("#write-config").on("click", function() {
     writeYamlConfig(this)
@@ -112,7 +112,8 @@ $(function() {
     commitConfig(this)
   })
   $("#update-cache").on("click", function() {
-    loadObjects("manual")
+    $("#settings-modal").modal("toggle")
+    importObjects()
   })
 
   $('[data-toggle="tooltip"]').tooltip({
@@ -150,11 +151,37 @@ function cloneGitRepo() {
 
   $.get("/git/clonerepo/")
     .done(function(response) {
-      if (response === "success") {
-        console.log("Finished Git clone")
-        $("#write-config").prop("disabled", false)
+      $("#write-config").prop("disabled", false)
+      if (response.clone_result === "success") {
+        console.log("Git clone succeeded")
+        validateCache(response.srcfile_commithash)
+      } else if (response.clone_result === "up_to_date") {
+        console.log("Git repository is already up to date")
       } else {
-        alert(response)
+        alert(
+          "Git clone failed because of the following error:\n\n" +
+            JSON.parse(response.clone_result.error)
+        )
+      }
+
+    })
+    .fail(function(errorThrown) {
+      console.log(errorThrown.toString())
+    })
+}
+
+function validateCache(srcfile_commithash) {
+  $.get("/srx/validatecache/", {
+    srcfile_commithash: srcfile_commithash,
+  })
+    .done(function(response) {
+      if (response === "cache_invalid") {
+        console.log("Cache is invalid, update needed")
+        swal("Cache Update", "Updating cache to latest configuration \
+          revision...", "info")
+        importObjects(srcfile_commithash)
+      } else if (response === "cache_valid") {
+        console.log("Cache is up to date")
       }
     })
     .fail(function(errorThrown) {
@@ -162,16 +189,12 @@ function cloneGitRepo() {
     })
 }
 
-function loadObjects(mode) {
-  if (mode === "auto") {
-    swal("Cache Update", "Updating cache to latest configuration \
-      revision...", "info")
-  } else if (mode === "manual") {
-    $("#settings-modal").modal("toggle")
-  }
+function importObjects(srcfile_commithash = null) {
+  console.log("Importing config data from YAML...")
   $(".spinner-container").fadeIn()
-  $.get({
-    url: "/srx/loadobjects/",
+
+  $.get("/srx/importobjects/", {
+    srcfile_commithash: srcfile_commithash,
   })
     .done(function(response) {
       $(".spinner-container").fadeOut()
@@ -193,10 +216,15 @@ function loadObjects(mode) {
 function createConfigSession() {
   $.post("/srx/createconfigsession/")
     .done(function(response) {
-      if (response === "cache_update") {
-        loadObjects("auto")
-      } else if (response === "cache_ok") {
-        console.log("Configuration cache is up to date")
+      if (response === "cache_loaded") {
+        console.log("Config workingset loaded from cache")
+      } else if (response === "cache_empty") {
+        console.log("Cache is empty, wait for git clone")
+        swal("Cache empty, please wait for git clone to finish")
+      } else if (response === "config_session_exists") {
+        getYamlConfig()
+      } else if (response.error != null) {
+        alert(JSON.parse(response.error))
       }
     })
     .fail(function(errorThrown) {
@@ -208,7 +236,22 @@ function getYamlConfig() {
   $.get("/srx/getyamlconfig/")
     .done(function(response) {
       check_response_backend_error(response)
-      updateYaml(response.yamlconfig)
+      updateYamlContainer(response.yamlconfig)
+    })
+    .fail(function(errorThrown) {
+      console.log(errorThrown.toString())
+    })
+}
+
+function resetConfigSession() {
+  $.post("/srx/resetconfigsession/")
+    .done(function(response) {
+      console.log(response)
+      if (response === 0) {
+        window.location.replace("/srx/")
+      } else if (response.error != null) {
+        alert(JSON.parse(response.error))
+      }
     })
     .fail(function(errorThrown) {
       console.log(errorThrown.toString())
@@ -344,7 +387,7 @@ class AddrObj {
           thisParent.blend_in_zone()
           thisParent.add_object_to_list()
           check_response_backend_error(response)
-          updateYaml(response.yamlconfig)
+          updateYamlContainer(response.yamlconfig)
         } else {
           swal({
             title: "Policy already exists",
@@ -419,7 +462,7 @@ class AppObj {
       .done(function(response) {
         thisParent.add_object_to_list()
         check_response_backend_error(response)
-        updateYaml(response.yamlconfig)
+        updateYamlContainer(response.yamlconfig)
       })
       .fail(function(errorThrown) {
         console.log(errorThrown.toString())
@@ -474,7 +517,7 @@ class ListAddrObj {
     })
       .done(function(response) {
         check_response_backend_error(response)
-        updateYaml(response.yamlconfig)
+        updateYamlContainer(response.yamlconfig)
       })
       .fail(function(errorThrown) {
         console.log(errorThrown.toString())
@@ -528,7 +571,7 @@ class ListAppObj {
     })
       .done(function(response) {
         check_response_backend_error(response)
-        updateYaml(response.yamlconfig)
+        updateYamlContainer(response.yamlconfig)
       })
       .fail(function(errorThrown) {
         console.log(errorThrown.toString())
@@ -585,7 +628,7 @@ function check_response_backend_error(response) {
   }
 }
 
-function updateYaml(yamlconfig) {
+function updateYamlContainer(yamlconfig) {
   $("#yamlcontainer").html(yamlconfig)
   $("#yamlcard").removeClass("d-none")
   if (yamlconfig === "{}\n") {
@@ -702,7 +745,7 @@ function createAddress() {
     },
   })
     .done(function(response) {
-      updateYaml(response.yamlconfig)
+      updateYamlContainer(response.yamlconfig)
     })
     .fail(function(errorThrown) {
       console.log(errorThrown.toString())
@@ -728,7 +771,7 @@ function createAddrset() {
     },
   })
     .done(function(response) {
-      updateYaml(response.yamlconfig)
+      updateYamlContainer(response.yamlconfig)
     })
     .fail(function(errorThrown) {
       console.log(errorThrown.toString())
@@ -754,7 +797,7 @@ function createApplication() {
     },
   })
     .done(function(response) {
-      updateYaml(response.yamlconfig)
+      updateYamlContainer(response.yamlconfig)
     })
     .fail(function(errorThrown) {
       console.log(errorThrown.toString())
@@ -778,7 +821,7 @@ function createAppset() {
     },
   })
     .done(function(response) {
-      updateYaml(response.yamlconfig)
+      updateYamlContainer(response.yamlconfig)
     })
     .fail(function(errorThrown) {
       console.log(errorThrown.toString())
@@ -806,7 +849,7 @@ function renamePolicy() {
   })
     .done(function(response) {
       check_response_backend_error(response)
-      updateYaml(response.yamlconfig)
+      updateYamlContainer(response.yamlconfig)
     })
     .fail(function(errorThrown) {
       console.log(errorThrown.toString())
@@ -930,9 +973,7 @@ function changePassword(pwNew) {
 }
 
 function enableCommitButton() {
-  $.post({
-    url: "/checktoken/gogs/",
-  })
+  $.post("/checktoken/gogs/")
     .done(function(response) {
       if (response === true) {
         $("#commit-config").prop("disabled", false)

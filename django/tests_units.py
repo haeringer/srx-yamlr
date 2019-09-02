@@ -19,9 +19,16 @@ def create_client_session():
     client = Client()
     client.login(username=username, password=password)
     client.get("/srx/")
-    client.get("/git/clonerepo/")
     client.post("/srx/createconfigsession/")
-    client.get("/srx/loadobjects/")
+    client.get("/git/clonerepo/")
+    client.get(
+        "/srx/validatecache/",
+        {"srcfile_commithash": "<invalidcommithash>"},
+    )
+    client.get(
+        "/srx/importobjects/",
+        {"srcfile_commithash": "<somecommithash>"},
+    )
 
     global client_glob
     client_glob = client
@@ -292,3 +299,9 @@ class Tests(TestCase):
             '<option value="{0}">{0}</option>'.format(self.zone_a),
             response_val
         )
+
+    def test_reset_config_session(self):
+        response = client_glob.post("/srx/resetconfigsession/")
+
+        response_val = response.content.decode("utf-8")
+        self.assertEqual(response_val, "0")
