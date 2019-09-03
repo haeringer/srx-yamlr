@@ -53,7 +53,7 @@ class srxPolicy:
         sorted_dict_for_hash = helpers.dict_with_sorted_list_values(
             source=policydict["source"], destination=policydict["destination"]
         )
-        newpolicyhash = hash(repr(sorted_dict_for_hash))
+        newpolicyhash = helpers.get_hash(sorted_dict_for_hash)
 
         for p in self.workingdict["policies"]:
             if newpolicyhash == p["policyhash"]:

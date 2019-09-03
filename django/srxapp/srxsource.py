@@ -152,7 +152,7 @@ class sourceData:
             sorted_dict_for_hash = helpers.dict_with_sorted_list_values(
                 source=values["source"], destination=values["destination"]
             )
-            policyhash = hash(repr(sorted_dict_for_hash))
+            policyhash = helpers.get_hash(sorted_dict_for_hash)
 
             policies.append(
                 {

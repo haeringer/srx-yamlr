@@ -48,6 +48,11 @@ def dict_with_sorted_list_values(**kwargs):
     return new_dict
 
 
+def get_hash(dict_):
+    string = json.dumps(dict_, sort_keys=True).encode('utf-8')
+    return hashlib.md5(string).hexdigest()
+
+
 def get_django_secret():
     secret = os.environ.get("YM_DJANGOSECRET", "")
     return force_text(secret)
