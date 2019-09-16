@@ -64,11 +64,11 @@
                         <div class="col-4">
                           <h6>Git Access Token</h6>
                         </div>
-                        <div class="col-8" id="token-set-check">
+                        <div class="col-8">
                           {% if token_set %}
-                          <i class="fas fa-circle mr-2 custom-green"></i><small>Token has been set</small>
+                          <i id="token-indicator" class="fas fa-circle mr-2 custom-green"></i><small id="token-set-check">Token has been set</small>
                           {% else %}
-                          <i class="fas fa-circle mr-2 custom-red"></i><small>Token not set</small>
+                          <i id="token-indicator" class="fas fa-circle mr-2 custom-red"></i><small id="token-set-check">Token not set</small>
                           {% endif %}
                         </div>
                       </div>

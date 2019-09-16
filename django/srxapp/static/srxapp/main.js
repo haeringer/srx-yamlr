@@ -928,6 +928,15 @@ function settingsHandler() {
 }
 
 function setToken(token) {
+  var tokenIndicator = $("#token-indicator")
+  var tokenText = $("#token-set-check")
+
+  if (tokenIndicator.hasClass("custom-green") === true) {
+    tokenIndicator.removeClass("custom-green").addClass("custom-red")
+    tokenText.html("Token not set")
+  }
+  $(".spinner-container").fadeIn()
+
   $.post({
     url: "/settings/token/gogs/",
     data: {
@@ -936,16 +945,18 @@ function setToken(token) {
   })
     .done(function(response) {
       if (response === 0) {
-        $("#token-set-check").html(
-          `<i class="fas fa-circle mr-2 custom-green"></i>` +
-            `<small>Token has been set</small>`
-        )
-      }
-      if ($("#yamlcard").hasClass("d-none") === false) {
-        window.location.replace("/srx/")
+        setTimeout(function() {
+          $(".spinner-container").fadeOut()
+          tokenIndicator.removeClass("custom-red").addClass("custom-green")
+          tokenText.html("Token has been set")
+          if ($("#yamlcard").hasClass("d-none") === false) {
+            window.location.replace("/srx/")
+          }
+        }, 1500)
       }
     })
     .fail(function(errorThrown) {
+      $(".spinner-container").fadeOut()
       console.log(errorThrown.toString())
     })
 }
