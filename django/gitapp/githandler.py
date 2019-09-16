@@ -2,7 +2,6 @@ import os
 import shutil
 import git
 import logging
-import requests
 import urllib3
 
 from baseapp import helpers
@@ -90,20 +89,9 @@ class Repo:
         except Exception:
             helpers.view_exception(Exception)
 
-    def validate_git_authorization(self):
-        try:
-            token = helpers.get_token(self.request)
-            api_url = os.path.join(self.git_server, "api/v1/repos/", self.remote_repo)
-            headers = {"Authorization": "token {}".format(token)}
-            return requests.get(api_url, headers=headers, verify=False)
-
-        except Exception:
-            helpers.view_exception(Exception)
-
     def git_push(self):
         try:
             address = self.get_git_push_address()
-            response = self.validate_git_authorization()
 
             self.local_repo.git.pull()
 
