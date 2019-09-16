@@ -83,7 +83,9 @@ class Repo:
             token = helpers.get_token(self.request)
             prfx = "https://" if self.remote_repo_url.startswith("https") else "http://"
             repo = self.remote_repo_url.replace(prfx, "")
-            return prfx + token + "@" + repo
+            # Put colon behind token to prevent gogs from opening a stdin
+            # prompt asking for a password in case of invalid token.
+            return prfx + token + ":" + "@" + repo
 
         except Exception:
             helpers.view_exception(Exception)
@@ -103,20 +105,18 @@ class Repo:
             address = self.get_git_push_address()
             response = self.validate_git_authorization()
 
-            if response.status_code == 200:
-                self.local_repo.git.pull()
-                logger.info("Pushing config to {}...".format(self.remote_repo_url))
+            self.local_repo.git.pull()
+
+            logger.info("Pushing config to {}...".format(self.remote_repo_url))
+            if self.username != "unittest_user":
                 self.local_repo.git.push(address)
-                return "success"
-
-            elif response.status_code == 401:
-                if self.username == "unittest_user":
-                    self.local_repo.git.push("-n", address)
-                    return "success"
-                else:
-                    return "unauthorized"
             else:
-                raise Exception(response.status_code, response.reason)
+                self.local_repo.git.push("-n", address)
+            return "success"
 
-        except Exception:
-            return helpers.view_exception(Exception)
+        except Exception as exc_instance:
+            error = str(exc_instance)
+            if "HTTP 401" in error:
+                return "unauthorized"
+            else:
+                return helpers.view_exception(Exception)
