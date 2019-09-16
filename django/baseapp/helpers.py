@@ -68,10 +68,13 @@ def check_if_token_set(user):
 
 
 def get_token(request):
-    user = User.objects.get(username=request.user.username)
-    token_encrypted = user.usersettings.gogs_tkn
-    token = decrypt_string(token_encrypted)
-    return token
+    try:
+        user = User.objects.get(username=request.user.username)
+        token_encrypted = user.usersettings.gogs_tkn
+        token = decrypt_string(token_encrypted)
+        return token
+    except Exception:
+        return "Token could not be retrieved"
 
 
 def in_string(word):
