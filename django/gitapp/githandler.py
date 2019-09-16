@@ -5,6 +5,7 @@ import logging
 import urllib3
 
 from baseapp import helpers
+from . import REMOTE_REPO_URL
 
 urllib3.disable_warnings()
 logger = logging.getLogger(__name__)
@@ -13,9 +14,6 @@ logger = logging.getLogger(__name__)
 class Repo:
     def __init__(self, request):
         self.request = request
-        self.git_server = os.environ.get("YM_GITSERVER", "")
-        self.remote_repo = os.environ.get("YM_ANSIBLEREPO", "")
-        self.remote_repo_url = os.path.join(self.git_server, self.remote_repo)
         self.username = request.user.username
         self.useremail = request.user.email
         self.workspace = "workspace/" + self.username
@@ -29,7 +27,7 @@ class Repo:
 
             logger.info("Cloning git repository...")
             git.Repo.clone_from(
-                self.remote_repo_url, self.workspace,
+                REMOTE_REPO_URL, self.workspace,
                 config="http.sslVerify=false",
             )
             self.local_repo = git.Repo(self.workspace)
@@ -80,8 +78,8 @@ class Repo:
     def get_git_push_address(self):
         try:
             token = helpers.get_token(self.request)
-            prfx = "https://" if self.remote_repo_url.startswith("https") else "http://"
-            repo = self.remote_repo_url.replace(prfx, "")
+            prfx = "https://" if REMOTE_REPO_URL.startswith("https") else "http://"
+            repo = REMOTE_REPO_URL.replace(prfx, "")
             # Put colon behind token to prevent gogs from opening a stdin
             # prompt asking for a password in case of invalid token.
             return prfx + token + ":" + "@" + repo
@@ -95,7 +93,7 @@ class Repo:
 
             self.local_repo.git.pull()
 
-            logger.info("Pushing config to {}...".format(self.remote_repo_url))
+            logger.info("Pushing config to {}...".format(REMOTE_REPO_URL))
             if self.username != "unittest_user":
                 self.local_repo.git.push(address)
             else:
