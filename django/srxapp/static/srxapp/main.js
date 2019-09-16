@@ -155,8 +155,9 @@ function cloneGitRepo() {
       if (response.clone_result === "success") {
         console.log("Git clone succeeded")
         validateCache(response.srcfile_commithash)
-      } else if (response.clone_result === "up_to_date") {
-        console.log("Git repository is already up to date")
+      } else if (response.clone_result === "clone_failed") {
+        swal("Git clone failed", "Please try reloading the window. If the " +
+          "problem persists, check the application logs for more info.", "error")
       } else {
         alert(
           "Git clone failed because of the following error:\n\n" +

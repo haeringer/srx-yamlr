@@ -7,8 +7,9 @@ from . import githandler
 def clone_repo(request):
     try:
         response = {}
-        repo = githandler.Repo(request)
+        repo = githandler.Repo(request, auto_enable_workspace=False)
         response["clone_result"] = repo.git_clone()
+        repo.git_enable_workspace()
         repo.git_config()
         response["srcfile_commithash"] = repo.get_srcfile_commithash()
     except Exception:

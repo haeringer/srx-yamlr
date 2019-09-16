@@ -12,13 +12,13 @@ logger = logging.getLogger(__name__)
 
 
 class Repo:
-    def __init__(self, request):
+    def __init__(self, request, auto_enable_workspace=True):
         self.request = request
         self.username = request.user.username
         self.useremail = request.user.email
         self.workspace = "workspace/" + self.username
-        if os.path.isdir(self.workspace):
-            self.local_repo = git.Repo(self.workspace)
+        if auto_enable_workspace is True:
+            self.git_enable_workspace()
 
     def git_clone(self):
         try:
@@ -30,9 +30,15 @@ class Repo:
                 REMOTE_REPO_URL, self.workspace,
                 config="http.sslVerify=false",
             )
-            self.local_repo = git.Repo(self.workspace)
             return "success"
 
+        except Exception:
+            helpers.view_exception(Exception)
+            return "clone_failed"
+
+    def git_enable_workspace(self):
+        try:
+            self.local_repo = git.Repo(self.workspace)
         except Exception:
             return helpers.view_exception(Exception)
 
