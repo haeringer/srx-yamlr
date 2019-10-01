@@ -110,6 +110,7 @@ def commit_config(request):
     except Exception as exc_instance:
         error = str(exc_instance)
         if "HTTP 401" in error:
+            logger.info("Invalid token: {}".format(helpers.get_token(request)))
             response = "unauthorized"
         else:
             response = helpers.view_exception(Exception)
