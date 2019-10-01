@@ -53,6 +53,9 @@
                     <a class="nav-link active" id="settings-user-tab" data-toggle="tab" href="#settings-user" role="tab">User</a>
                   </li>
                   <li class="nav-item">
+                    <a class="nav-link" id="settings-general-tab" data-toggle="tab" href="#settings-general" role="tab">General</a>
+                  </li>
+                  <li class="nav-item">
                     <a class="nav-link" id="settings-about-tab" data-toggle="tab" href="#settings-about" role="tab">About</a>
                   </li>
                 </ul>
@@ -83,6 +86,25 @@
                         <input type="password" class="form-control mt-2" placeholder="Confirm password" id="pw-new-confirm" autocomplete="new-password">
                       </div>
                     </div>
+                  </div>
+                  <div class="tab-pane fade" id="settings-general" role="tabpanel" aria-labelledby="settings-general-tab">
+                    <br>
+                    <h6>SRX Ansible host_vars file</h6>
+                    <div>
+                      <!-- <div class="pb-2">Relative file path within the Ansible repository:</div> -->
+                      <div id="host-var-file-path-value" class="container">
+                        <div class="row">
+                          <div class="col pl-0" id="host-var-file-path">{{ host_var_file_path }}</div>
+                          <div class="col-1">
+                            <div data-toggle="tooltip" data-placement="left" title="Edit">
+                              <button class="btn p-0"><i class="fas fa-edit" id="host-var-file-path-edit"></i></i></button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <input type="text" class="form-control d-none" placeholder="Relative file path within the Ansible repository" id="host-var-file-path-input">
+                    </div>
+                    <br>
                   </div>
                   <div class="tab-pane fade" id="settings-about" role="tabpanel" aria-labelledby="settings-about-tab">
                     <br>

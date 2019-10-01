@@ -15,12 +15,18 @@ def main_view(request):
     try:
         user = User.objects.get(username=request.user.username)
         token_set = helpers.check_if_token_set(user)
+        try:
+            host_var_file_path = models.HostVarFilePath.objects.get(id=0).path
+        except Exception:
+            host_var_file_path = None
+
         with open("version") as vfile:
             version = vfile.read()
         context = {
             "username": user,
             "token_set": token_set,
             "version": version,
+            "host_var_file_path": host_var_file_path,
         }
     except Exception:
         helpers.view_exception(Exception)
@@ -263,6 +269,19 @@ def write_config(request):
 
 def get_existing_policy_details(request):
     response = request.session["pe_detail"]
+    return JsonResponse(response, safe=False)
+
+
+def set_host_var_file_path(request):
+    try:
+        file_path = request.POST.get("host_var_file_path")
+
+        obj, created = models.HostVarFilePath.objects.update_or_create(
+            id=0, defaults={"path": file_path},
+        )
+        response = 0
+    except Exception:
+        response = helpers.view_exception(Exception)
     return JsonResponse(response, safe=False)
 
 

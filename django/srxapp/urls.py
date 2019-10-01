@@ -6,6 +6,8 @@ app_name = "srxapp"
 urlpatterns = [
     path("", views.main_view,
          name="main_view"),
+    path("sethostvarfilepath/", views.set_host_var_file_path,
+         name="set_host_var_file_path"),
     path("createconfigsession/", views.create_config_session,
          name="create_config_session"),
     path("resetconfigsession/", views.reset_config_session,

@@ -5,21 +5,27 @@ from django.test import TestCase
 from django.test import Client
 from django.contrib.auth.models import User
 
+HOST_VAR_FILE_PATH = "host_vars/kami-kaze.yml"
+USERNAME = "unittest_user"
+PASSWORD = "123456"
+
 client_glob = None
 
 
 def create_client_session():
-    username = "unittest_user"
-    password = "123456"
 
-    user = User.objects.create(username=username)
-    user.set_password(password)
+    user = User.objects.create(username=USERNAME)
+    user.set_password(PASSWORD)
     user.save()
 
     client = Client()
-    client.login(username=username, password=password)
+    client.login(username=USERNAME, password=PASSWORD)
     client.get("/srx/")
     client.post("/srx/createconfigsession/")
+    client.post(
+        "/srx/sethostvarfilepath/",
+        {"host_var_file_path": HOST_VAR_FILE_PATH},
+    )
     client.get("/git/clonerepo/")
     client.get(
         "/srx/validatecache/",
@@ -230,7 +236,10 @@ class Tests(TestCase):
         )
         self.assertIn("+    action: permit", diff)
 
-        client_glob.post("/git/commitconfig/")
+        client_glob.post(
+            "/git/commitconfig/",
+            {"host_var_file_path": HOST_VAR_FILE_PATH},
+        )
 
         local_repo = git.Repo("workspace/unittest_user")
         diff = local_repo.git.diff()

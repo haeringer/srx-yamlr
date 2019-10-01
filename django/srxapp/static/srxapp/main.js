@@ -12,9 +12,15 @@ $(window).on("load", function() {
   var url = new URL(window.location.href)
 
   if (url.search === "") {
-    generateNewPolicyName()
-    cloneGitRepo()
-    createConfigSession()
+    var hostVarFilePath = $("#host-var-file-path").text()
+    if (hostVarFilePath === "None") {
+      swal("No host_vars file found", "Please configure the file path in the" +
+        " settings", "error")
+    } else {
+      generateNewPolicyName()
+      cloneGitRepo()
+      createConfigSession()
+    }
   } else if (url.search === "?loadpolicy") {
     getExistingPolicyDetails()
     getYamlConfig()
@@ -114,6 +120,10 @@ $(function() {
   $("#update-cache").on("click", function() {
     $("#settings-modal").modal("toggle")
     importObjects()
+  })
+  $("#host-var-file-path-edit").on("click", function() {
+    $("#host-var-file-path-value").addClass("d-none")
+    $("#host-var-file-path-input").removeClass("d-none")
   })
 
   $('[data-toggle="tooltip"]').tooltip({
@@ -874,10 +884,14 @@ function writeYamlConfig(writeButton) {
 }
 
 function commitConfig(commitButton) {
+  var hostVarFilePath = $("#host-var-file-path").html()
+
   $(commitButton).prop("disabled", true)
   $(commitButton).html(`<i class="spinner-border spinner-border-sm"></i>`)
 
-  $.post("/git/commitconfig/")
+  $.post("/git/commitconfig/", {
+    host_var_file_path: hostVarFilePath,
+  })
     .done(function(response) {
       if (response === "success") {
         $("#diffcard").addClass("d-none")
@@ -909,6 +923,7 @@ function settingsHandler() {
   var gogsToken = $("input#gogs-token").val()
   var pwNew = $("input#pw-new").val()
   var pwNewConfirm = $("input#pw-new-confirm").val()
+  var newHostVarFilePath = $("input#host-var-file-path-input").val()
 
   if (gogsToken !== "") {
     setToken(gogsToken)
@@ -925,6 +940,9 @@ function settingsHandler() {
         changePassword(pwNew)
       }
     }
+  }
+  if (newHostVarFilePath !== "") {
+    setHostVarFilePath(newHostVarFilePath)
   }
 }
 
@@ -980,6 +998,29 @@ function changePassword(pwNew) {
       })
     })
     .fail(function(errorThrown) {
+      console.log(errorThrown.toString())
+    })
+}
+
+function setHostVarFilePath(newHostVarFilePath) {
+  $(".spinner-container").fadeIn()
+
+  $.post("/srx/sethostvarfilepath/", {
+    host_var_file_path: newHostVarFilePath,
+  })
+    .done(function(response) {
+      if (response === 0) {
+        $("#host-var-file-path-input").addClass("d-none")
+        $("#host-var-file-path-value").removeClass("d-none")
+        $("#host-var-file-path-value").html(newHostVarFilePath)
+        setTimeout(function() {
+          $(".spinner-container").fadeOut()
+          window.location.replace("/srx/")
+        }, 1500)
+      }
+    })
+    .fail(function(errorThrown) {
+      $(".spinner-container").fadeOut()
       console.log(errorThrown.toString())
     })
 }

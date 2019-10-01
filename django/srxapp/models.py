@@ -8,3 +8,10 @@ class Cache(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class HostVarFilePath(models.Model):
+    path = models.CharField(max_length=255)
+
+    def __str__(self):
+        return self.path

@@ -1,6 +1,4 @@
-import os
 import logging
-import time
 import json
 from ruamel.yaml import YAML
 from uuid import uuid4
@@ -19,8 +17,8 @@ class sourceData:
         self.srcfile_commithash = request.GET.get("srcfile_commithash", None)
         self.request = request
         workspace = "workspace/" + request.user.get_username()
-        yamlfile = os.environ.get("YM_YAMLFILE", "")
-        self.filepath = workspace + "/" + yamlfile
+        host_var_file = models.HostVarFilePath.objects.get(id=0).path
+        self.filepath = workspace + "/" + host_var_file
         self.configdict = {}
         self.workingdict = {}
 
