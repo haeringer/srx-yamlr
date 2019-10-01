@@ -39,23 +39,11 @@ class sourceData:
     def set_configdict(self):
         self.configdict = self.request.session["configdict"]
 
-    def check_if_source_file_exists(self):
-        try:
-            open(self.filepath, "r")
-            return True
-        except Exception:
-            return False
-
     def read_source_file(self):
-        sourcefile = None
-        while sourcefile is None:
-            try:
-                with open(self.filepath, "r") as sourcefile:
-                    logger.info("Importing YAML source data...")
-                    self.sourcedict = yaml.load(sourcefile)
-                    cache.set("sourcedict", self.sourcedict)
-            except Exception:
-                time.sleep(1)
+        with open(self.filepath, "r") as sourcefile:
+            logger.info("Importing YAML source data...")
+            self.sourcedict = yaml.load(sourcefile)
+            cache.set("sourcedict", self.sourcedict)
 
     def update_source_file(self):
         sourcedict = cache.get("sourcedict")
