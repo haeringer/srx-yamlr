@@ -7,7 +7,6 @@ from django.contrib.auth.models import User
 
 from . import srxconfig, srxsource, models
 from baseapp import helpers
-from gitapp import githandler
 
 
 @login_required(redirect_field_name=None)
@@ -260,8 +259,7 @@ def write_config(request):
         src = srxsource.sourceData(request)
         src.set_configdict()
         src.update_source_file()
-        repo = githandler.Repo(request)
-        response = repo.git_get_diff()
+        response = "success"
     except Exception:
         response = helpers.view_exception(Exception)
     return JsonResponse(response, safe=False)

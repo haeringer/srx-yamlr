@@ -162,19 +162,29 @@ function cloneGitRepo() {
   $.get("/git/clonerepo/")
     .done(function(response) {
       $("#write-config").prop("disabled", false)
-      if (response.clone_result === "success") {
+      if (response === "success") {
         console.log("Git clone succeeded")
-        validateCache(response.srcfile_commithash)
-      } else if (response.clone_result === "clone_failed") {
-        swal("Git clone failed", "Please try reloading the window. If the " +
-          "problem persists, check the application logs for more info.", "error")
+        getCommitHash()
       } else {
-        alert(
-          "Git clone failed because of the following error:\n\n" +
-            JSON.parse(response.clone_result.error)
-        )
+        console.log(response.error)
+        swal("Git clone failed", "Please try reloading the window. If the " +
+          "problem persists, check the application logs for more information.",
+          "error")
       }
+    })
+    .fail(function(errorThrown) {
+      console.log(errorThrown.toString())
+    })
+}
 
+function getCommitHash() {
+  var filePath = $("#host-var-file-path").text()
+  $.get("/git/commithash/", {
+    "file_path": filePath,
+  })
+    .done(function(response) {
+      console.log("Latest commit hash of " + filePath + ": " + response)
+      validateCache(response)
     })
     .fail(function(errorThrown) {
       console.log(errorThrown.toString())
@@ -650,24 +660,30 @@ function updateYamlContainer(yamlconfig) {
   $("#commit-config").prop("disabled", true)
 }
 
-function updateGitDiff(diff) {
-  $("#diffcontainer").html("")
-  var lines = diff.split("\n")
-  lines.splice(0, 2)
+function updateGitDiff() {
+  $.get("/git/diff/")
+  .done(function(response) {
+    $("#diffcontainer").html("")
+    var lines = response.split("\n")
+    lines.splice(0, 2)
 
-  for (i = 0; i < lines.length; i++) {
-    var el = $("<div>" + lines[i] + "\n" + "</div>")
+    for (i = 0; i < lines.length; i++) {
+      var el = $("<div>" + lines[i] + "\n" + "</div>")
 
-    $("#diffcontainer").append(el)
-    if (lines[i].startsWith("+ ")) {
-      el.addClass("custom-diffgreen")
-    } else {
-      el.addClass("custom-diffgrey")
+      $("#diffcontainer").append(el)
+      if (lines[i].startsWith("+ ")) {
+        el.addClass("custom-diffgreen")
+      } else {
+        el.addClass("custom-diffgrey")
+      }
     }
-  }
 
-  $("#diffcard").removeClass("d-none")
-  $("#diffcard-tab").tab("show")
+    $("#diffcard").removeClass("d-none")
+    $("#diffcard-tab").tab("show")
+  })
+  .fail(function(errorThrown) {
+    console.log(errorThrown.toString())
+  })
 }
 
 function filterObjects(zoneselector) {
@@ -873,10 +889,14 @@ function writeYamlConfig(writeButton) {
 
   $.post("/srx/writeconfig/")
     .done(function(response) {
-      updateGitDiff(response)
-      $(writeButton).prop("disabled", false)
       $(writeButton).html(`<i class="fas fa-check"></i>`)
-      enableCommitButton()
+      $(writeButton).prop("disabled", false)
+      if (response === "success") {
+        updateGitDiff()
+        enableCommitButton()
+      } else {
+        alert(response.error)
+      }
     })
     .fail(function(errorThrown) {
       console.log(errorThrown.toString())
