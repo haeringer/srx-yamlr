@@ -1,8 +1,7 @@
 [run]
-source =
-    srxapp/
 omit =
-    srxapp/migrations/*
-    srxapp/apps.py
-    srxapp/tests.py
-    */__init__.py
+    *migrations/*
+    *apps.py
+    *tests_*
+    *__init__.py
+    manage.py
