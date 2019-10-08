@@ -3,7 +3,6 @@ import json
 from django.shortcuts import render
 from django.http import JsonResponse, Http404
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.models import User
 
 from . import srxconfig, srxsource, models
 from baseapp import helpers
@@ -12,21 +11,7 @@ from baseapp import helpers
 @login_required(redirect_field_name=None)
 def main_view(request):
     try:
-        user = User.objects.get(username=request.user.username)
-        token_set = helpers.check_if_token_set(user)
-        try:
-            host_var_file_path = models.HostVarFilePath.objects.get(id=0).path
-        except Exception:
-            host_var_file_path = None
-
-        with open("version") as vfile:
-            version = vfile.read()
-        context = {
-            "username": user,
-            "token_set": token_set,
-            "version": version,
-            "host_var_file_path": host_var_file_path,
-        }
+        context = helpers.get_baseapp_context(request)
     except Exception:
         helpers.view_exception(Exception)
         raise Http404("HTTP 404 Error")

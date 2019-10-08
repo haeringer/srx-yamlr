@@ -4,6 +4,7 @@ import json
 import hashlib
 import logging
 import traceback
+import srxapp
 
 from ruamel.yaml import YAML
 from django.utils.encoding import force_text
@@ -15,6 +16,25 @@ from base64 import b64encode, b64decode
 logger = logging.getLogger(__name__)
 yaml = YAML()
 yaml.indent(mapping=2, sequence=4, offset=2)
+
+
+def get_baseapp_context(request):
+    user = User.objects.get(username=request.user.username)
+    token_set = check_if_token_set(user)
+    try:
+        host_var_file_path = srxapp.models.HostVarFilePath.objects.get(id=0).path
+    except Exception:
+        host_var_file_path = None
+
+    with open("version") as vfile:
+        version = vfile.read()
+    context = {
+        "username": user,
+        "token_set": token_set,
+        "version": version,
+        "host_var_file_path": host_var_file_path,
+    }
+    return context
 
 
 def view_exception(Exception):

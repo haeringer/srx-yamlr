@@ -9,11 +9,11 @@ from . import helpers
 @login_required(redirect_field_name=None)
 def main_view(request):
     try:
-        print("<BASEAPP MAIN PAGE PLACEHOLDER>")
+        context = helpers.get_baseapp_context(request)
     except Exception:
         helpers.view_exception(Exception)
         raise Http404("HTTP 404 Error")
-    return render(request, "baseapp/main.html")
+    return render(request, "baseapp/main.html", context)
 
 
 def set_token_gogs(request):
