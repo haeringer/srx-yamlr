@@ -1,75 +1,16 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="SRX YAMLr">
-    <meta name="author" content="bhaeringer">
 
-    {% load static %}
-
-    <link rel="shortcut icon" href="{% static 'favicon.ico' %}" type="image/x-icon">
-
-    <title>SRX YAMLr</title>
-
-    <!-- Bootstrap core CSS + other libraries -->
-    <link rel="stylesheet" href="{% static 'bootstrap.min.css' %}">
-    <link rel="stylesheet" href="{% static 'fontawesome-all.min.css' %}">
-
-    <!-- Google Font for Logo -->
-    <link href="https://fonts.googleapis.com/css?family=Comfortaa" rel="stylesheet">
-
-    <!-- Custom CSS -->
-    <link rel="stylesheet" type="text/css" href="{% static 'srxapp/main.css' %}">
-  </head>
+  {% include "baseapp/head.html" %}
 
   <body>
 
-    <!-- Modals -->
-    <div id="modals">
-      {% include "srxapp/modals.html" %}
-    </div>
+    {% include "baseapp/modals.html" %}
+    {% include "baseapp/templates.html" %}
+    {% include "baseapp/spinner.html" %}
+    {% include "baseapp/navbar.html" %}
 
-    <!-- Templates -->
-    <!-- Template 0 -->
-    <template>
-      <div class="alert alert-info" role="alert" id="field-empty">
-        Please fill all values!
-      </div>
-    </template>
-    <!-- Template 1 -->
-    <template>
-      <div class="alert alert-warning" role="alert" id="field-empty">
-        Password confirmation does not match!
-      </div>
-    </template>
-
-    <!-- Loading Spinner -->
-    <div class="spinner-container">
-      <div class="d-flex justify-content-center">
-        <div class="spinner-border spinner-custom" role="status">
-        </div>
-      </div>
-    </div>
-
-    <!-- Content -->
-    <nav class="navbar navbar-expand-lg navbar-dark fixed-top bg-dark p-0 shadow">
-      <div class="navbar-brand col-sm-3">SRX YAMLr</div>
-      <ul class="navbar-nav ml-auto px-2">
-        <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            <i class="fas fa-user"></i>
-          </a>
-          <div class="dropdown-menu dropdown-menu-right mt-2 shadow-lg" aria-labelledby="navbarDropdown">
-            <h6 class="dropdown-header">Logged in as <b>{{ username }}</b></h6>
-            <div class="dropdown-divider"></div>
-            <a class="dropdown-item" href="#" data-toggle="modal" data-target="#settings-modal"><i class="fas fa-wrench mr-2"></i>Settings</a>
-            <a class="dropdown-item" href="/auth/logout"><i class="fas fa-sign-out-alt mr-2"></i>Log out</a>
-          </div>
-        </li>
-      </ul>
-    </nav>
-
+    <!-- srxapp content -->
     <main role="main" class="container-fluid main-container">
       <div class="row main-row full-height">
         <div class="col-sm pr-0">
@@ -226,22 +167,15 @@
       </div>
     </main>
 
-    <!-- Bootstrap core JavaScript + dependencies
-    ================================================== -->
-    <script src="{% static 'jquery.min.js' %}"></script>
-    <script src="{% static 'bootstrap.bundle.min.js' %}"></script>
-
-    <!-- Other plug ins -->
-    <script src="{% static 'pace.min.js' %}"></script>
-    <script src="{% static 'sweetalert.min.js' %}"></script>
+    {% include "baseapp/scripts-base.html" %}
 
     <!-- SRX YAMLr JavaScript -->
+    {% load static %}
     <script>
     var static = "{% static . %}"
-    document.write("<script src='" + static + "srxapp/main.js?v="
+    document.write("<script src='" + static + "srxapp/srxapp.js?v="
       + Date.now() + "'><\/script>")
     </script>
-
 
   </body>
 </html>
