@@ -156,6 +156,8 @@ LOGGING = {
             "level": "DEBUG",
             "propagate": False,
         },
+        "baseapp": {"handlers": ["console", "logfile"], "level": "DEBUG"},
         "srxapp": {"handlers": ["console", "logfile"], "level": "DEBUG"},
+        "gitapp": {"handlers": ["console", "logfile"], "level": "DEBUG"},
     },
 }
