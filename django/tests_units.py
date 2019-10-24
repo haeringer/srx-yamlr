@@ -1,4 +1,3 @@
-import git
 import copy
 
 from django.test import TestCase
@@ -114,6 +113,14 @@ class Tests(TestCase):
         response_val = response.content.decode("utf-8")
         self.assertEqual(response_val, "0")
 
+    def test_get_commithash(self):
+        response = client_glob.get(
+            "/git/commithash/",
+            {"file_path": HOST_VAR_FILE_PATH},
+        )
+        response_val = response.content.decode("utf-8")
+        self.assertEqual(len(response_val), 40+2)
+
     def test_created_objects(self):
         configdict_str = str(client_glob.session["configdict"])
         obj_list = [
@@ -211,11 +218,10 @@ class Tests(TestCase):
         self.test_build_policy()
 
         client_glob.post("/srx/writeconfig/")
+        response = client_glob.get("/git/diff/")
+        diff = response.content.decode("utf-8")
+        lines = diff.split("\\n")
 
-        local_repo = git.Repo("workspace/unittest_user")
-        diff = local_repo.git.diff()
-
-        lines = diff.split("\n")
         count = 0
         for line in lines:
             if line.startswith("+ "):
@@ -225,13 +231,13 @@ class Tests(TestCase):
 
         self.assertIn("+    fromzone: untrust", diff)
         self.assertIn(
-            "+    source:\n+      - TEST_ADDRESS_0\n+      - TEST_ADDRSET",
+            "+    source:\\n+      - TEST_ADDRESS_0\\n+      - TEST_ADDRSET",
             diff
         )
         self.assertIn("+    tozone: OfficeLAN", diff)
         self.assertIn("+    destination: TEST_ADDRESS_3", diff)
         self.assertIn(
-            "+    application:\n+      - TEST_APPLICATION_0\n+      - TEST_APPSET",
+            "+    application:\\n+      - TEST_APPLICATION_0\\n+      - TEST_APPSET",
             diff
         )
         self.assertIn("+    action: permit", diff)
@@ -241,10 +247,8 @@ class Tests(TestCase):
             {"host_var_file_path": HOST_VAR_FILE_PATH},
         )
 
-        local_repo = git.Repo("workspace/unittest_user")
-        diff = local_repo.git.diff()
-
-        self.assertEqual(diff, "")
+        response = client_glob.get("/git/diff/")
+        self.assertEqual(response.content, b'""')
 
     def test_check_session_status(self):
         response = client_glob.get("/session/status/")
