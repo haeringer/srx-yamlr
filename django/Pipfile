@@ -7,11 +7,11 @@ verify_ssl = true
 flake8 = "*"
 
 [packages]
-django = "==2.1.*"
-gitpython = "==2.1.*"
-ruamel-yaml = "==0.15.*"
+django = "==2.2.*"
+gitpython = "==3.0.*"
+ruamel-yaml = "==0.16.*"
 gunicorn = "==19.9.*"
-pycryptodome = "==3.8.*"
+pycryptodome = "==3.9.*"
 selenium = "*"
 coverage = "*"
 
