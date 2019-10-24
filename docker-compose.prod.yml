@@ -34,8 +34,6 @@ services:
     networks:
       - nginx_network
     restart: always
-    depends_on:
-      - web
 
 networks:
   nginx_network:

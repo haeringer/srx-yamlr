@@ -32,8 +32,6 @@ services:
         target: /var/www/srx-yamlr/static/
     networks:
       - nginx_network_test
-    depends_on:
-      - web_test
 
   selenium_chrome:
     image: selenium/standalone-chrome
@@ -41,8 +39,6 @@ services:
       - "5900:5900"
     networks:
       - nginx_network_test
-    depends_on:
-      - nginx_test
 
 networks:
   nginx_network_test:
