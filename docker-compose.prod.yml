@@ -3,6 +3,7 @@ version: '3.7'
 services:
   web:
     build: .
+    container_name: srx-yamlr_application
     volumes:
       - type: volume
         source: ym_persistent
@@ -24,6 +25,7 @@ services:
 
   nginx:
     image: nginx:1.17.2-alpine
+    container_name: srx-yamlr_proxy
     ports:
       - "8001:8001"
     volumes:
