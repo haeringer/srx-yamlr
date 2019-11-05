@@ -295,23 +295,18 @@ class AddrObj {
 
   validate_policy_logic() {
     var errorDifferent = "Can't use objects from different zones!"
-    var errorZone = "Can't use the same zone for source and destination!"
     var errorUsed = "Object already in use!"
 
     var presentZone = $("#added-zone-body-" + this.obj.direction).html()
     var thisZoneContainerCard = $("#added-zone-" + this.obj.direction)
 
     if (this.obj.direction === "from") {
-      var otherZone = $("#added-zone-body-to").html()
       var objUsed = currentPolicy.from.includes(this.obj.name)
     } else if (this.obj.direction === "to") {
-      var otherZone = $("#added-zone-body-from").html()
       var objUsed = currentPolicy.to.includes(this.obj.name)
     }
 
-    if (this.obj.zone === otherZone) {
-      swal(errorZone)
-    } else if (
+    if (
       !thisZoneContainerCard.hasClass("d-none") &&
       this.obj.zone != presentZone
     ) {
