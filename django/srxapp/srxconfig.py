@@ -51,7 +51,10 @@ class srxPolicy:
             return
 
         sorted_dict_for_hash = helpers.dict_with_sorted_list_values(
-            source=policydict["source"], destination=policydict["destination"]
+            fromzone=policydict["fromzone"],
+            tozone=policydict["tozone"],
+            source=policydict["source"],
+            destination=policydict["destination"]
         )
         newpolicyhash = helpers.get_hash(sorted_dict_for_hash)
 

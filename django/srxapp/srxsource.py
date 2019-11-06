@@ -136,7 +136,10 @@ class sourceData:
         for name, values in self.sourcedict["policies"].items():
 
             sorted_dict_for_hash = helpers.dict_with_sorted_list_values(
-                source=values["source"], destination=values["destination"]
+                fromzone=values["fromzone"],
+                tozone=values["tozone"],
+                source=values["source"],
+                destination=values["destination"]
             )
             policyhash = helpers.get_hash(sorted_dict_for_hash)
 
