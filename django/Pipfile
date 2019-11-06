@@ -11,7 +11,6 @@ django = "==2.2.*"
 gitpython = "==3.0.*"
 ruamel-yaml = "==0.16.*"
 gunicorn = "==19.9.*"
-pycryptodome = "==3.9.*"
 selenium = "*"
 coverage = "*"
 
