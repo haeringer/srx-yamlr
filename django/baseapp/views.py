@@ -20,7 +20,7 @@ def set_token_gogs(request):
     try:
         user = User.objects.get(username=request.user.username)
         token = request.POST.get("token", None)
-        token_encrypted = helpers.encrypt_string(token)
+        token_encrypted = helpers.encode_string(token)
         user.usersettings.gogs_tkn = token_encrypted
         user.save()
         response = 0

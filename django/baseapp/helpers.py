@@ -1,6 +1,7 @@
 import os
 import re
 import json
+import base64
 import hashlib
 import logging
 import traceback
@@ -9,9 +10,6 @@ import srxapp
 from ruamel.yaml import YAML
 from django.utils.encoding import force_text
 from django.contrib.auth.models import User
-from Crypto.Cipher import AES
-from Crypto import Random
-from base64 import b64encode, b64decode
 
 logger = logging.getLogger(__name__)
 yaml = YAML()
@@ -80,18 +78,14 @@ def get_django_secret():
 
 def check_if_token_set(user):
     dbstring = user.usersettings.gogs_tkn
-
-    if dbstring == "":
-        return False
-    else:
-        return True
+    return False if dbstring == "" else True
 
 
 def get_token(request):
     try:
         user = User.objects.get(username=request.user.username)
         token_encrypted = user.usersettings.gogs_tkn
-        token = decrypt_string(token_encrypted)
+        token = decode_string(token_encrypted)
         return token
     except Exception:
         return "Token could not be retrieved"
@@ -108,32 +102,31 @@ def in_string(word):
     return re.compile(r'\b({0})\b'.format(word), flags=re.IGNORECASE).search
 
 
-def pad(string, size):
-    return string + (size - len(string) % size) * chr(size - len(string) % size)
+def encode_string(string):
+    try:
+        key = get_django_secret()
+        enc = []
+        for i in range(len(string)):
+            key_c = key[i % len(key)]
+            enc_c = chr((ord(string[i]) + ord(key_c)) % 256)
+            enc.append(enc_c)
+        return base64.urlsafe_b64encode("".join(enc).encode()).decode()
+    except Exception:
+        logger.error(traceback.format_exc())
 
 
-def unpad(string):
-    return string[:-ord(string[len(string) - 1:])]
-
-
-def encrypt_string(string):
-    password = get_django_secret()
-    private_key = hashlib.sha256(password.encode("utf-8")).digest()
-    str_padded = pad(string, 16).encode("utf8")
-    iv = Random.new().read(AES.block_size)
-    cipher = AES.new(private_key, AES.MODE_CBC, iv)
-    encoded_cipher = b64encode(iv + cipher.encrypt(str_padded))
-    return encoded_cipher.decode("utf-8")
-
-
-def decrypt_string(encrypted):
-    password = get_django_secret()
-    private_key = hashlib.sha256(password.encode("utf-8")).digest()
-    enc_decoded = b64decode(encrypted)
-    iv = enc_decoded[:16]
-    cipher = AES.new(private_key, AES.MODE_CBC, iv)
-    decrypted = unpad(cipher.decrypt(enc_decoded[16:]))
-    return bytes.decode(decrypted)
+def decode_string(encoded):
+    try:
+        key = get_django_secret()
+        dec = []
+        encoded = base64.urlsafe_b64decode(encoded).decode()
+        for i in range(len(encoded)):
+            key_c = key[i % len(key)]
+            dec_c = chr((256 + ord(encoded[i]) - ord(key_c)) % 256)
+            dec.append(dec_c)
+        return "".join(dec)
+    except Exception:
+        logger.error(traceback.format_exc())
 
 
 def search_object_in_workingdict(request):
