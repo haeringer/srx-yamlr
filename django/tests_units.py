@@ -308,10 +308,7 @@ class Tests(TestCase):
 
         self.assertIn('<option class="small">TEST_ADDRESS_0</option>', response_val)
         self.assertIn('<option class="small">TEST_APPLICATION_0</option>', response_val)
-        self.assertIn(
-            '<option value="{0}">{0}</option>'.format(self.zone_a),
-            response_val
-        )
+        self.assertIn('<option value="{0}">{0}'.format(self.zone_a), response_val)
 
     def test_reset_config_session(self):
         response = client_glob.post("/srx/resetconfigsession/")

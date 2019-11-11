@@ -96,8 +96,16 @@ def import_objects(request):
 def loadcontent_createmodal(request):
     try:
         workingdict = request.session["workingdict"]
+        zone_addresses = {}
+        for zone in workingdict["zones"]:
+            valueslist = []
+            for adr in workingdict["addresses"]:
+                if (adr["zone"] == zone["name"] and adr["name"] != "any"):
+                    valueslist.append(adr["val"])
+            zone_addresses[zone["name"]] = valueslist
+
         context = {
-            "zones": workingdict["zones"],
+            "zone_addresses": zone_addresses,
             "addresses": workingdict["addresses"],
             "applications": workingdict["applications"],
         }

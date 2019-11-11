@@ -23,8 +23,8 @@
         <div id="address-form-alert"></div>
         <select class="custom-select" id="address-form-control-zone" autocomplete="off">
           <option selected>Choose Zone...</option>
-          {% for zone in zones %}
-          <option value="{{ zone.name }}">{{ zone.name }}</option>
+          {% for zone, addresses in zone_addresses.items %}
+          <option value="{{ zone }}">{{ zone }}&nbsp;&nbsp;({{ addresses.0 }}, {{ addresses.1 }}, ...)</option>
           {% endfor %}
         </select>
       </div>
@@ -43,8 +43,8 @@
         <div id="addrset-form-alert"></div>
         <select class="custom-select" id="adrset-form-control-zone" autocomplete="off">
           <option selected>Choose Zone...</option>
-          {% for zone in zones %}
-          <option value="{{ zone.name }}">{{ zone.name }}</option>
+          {% for zone, addresses in zone_addresses.items %}
+          <option value="{{ zone }}">{{ zone }}&nbsp;&nbsp;({{ addresses.0 }}, {{ addresses.1 }}, ...)</option>
           {% endfor %}
         </select>
       </div>
