@@ -103,28 +103,52 @@ def in_string(word):
 
 
 def encode_string(string):
+    """
+    Encode a string with the django secret.
+    """
     try:
         key = get_django_secret()
-        enc = []
-        for i in range(len(string)):
-            key_c = key[i % len(key)]
-            enc_c = chr((ord(string[i]) + ord(key_c)) % 256)
-            enc.append(enc_c)
-        return base64.urlsafe_b64encode("".join(enc).encode()).decode()
+
+        encoded_str_list = []
+        for string_position in range(len(string)):
+            key_char = key[string_position % len(key)]
+            unicode_number = ord(string[string_position])
+            unicode_number_keyencoded = unicode_number + ord(key_char)
+            unicode_string = chr(unicode_number_keyencoded)
+            encoded_str_list.append(unicode_string)
+
+        str_of_encoded_unicode_strings = "".join(encoded_str_list)
+        encoded_str_binary = str_of_encoded_unicode_strings.encode("utf-8")
+        encoded_str_bin_b64 = base64.urlsafe_b64encode(encoded_str_binary)
+        encoded_str_for_storage = encoded_str_bin_b64.decode("utf-8")
+        return encoded_str_for_storage
+
     except Exception:
         logger.error(traceback.format_exc())
 
 
 def decode_string(encoded):
+    """
+    Decode a string that was encoded with the django secret.
+    """
     try:
         key = get_django_secret()
-        dec = []
-        encoded = base64.urlsafe_b64decode(encoded).decode()
-        for i in range(len(encoded)):
-            key_c = key[i % len(key)]
-            dec_c = chr((256 + ord(encoded[i]) - ord(key_c)) % 256)
-            dec.append(dec_c)
-        return "".join(dec)
+
+        encoded_str_b64 = encoded.encode("utf-8")
+        encoded_str_bin = base64.urlsafe_b64decode(encoded_str_b64)
+        str_of_encoded_unicode_strings = encoded_str_bin.decode("utf-8")
+
+        decoded_str_list = []
+        for string_position in range(len(str_of_encoded_unicode_strings)):
+            key_char = key[string_position % len(key)]
+            unicode_number = ord(str_of_encoded_unicode_strings[string_position])
+            unicode_number_keydecoded = unicode_number - ord(key_char)
+            unicode_string = chr(unicode_number_keydecoded)
+            decoded_str_list.append(unicode_string)
+
+        decoded_string = "".join(decoded_str_list)
+        return decoded_string
+
     except Exception:
         logger.error(traceback.format_exc())
 
