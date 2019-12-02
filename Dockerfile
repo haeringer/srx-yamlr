@@ -7,6 +7,16 @@ ARG PROJECT_NAME=srx-yamlr
 ARG PROJECT_DIR=/opt/srx-yamlr
 ARG STATIC_DIR=/var/www/srx-yamlr/static
 
+# Set environment variables for the application
+ARG gitserver
+ARG ansiblerepo
+ARG debug
+ARG djangosecret
+ENV YM_GITSERVER=$gitserver
+ENV YM_ANSIBLEREPO=$ansiblerepo
+ENV YM_DEBUG=$debug
+ENV YM_DJANGOSECRET=$djangosecret
+
 # Install Python and package Libraries
 RUN apt-get update && apt-get upgrade -y
 RUN apt-get install -y vim git
