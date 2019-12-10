@@ -19,19 +19,19 @@ def create_client_session():
 
     client = Client()
     client.login(username=USERNAME, password=PASSWORD)
-    client.get("/srx/")
-    client.post("/srx/createconfigsession/")
+    client.get("/srx/policybuilder/")
+    client.post("/srx/policybuilder/createconfigsession/")
     client.post(
-        "/srx/sethostvarfilepath/",
+        "/srx/policybuilder/sethostvarfilepath/",
         {"host_var_file_path": HOST_VAR_FILE_PATH},
     )
     client.get("/git/clonerepo/")
     client.get(
-        "/srx/validatecache/",
+        "/srx/policybuilder/validatecache/",
         {"srcfile_commithash": "<invalidcommithash>"},
     )
     client.get(
-        "/srx/importobjects/",
+        "/srx/policybuilder/importobjects/",
         {"srcfile_commithash": "<somecommithash>"},
     )
 
@@ -51,7 +51,7 @@ class Tests(TestCase):
 
         for i in range(2):
             client_glob.post(
-                "/srx/object/create/address/",
+                "/srx/policybuilder/object/create/address/",
                 {
                     "zone": cls.zone_a,
                     "name": "TEST_ADDRESS_{}".format(i),
@@ -59,7 +59,7 @@ class Tests(TestCase):
                 },
             )
         client_glob.post(
-            "/srx/object/create/addrset/",
+            "/srx/policybuilder/object/create/addrset/",
             {
                 "zone": cls.zone_a,
                 "name": "TEST_ADDRSET",
@@ -67,12 +67,12 @@ class Tests(TestCase):
             },
         )
         client_glob.post(
-            "/srx/object/create/address/",
+            "/srx/policybuilder/object/create/address/",
             {"zone": cls.zone_b, "name": "TEST_ADDRESS_3", "value": "10.20.30.3/32"},
         )
         for i in range(2):
             client_glob.post(
-                "/srx/object/create/application/",
+                "/srx/policybuilder/object/create/application/",
                 {
                     "name": "TEST_APPLICATION_{}".format(i),
                     "port": "123{}".format(i),
@@ -80,7 +80,7 @@ class Tests(TestCase):
                 },
             )
         client_glob.post(
-            "/srx/object/create/appset/",
+            "/srx/policybuilder/object/create/appset/",
             {
                 "name": "TEST_APPSET",
                 "valuelist[]": ["TEST_APPLICATION_0", "TEST_APPLICATION_1"],
@@ -145,7 +145,7 @@ class Tests(TestCase):
 
         def post_address(direction, objname, zone):
             client_glob.post(
-                "/srx/policy/add/address/",
+                "/srx/policybuilder/policy/add/address/",
                 {
                     "policyname": self.policyname,
                     "direction": direction,
@@ -156,7 +156,7 @@ class Tests(TestCase):
 
         def post_application(objname):
             client_glob.post(
-                "/srx/policy/add/application/",
+                "/srx/policybuilder/policy/add/application/",
                 {"policyname": self.policyname, "objname": objname},
             )
 
@@ -179,7 +179,7 @@ class Tests(TestCase):
         self.test_build_policy()
 
         client.post(
-            "/srx/policy/rename/",
+            "/srx/policybuilder/policy/rename/",
             {
                 "previousname": "allow-123456789-to-123456789",
                 "policyname": "allow-TEST_ADDRESS_3-to-TEST_ADDRSET",
@@ -196,7 +196,7 @@ class Tests(TestCase):
         self.test_build_policy()
 
         client.post(
-            "/srx/policy/delete/address/",
+            "/srx/policybuilder/policy/delete/address/",
             {
                 "policyname": self.policyname,
                 "direction": "from",
@@ -205,7 +205,7 @@ class Tests(TestCase):
             },
         )
         client.post(
-            "/srx/policy/delete/application/",
+            "/srx/policybuilder/policy/delete/application/",
             {"policyname": self.policyname, "objname": "TEST_APPSET"},
         )
 
@@ -217,7 +217,7 @@ class Tests(TestCase):
         self.test_set_git_token()
         self.test_build_policy()
 
-        client_glob.post("/srx/writeconfig/")
+        client_glob.post("/srx/policybuilder/writeconfig/")
         response = client_glob.get("/git/diff/")
         diff = response.content.decode("utf-8")
         lines = diff.split("\\n")
@@ -272,7 +272,7 @@ class Tests(TestCase):
 
     def test_filter_object_list(self):
         response = client_glob.get(
-            "/srx/filterobjects/",
+            "/srx/policybuilder/filterobjects/",
             {"selectedzone": self.zone_a},
         )
         response_val = response.content.decode("utf-8")
@@ -283,7 +283,7 @@ class Tests(TestCase):
     def test_search_address_object(self):
         inputdata = "TEST_ADDRESS"
         response = client_glob.get(
-            "/srx/search/object/",
+            "/srx/policybuilder/search/object/",
             {"input": inputdata, "searchtype": "from"},
         )
         response_val = response.content.decode("utf-8")
@@ -295,7 +295,7 @@ class Tests(TestCase):
     def test_search_application_object(self):
         inputdata = "TEST_APPLICATION"
         response = client_glob.get(
-            "/srx/search/object/",
+            "/srx/policybuilder/search/object/",
             {"input": inputdata, "searchtype": "app"},
         )
         response_val = response.content.decode("utf-8")
@@ -303,7 +303,7 @@ class Tests(TestCase):
         self.assertIn("TEST_APPLICATION_0", response_val)
 
     def test_load_modalcontent(self):
-        response = client_glob.get("/srx/loadcontent/createmodal/")
+        response = client_glob.get("/srx/policybuilder/loadcontent/createmodal/")
         response_val = response.content.decode("utf-8")
 
         self.assertIn('<option class="small">TEST_ADDRESS_0</option>', response_val)
@@ -311,7 +311,7 @@ class Tests(TestCase):
         self.assertIn('<option value="{0}">{0}'.format(self.zone_a), response_val)
 
     def test_reset_config_session(self):
-        response = client_glob.post("/srx/resetconfigsession/")
+        response = client_glob.post("/srx/policybuilder/resetconfigsession/")
 
         response_val = response.content.decode("utf-8")
         self.assertEqual(response_val, "0")

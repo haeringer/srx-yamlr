@@ -130,7 +130,7 @@
             tokenIndicator.removeClass("custom-red").addClass("custom-green")
             tokenText.html("Token has been set")
             if ($("#yamlcard").hasClass("d-none") === false) {
-              window.location.replace("/srx/")
+              window.location.replace("/srx/policybuilder/")
             }
           }, 1500)
         }
@@ -166,7 +166,7 @@
   function setHostVarFilePath(newHostVarFilePath) {
     $(".spinner-container").fadeIn()
 
-    $.post("/srx/sethostvarfilepath/", {
+    $.post("/srx/policybuilder/sethostvarfilepath/", {
       host_var_file_path: newHostVarFilePath,
     })
       .done(function(response) {
@@ -176,7 +176,7 @@
           $("#host-var-file-path-value").html(newHostVarFilePath)
           setTimeout(function() {
             $(".spinner-container").fadeOut()
-            window.location.replace("/srx/")
+            window.location.replace("/srx/policybuilder/")
           }, 1500)
         }
       })

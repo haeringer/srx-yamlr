@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+
+  {% include "baseapp/head.html" %}
+
+  <body>
+
+    {% include "baseapp/modals.html" %}
+    {% include "baseapp/templates.html" %}
+    {% include "baseapp/spinner.html" %}
+    {% include "baseapp/navbar.html" %}
+
+    <!-- srxpolsrch content -->
+    <main role="main" class="container-fluid main-container">
+      <div class="row main-row full-height">
+        <div class="col-sm pr-0">
+
+          <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 pl-3 border-bottom">
+            <h3 class="h3">SRX Policy Search</h3>
+            <div class="btn-toolbar mb-2 mb-md-0 pr-2">
+            </div>
+          </div>
+
+          <div class="row search-row full-height">
+            <div class="col mt-3">
+
+              <div id="search-forms">
+                <div class="d-flex pt-3 pb-4">
+
+                  <div class="col-sm">
+
+                    <h4>From...</h4>
+
+                    <input autofocus class="form-control searchform" type="text" id="search-from" onkeyup="policySearch(this)" placeholder="Search policy source object name" aria-label="Search" autocomplete="off">
+
+                    <ul class="list-inline d-none search-results-list shadow" id="search-from-ul"></ul>
+
+                  </div>
+
+
+                  <div class="col-sm">
+
+                    <h4>To...</h4>
+
+                    <input class="form-control searchform" type="text" id="search-to" onkeyup="policySearch(this)" placeholder="Search policy destination object name" aria-label="Search" autocomplete="off">
+
+                    <ul class="list-inline d-none search-results-list shadow" id="search-to-ul"></ul>
+
+                  </div>
+
+                </div>
+
+              </div>
+              <div class="d-flex pt-3 pb-5 mb-4">
+
+
+                <div class="col-sm">
+
+                  <div class="card hide-border text-black-50 mb-3 d-none" id="added-zone-from">
+                    <div class="card-body bg-light pt-3 pb-3 font-weight-bold" id="added-zone-body-from">
+                    </div>
+                  </div>
+
+                  <div class="card hide-border panel-default d-none" id="added-obj-from">
+                    <ul class="list-group list-group-flush" id="added-list-from">
+                    </ul>
+                  </div>
+
+                </div>
+
+              </div>
+
+            </div>
+            <div class="col-3 pt-4 bg-light">
+              <div class="row">
+                <div class="col" >
+                  <div class="row ml-3">
+                    <h6>YAML</h6>
+                  </div>
+                  <div class="row ml-3">
+                    <div class="card hide-border" id="yamlcard">
+                      <pre class="card-body mr-3 scrollable" id="yamlcontainer">
+                        blatest
+                      </pre>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+
+      </div>
+    </main>
+
+    {% include "baseapp/scripts-base.html" %}
+
+    <!-- SRX YAMLr JavaScript -->
+    {% load static %}
+    <script>
+    var static = "{% static . %}"
+    document.write("<script src='" + static + "srxpolsrch/srxpolsrch.js?v="
+      + Date.now() + "'><\/script>")
+    </script>
+
+  </body>
+</html>

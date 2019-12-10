@@ -71,7 +71,7 @@ $(function() {
     renamePolicyFormSetup()
   })
   $("#add-policy").on("click", function() {
-    window.location.replace("/srx/?addpolicy")
+    window.location.replace("/srx/policybuilder/?addpolicy")
   })
   $("#clear-config").on("click", function() {
     resetConfigSession()
@@ -121,7 +121,7 @@ function getCommitHash() {
 }
 
 function validateCache(srcfile_commithash) {
-  $.get("/srx/validatecache/", {
+  $.get("/srx/policybuilder/validatecache/", {
     srcfile_commithash: srcfile_commithash,
   })
     .done(function(response) {
@@ -143,7 +143,7 @@ function importObjects(srcfile_commithash = null) {
   console.log("Importing config data from YAML...")
   $(".spinner-container").fadeIn()
 
-  $.get("/srx/importobjects/", {
+  $.get("/srx/policybuilder/importobjects/", {
     srcfile_commithash: srcfile_commithash,
   })
     .done(function(response) {
@@ -164,7 +164,7 @@ function importObjects(srcfile_commithash = null) {
 }
 
 function createConfigSession() {
-  $.post("/srx/createconfigsession/")
+  $.post("/srx/policybuilder/createconfigsession/")
     .done(function(response) {
       if (response === "cache_loaded") {
         console.log("Config workingset loaded from cache")
@@ -183,7 +183,7 @@ function createConfigSession() {
 }
 
 function getYamlConfig() {
-  $.get("/srx/getyamlconfig/")
+  $.get("/srx/policybuilder/getyamlconfig/")
     .done(function(response) {
       check_response_backend_error(response)
       updateYamlContainer(response.yamlconfig)
@@ -194,11 +194,11 @@ function getYamlConfig() {
 }
 
 function resetConfigSession() {
-  $.post("/srx/resetconfigsession/")
+  $.post("/srx/policybuilder/resetconfigsession/")
     .done(function(response) {
       console.log(response)
       if (response === 0) {
-        window.location.replace("/srx/")
+        window.location.replace("/srx/policybuilder/")
       } else if (response.error != null) {
         alert(JSON.parse(response.error))
       }
@@ -209,7 +209,7 @@ function resetConfigSession() {
 }
 
 function getExistingPolicyDetails() {
-  $.post("/srx/loadpolicy/")
+  $.post("/srx/policybuilder/loadpolicy/")
     .done(function(response) {
       loadExistingPolicy(response)
       console.log(response)
@@ -321,7 +321,7 @@ class AddrObj {
   ajax_add_address_to_policy_yaml() {
     var thisParent = this
 
-    $.post("/srx/policy/add/address/", {
+    $.post("/srx/policybuilder/policy/add/address/", {
       policyname: currentPolicy.policyname,
       direction: this.obj.direction,
       objname: this.obj.name,
@@ -339,7 +339,7 @@ class AddrObj {
             text: "Loading the existing policy for editing...",
             icon: "warning",
           }).then(() => {
-            window.location.replace("/srx/?loadpolicy")
+            window.location.replace("/srx/policybuilder/?loadpolicy")
           })
         }
       })
@@ -400,7 +400,7 @@ class AppObj {
 
   ajax_add_application_to_policy_yaml() {
     var thisParent = this
-    $.post("/srx/policy/add/application/", {
+    $.post("/srx/policybuilder/policy/add/application/", {
       policyname: currentPolicy.policyname,
       objname: this.obj.name,
     })
@@ -454,7 +454,7 @@ class ListAddrObj {
   }
 
   ajax_delete_address_from_policy_yaml() {
-    $.post("/srx/policy/delete/address/", {
+    $.post("/srx/policybuilder/policy/delete/address/", {
       policyname: currentPolicy.policyname,
       direction: this.direction,
       objname: this.name,
@@ -510,7 +510,7 @@ class ListAppObj {
   }
 
   ajax_delete_application_from_policy_yaml() {
-    $.post("/srx/policy/delete/application/", {
+    $.post("/srx/policybuilder/policy/delete/application/", {
       policyname: currentPolicy.policyname,
       objname: this.name,
     })
@@ -614,7 +614,7 @@ function filterObjects(zoneselector) {
   var selectedzone = $(zoneselector).val()
 
   $.get({
-    url: "/srx/filterobjects/",
+    url: "/srx/policybuilder/filterobjects/",
     data: { selectedzone: selectedzone },
   })
     .done(function(response) {
@@ -688,7 +688,7 @@ function createAddress() {
   }
   $("#create-object-modal").modal("toggle")
   $.post({
-    url: "/srx/object/create/address/",
+    url: "/srx/policybuilder/object/create/address/",
     data: {
       zone: zone,
       name: name,
@@ -714,7 +714,7 @@ function createAddrset() {
   }
   $("#create-object-modal").modal("toggle")
   $.post({
-    url: "/srx/object/create/addrset/",
+    url: "/srx/policybuilder/object/create/addrset/",
     data: {
       zone: zone,
       name: name,
@@ -740,7 +740,7 @@ function createApplication() {
   }
   $("#create-object-modal").modal("toggle")
   $.post({
-    url: "/srx/object/create/application/",
+    url: "/srx/policybuilder/object/create/application/",
     data: {
       name: name,
       port: port,
@@ -765,7 +765,7 @@ function createAppset() {
   }
   $("#create-object-modal").modal("toggle")
   $.post({
-    url: "/srx/object/create/appset/",
+    url: "/srx/policybuilder/object/create/appset/",
     data: {
       name: name,
       valuelist: valuelist,
@@ -794,7 +794,7 @@ function renamePolicy() {
   currentPolicy.policyname = $("#input-policy-name").val()
   $("#rename-policy-modal").modal("toggle")
 
-  $.post("/srx/policy/rename/", {
+  $.post("/srx/policybuilder/policy/rename/", {
     previousname: previousName,
     policyname: currentPolicy.policyname,
   })
@@ -811,7 +811,7 @@ function writeYamlConfig(writeButton) {
   $(writeButton).prop("disabled", true)
   $(writeButton).html(`<i class="spinner-border spinner-border-sm"></i>`)
 
-  $.post("/srx/writeconfig/")
+  $.post("/srx/policybuilder/writeconfig/")
     .done(function(response) {
       $(writeButton).html(`<i class="fas fa-check"></i>`)
       $(writeButton).prop("disabled", false)
@@ -845,7 +845,7 @@ function commitConfig(commitButton) {
           text: "Configuration has been committed to Git",
           icon: "success",
         }).then(() => {
-          window.location.replace("/srx/")
+          window.location.replace("/srx/policybuilder/")
         })
       } else if (response === "unauthorized") {
         swal("Unauthorized", "Please verify your Git token", "error")
@@ -953,7 +953,7 @@ function policyObjectSearch(e) {
 
 function objectSearch(input, searchType, callbackFunc) {
   $.get({
-    url: "/srx/search/object/",
+    url: "/srx/policybuilder/search/object/",
     data: {
       input: input,
       searchtype: searchType,

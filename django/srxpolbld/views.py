@@ -15,7 +15,7 @@ def main_view(request):
     except Exception:
         helpers.view_exception(Exception)
         raise Http404("HTTP 404 Error")
-    return render(request, "srxapp/main.html", context)
+    return render(request, "srxpolbld/main.html", context)
 
 
 def create_config_session(request):
@@ -111,7 +111,7 @@ def loadcontent_createmodal(request):
         }
     except Exception:
         raise Http404("HTTP 404 Error")
-    return render(request, "srxapp/cnt-createmodal.html", context)
+    return render(request, "srxpolbld/cnt-createmodal.html", context)
 
 
 def search_object(request):

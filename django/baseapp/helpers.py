@@ -5,7 +5,7 @@ import base64
 import hashlib
 import logging
 import traceback
-import srxapp
+import srxpolbld
 
 from ruamel.yaml import YAML
 from django.utils.encoding import force_text
@@ -20,7 +20,7 @@ def get_baseapp_context(request):
     user = User.objects.get(username=request.user.username)
     token_set = check_if_token_set(user)
     try:
-        host_var_file_path = srxapp.models.HostVarFilePath.objects.get(id=0).path
+        host_var_file_path = srxpolbld.models.HostVarFilePath.objects.get(id=0).path
     except Exception:
         host_var_file_path = None
 

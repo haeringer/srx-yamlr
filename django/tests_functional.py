@@ -79,7 +79,8 @@ class MySeleniumTests(StaticLiveServerTestCase):
             EC.presence_of_element_located((By.CSS_SELECTOR, selector))
         )
 
-    def test_srxapp_is_present(self):
+    def test_srxpolbld_is_present(self):
+        self.find_by_id("policybuilder").click()
         search_el = self.find_by_id("search-from")
         self.assertIsNotNone(search_el)
 
@@ -87,7 +88,7 @@ class MySeleniumTests(StaticLiveServerTestCase):
         """
         Disabled because of completely random failures :(
         """
-        self.browser.get("%s%s" % (self.live_server_url, "/srx"))
+        self.browser.get("%s%s" % (self.live_server_url, "/srx/policybuilder/"))
 
         # Create TESTADDRESS_01 (zone 1)
         self.find_by_id("create-object").click()

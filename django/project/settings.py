@@ -20,8 +20,9 @@ ALLOWED_HOSTS = ["*"]
 
 INSTALLED_APPS = [
     "baseapp.apps.BaseappConfig",
-    "srxapp.apps.SrxappConfig",
     "gitapp.apps.GitappConfig",
+    "srxpolbld.apps.SrxpolbldConfig",
+    "srxpolsrch.apps.SrxpolsrchConfig",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -119,7 +120,7 @@ STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static'), )
 
 LOGIN_URL = "/auth/login"
 LOGOUT_URL = "/auth/logout"
-LOGIN_REDIRECT_URL = "/srx"
+LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/"
 
 
@@ -157,7 +158,7 @@ LOGGING = {
             "propagate": False,
         },
         "baseapp": {"handlers": ["console", "logfile"], "level": "DEBUG"},
-        "srxapp": {"handlers": ["console", "logfile"], "level": "DEBUG"},
+        "srxpolbld": {"handlers": ["console", "logfile"], "level": "DEBUG"},
         "gitapp": {"handlers": ["console", "logfile"], "level": "DEBUG"},
     },
 }

@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('srxapp', '0001_initial'),
+        ('srxpolbld', '0001_initial'),
     ]
 
     operations = [
