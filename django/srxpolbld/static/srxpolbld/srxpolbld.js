@@ -18,7 +18,6 @@ $(window).on("load", function() {
         " settings", "error")
     } else {
       generateNewPolicyName()
-      cloneGitRepo()
       createConfigSession()
     }
   } else if (url.search === "?loadpolicy") {
@@ -83,85 +82,6 @@ $(function() {
     commitConfig(this)
   })
 })
-
-function cloneGitRepo() {
-  $("#write-config").prop("disabled", true)
-  console.log("Cloning Ansible Git repository...")
-
-  $.get("/git/clonerepo/")
-    .done(function(response) {
-      $("#write-config").prop("disabled", false)
-      if (response === "success") {
-        console.log("Git clone succeeded")
-        getCommitHash()
-      } else {
-        console.log(response.error)
-        swal("Git clone failed", "Please try reloading the window. If the " +
-          "problem persists, check the application logs for more information.",
-          "error")
-      }
-    })
-    .fail(function(errorThrown) {
-      console.log(errorThrown.toString())
-    })
-}
-
-function getCommitHash() {
-  var filePath = $("#host-var-file-path").text()
-  $.get("/git/commithash/", {
-    "file_path": filePath,
-  })
-    .done(function(response) {
-      console.log("Latest commit hash of " + filePath + ": " + response)
-      validateCache(response)
-    })
-    .fail(function(errorThrown) {
-      console.log(errorThrown.toString())
-    })
-}
-
-function validateCache(srcfile_commithash) {
-  $.get("/srx/policybuilder/validatecache/", {
-    srcfile_commithash: srcfile_commithash,
-  })
-    .done(function(response) {
-      if (response === "cache_invalid") {
-        console.log("Cache is invalid, update needed")
-        swal("Cache Update", "Updating cache to latest configuration \
-          revision...", "info")
-        importObjects(srcfile_commithash)
-      } else if (response === "cache_valid") {
-        console.log("Cache is up to date")
-      }
-    })
-    .fail(function(errorThrown) {
-      console.log(errorThrown.toString())
-    })
-}
-
-function importObjects(srcfile_commithash = null) {
-  console.log("Importing config data from YAML...")
-  $(".spinner-container").fadeIn()
-
-  $.get("/srx/policybuilder/importobjects/", {
-    srcfile_commithash: srcfile_commithash,
-  })
-    .done(function(response) {
-      $(".spinner-container").fadeOut()
-      if (response === "success") {
-        console.log("Finished importing config data from YAML")
-      }
-      if (response.error != null) {
-        alert(
-          "YAML import failed because of the following error:\n\n" +
-            JSON.parse(response.error)
-        )
-      }
-    })
-    .fail(function(errorThrown) {
-      console.log(errorThrown.toString())
-    })
-}
 
 function createConfigSession() {
   $.post("/srx/policybuilder/createconfigsession/")
