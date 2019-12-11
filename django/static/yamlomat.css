@@ -90,6 +90,10 @@ body {
     border-style: hidden;
   }
 
+  .appbtn {
+    color: #fff !important;
+  }
+
   .lgi-icon-close {
     opacity: 0;
   }
