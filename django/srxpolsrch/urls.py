@@ -5,4 +5,6 @@ app_name = "srxpolsrch"
 urlpatterns = [
     path("", views.main_view,
          name="main_view"),
+    path("search/", views.search,
+         name="search"),
 ]
