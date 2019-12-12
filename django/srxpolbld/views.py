@@ -18,6 +18,17 @@ def main_view(request):
     return render(request, "srxpolbld/main.html", context)
 
 
+def load_workingdict(request):
+    try:
+        wd_cache = models.Cache.objects.get(name="workingdict")
+        wdo_serialized = wd_cache.workingdict_origin
+    except Exception:
+        wdo_serialized = None
+    if wdo_serialized:
+        request.session["workingdict"] = json.loads(wdo_serialized)
+        return wdo_serialized
+
+
 def create_config_session(request):
     try:
         configdict = request.session.get("configdict")
@@ -25,18 +36,7 @@ def create_config_session(request):
         if not configdict:
             request.session["configdict"] = {}
             request.session["pe_detail"] = {}
-
-            try:
-                wd_cache = models.Cache.objects.get(name="workingdict")
-                wdo_serialized = wd_cache.workingdict_origin
-            except Exception:
-                wdo_serialized = None
-
-            if wdo_serialized:
-                request.session["workingdict"] = json.loads(wdo_serialized)
-                response = "cache_loaded"
-            else:
-                response = "cache_empty"
+            response = "cache_loaded" if load_workingdict(request) else "cache_empty"
         else:
             response = "config_session_exists"
 
@@ -64,6 +64,7 @@ def validate_cache(request):
             cached_commithash = None
         if srcfile_commithash == cached_commithash:
             response = "cache_valid"
+            load_workingdict(request)
         else:
             response = "cache_invalid"
     except Exception:
