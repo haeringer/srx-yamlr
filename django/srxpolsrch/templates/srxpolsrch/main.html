@@ -31,7 +31,7 @@
 
                     <h4>From...</h4>
 
-                    <input autofocus class="form-control searchform" type="text" id="search-from" onkeyup="policySearch(this)" placeholder="Search policy source object name" aria-label="Search" autocomplete="off">
+                    <input autofocus class="form-control searchform" type="text" id="search-from" onkeyup="policySearch()" placeholder="Search policy source object name" aria-label="Search" autocomplete="off">
 
                     <ul class="list-inline d-none search-results-list shadow" id="search-from-ul"></ul>
 
@@ -42,7 +42,7 @@
 
                     <h4>To...</h4>
 
-                    <input class="form-control searchform" type="text" id="search-to" onkeyup="policySearch(this)" placeholder="Search policy destination object name" aria-label="Search" autocomplete="off">
+                    <input class="form-control searchform" type="text" id="search-to" onkeyup="policySearch()" placeholder="Search policy destination object name" aria-label="Search" autocomplete="off">
 
                     <ul class="list-inline d-none search-results-list shadow" id="search-to-ul"></ul>
 
@@ -56,14 +56,8 @@
 
                 <div class="col-sm">
 
-                  <div class="card hide-border text-black-50 mb-3 d-none" id="added-zone-from">
-                    <div class="card-body bg-light pt-3 pb-3 font-weight-bold" id="added-zone-body-from">
-                    </div>
-                  </div>
-
-                  <div class="card hide-border panel-default d-none" id="added-obj-from">
-                    <ul class="list-group list-group-flush" id="added-list-from">
-                    </ul>
+                  <div class="list-group d-none" id="policy-list">
+                    <!-- search results go here -->
                   </div>
 
                 </div>
@@ -78,11 +72,13 @@
                     <h6>YAML</h6>
                   </div>
                   <div class="row ml-3">
-                    <div class="card hide-border" id="yamlcard">
-                      <pre class="card-body mr-3 scrollable" id="yamlcontainer">
-                        blatest
+
+                    <div class="card hide-border d-none" id="yamlcard">
+                      <pre class="card-body mr-3" id="yamlcontainer">
+                        <!-- policy in yaml format goes here -->
                       </pre>
                     </div>
+
                   </div>
                 </div>
               </div>

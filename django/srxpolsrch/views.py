@@ -1,3 +1,5 @@
+import sys
+from io import StringIO
 from django.shortcuts import render
 from django.http import JsonResponse, Http404
 from django.contrib.auth.decorators import login_required
@@ -67,6 +69,27 @@ def search(request):
                     policies.append(pol)
 
         response = policies
+    except Exception:
+        response = helpers.view_exception(Exception)
+    return JsonResponse(response, safe=False)
+
+
+def get_policy_yaml(request):
+    try:
+        policyhash = request.GET.get("policyhash", None)
+        wd = request.session["workingdict"]
+
+        response = None
+        for pol in wd["policies"]:
+            if policyhash == pol["policyhash"]:
+                pol.pop("name")
+                pol.pop("policyhash")
+                temp_in_memory_out = StringIO()
+                sys.stdout = temp_in_memory_out
+                helpers.yaml.dump(pol, sys.stdout)
+                response = temp_in_memory_out.getvalue()
+                sys.stdout = sys.__stdout__
+                break
     except Exception:
         response = helpers.view_exception(Exception)
     return JsonResponse(response, safe=False)
