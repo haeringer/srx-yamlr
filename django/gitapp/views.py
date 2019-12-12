@@ -26,10 +26,8 @@ def clone_repo(request):
             shutil.rmtree(workspace)
 
         logger.info("Cloning git repository...")
-        git.Repo.clone_from(
-            REMOTE_REPO_URL, workspace,
-            config="http.sslVerify=false",
-        )
+        address = get_git_auth_address(request)
+        git.Repo.clone_from(address, workspace, config="http.sslVerify=false")
 
         local_repo = get_local_repo(request)
         with local_repo.config_writer() as cw:
@@ -98,7 +96,7 @@ def commit_config(request):
         logger.info("Committing config")
         local_repo.git.commit(m="SRX YAMLr firewall policy change")
 
-        address = get_git_push_address(request)
+        address = get_git_auth_address(request)
         logger.info("Pushing config to {}...".format(REMOTE_REPO_URL))
         if username != "unittest_user":
             local_repo.git.push(address)
@@ -130,7 +128,7 @@ def get_local_repo(request):
         helpers.view_exception(Exception)
 
 
-def get_git_push_address(request):
+def get_git_auth_address(request):
     """
     Assemble the Git push address from user token, server url and repository.
     """
