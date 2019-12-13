@@ -1,7 +1,7 @@
 // Event listeners etc. - run once DOM is ready
 $(function() {
   $("#policy-list").on("click", ".pol", function() {
-    console.log("click on policy " + this.id)
+    loadExistingPolicy(this.id)
   })
 
   $("#policy-list").on("mouseenter", ".pol", function() {
@@ -21,7 +21,23 @@ function getPolicyYaml(polId) {
   })
     .done(function(response) {
       $("#yamlcard").removeClass("d-none")
-      $("#yamlcontainer").html(response)    })
+      $("#yamlcontainer").html(response)
+    })
+    .fail(function(errorThrown) {
+      console.log(errorThrown.toString())
+    })
+}
+
+function loadExistingPolicy(polId) {
+  $.get({
+    url: "/srx/policysearch/loadpolicy/",
+    data: { policyhash: polId },
+  })
+    .done(function(response) {
+      if (response === "load_existing") {
+        window.location.replace("/srx/policybuilder/?loadpolicy")
+      }
+    })
     .fail(function(errorThrown) {
       console.log(errorThrown.toString())
     })

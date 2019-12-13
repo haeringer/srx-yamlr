@@ -10,4 +10,6 @@ urlpatterns = [
          name="search"),
     path("getpolicyyaml/", views.get_policy_yaml,
          name="get_policy_yaml"),
+    path("loadpolicy/", views.loadpolicy,
+         name="loadpolicy"),
 ]

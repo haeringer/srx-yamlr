@@ -1,10 +1,13 @@
 import sys
 from io import StringIO
+from copy import deepcopy
 from django.shortcuts import render
 from django.http import JsonResponse, Http404
 from django.contrib.auth.decorators import login_required
+from ruamel.yaml import YAML
 
 from baseapp import helpers
+from srxpolbld import srxconfig
 
 
 @login_required(redirect_field_name=None)
@@ -93,6 +96,28 @@ def get_policy_yaml(request):
                 yaml.dump(pol, sys.stdout)
                 response = temp_in_memory_out.getvalue()
                 break
+    except Exception:
+        response = helpers.view_exception(Exception)
+    return JsonResponse(response, safe=False)
+
+
+def loadpolicy(request):
+    try:
+        policyhash = request.GET.get("policyhash")
+        wd = request.session["workingdict"]
+
+        for pol in wd["policies"]:
+            if policyhash == pol["policyhash"]:
+                p_existing = deepcopy(pol)
+
+        srxpolicy = srxconfig.srxPolicy(request)
+        pe_detail = srxpolicy.get_existing_policy_subvalues(p_existing)
+        pe_fmt = srxpolicy.format_existing_policy(p_existing)
+
+        request.session["configdict"] = pe_fmt
+        request.session["pe_detail"] = pe_detail
+
+        response = "load_existing"
     except Exception:
         response = helpers.view_exception(Exception)
     return JsonResponse(response, safe=False)

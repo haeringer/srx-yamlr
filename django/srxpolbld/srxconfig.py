@@ -6,9 +6,7 @@ from baseapp import helpers
 
 class srxPolicy:
     def __init__(self, request):
-        self.configdict = request.session["configdict"]
-        # Debug issue with disappearing config statements
-        helpers.log_config(self.configdict)
+        self.configdict = request.session.get("configdict")
         self.workingdict = request.session["workingdict"]
         self.direction = request.POST.get("direction", None)
         self.name = request.POST.get("objname", None)
