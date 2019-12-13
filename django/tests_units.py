@@ -1,3 +1,4 @@
+import os
 import copy
 import json
 
@@ -8,6 +9,7 @@ from django.contrib.auth.models import User
 HOST_VAR_FILE_PATH = "host_vars/kami-kaze.yml"
 USERNAME = "unittest_user"
 PASSWORD = "123456"
+TOKEN = os.environ.get("GIT_TOKEN")
 
 client_glob = None
 
@@ -20,6 +22,12 @@ def create_client_session():
 
     client = Client()
     client.login(username=USERNAME, password=PASSWORD)
+
+    client.post(
+        "/settings/token/gogs/",
+        {"token": TOKEN},
+    )
+
     client.get("/srx/policybuilder/")
     client.post("/srx/policybuilder/createconfigsession/")
     client.post(
@@ -89,10 +97,9 @@ class Tests(TestCase):
         )
 
     def test_set_git_token(self):
-        token = "ka2bjlhPlVnATs2OrcAB8mg1JeRXBDO03yxZlz3c"
         response = client_glob.post(
             "/settings/token/gogs/",
-            {"token": token},
+            {"token": TOKEN},
         )
 
         response_val = response.content.decode("utf-8")
