@@ -1,4 +1,5 @@
 import copy
+import json
 
 from django.test import TestCase
 from django.test import Client
@@ -315,3 +316,59 @@ class Tests(TestCase):
 
         response_val = response.content.decode("utf-8")
         self.assertEqual(response_val, "0")
+
+    def test_get_baseapp_page(self):
+        response = client_glob.get("/")
+        self.assertEquals(response.status_code, 200)
+        response_val = response.content.decode("utf-8")
+        htmlstring_btn = 'class="btn btn-primary btn-lg appbtn mr-3" id="policysearch"'
+        self.assertIn(htmlstring_btn, response_val)
+        htmlstring_modal = '<div class="form-group" id="settings-modal-form">'
+        self.assertIn(htmlstring_modal, response_val)
+
+    def test_get_policybuild_page(self):
+        response = client_glob.get("/srx/policybuilder/")
+        self.assertEquals(response.status_code, 200)
+        response_val = response.content.decode("utf-8")
+        htmlstring = 'placeholder="Search IP address or object name"'
+        self.assertIn(htmlstring, response_val)
+
+    def test_get_policysearch_page(self):
+        response = client_glob.get("/srx/policysearch/")
+        self.assertEquals(response.status_code, 200)
+        response_val = response.content.decode("utf-8")
+        htmlstring = 'placeholder="Search for source object or prefix"'
+        self.assertIn(htmlstring, response_val)
+
+    def test_policy_search(self):
+        response = client_glob.get(
+            "/srx/policysearch/search/",
+            {"input_from": "10.", "input_to": ""},
+        )
+        if response.content.decode("utf-8") == "[]":
+            response = client_glob.get(
+                "/srx/policysearch/search/",
+                {"input_from": "192.", "input_to": ""},
+            )
+        response_dict = json.loads(response.content)
+        self.assertIsNotNone(response_dict[0]["name"])
+        return response_dict[0]["policyhash"]
+
+    def test_get_policy_yaml(self):
+        policyhash = self.test_policy_search()
+        response = client_glob.get(
+            "/srx/policysearch/getpolicyyaml/",
+            {"policyhash": policyhash},
+        )
+        response_val = response.content.decode("utf-8")
+        self.assertIn("\\ntozone: ", response_val)
+
+    def test_load_policy(self):
+        policyhash = self.test_policy_search()
+        response = client_glob.get(
+            "/srx/policysearch/loadpolicy/",
+            {"policyhash": policyhash},
+        )
+        response_val = response.content.decode("utf-8")
+        self.assertEquals(response.status_code, 200)
+        self.assertIn("load_existing", response_val)
