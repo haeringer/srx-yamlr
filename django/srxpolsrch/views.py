@@ -95,6 +95,7 @@ def get_policy_yaml(request):
                 yaml.indent(mapping=2, sequence=4, offset=2)
                 yaml.dump(pol, sys.stdout)
                 response = temp_in_memory_out.getvalue()
+                sys.stdout = sys.__stdout__
                 break
     except Exception:
         response = helpers.view_exception(Exception)
