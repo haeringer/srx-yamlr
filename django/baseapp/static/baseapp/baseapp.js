@@ -4,8 +4,14 @@
 $(window).on("load", function() {
   var url = new URL(window.location.href)
 
-  if (url.search === "?init") {
+  var hostVarFilePath = $("#host-var-file-path").text()
+  if (hostVarFilePath === "None") {
+    swal("No host_vars file found", "Please configure the file path in the" +
+      " settings", "error")
+  } else if (url.search === "?init") {
     cloneGitRepo()
+  } else {
+    getCommitHash()
   }
 
   setInterval(function() {
@@ -215,7 +221,7 @@ function setToken(token) {
           tokenIndicator.removeClass("custom-red").addClass("custom-green")
           tokenText.html("Token has been set")
           if ($("#yamlcard").hasClass("d-none") === false) {
-            window.location.replace("/srx/policybuilder/")
+            window.location.replace("/")
           }
         }, 1500)
       }
@@ -261,7 +267,7 @@ function setHostVarFilePath(newHostVarFilePath) {
         $("#host-var-file-path-value").html(newHostVarFilePath)
         setTimeout(function() {
           $(".spinner-container").fadeOut()
-          window.location.replace("/srx/policybuilder/")
+          window.location.replace("/")
         }, 1500)
       }
     })
