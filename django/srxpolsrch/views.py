@@ -80,15 +80,18 @@ def get_policy_yaml(request):
         wd = request.session["workingdict"]
 
         response = None
-        for pol in wd["policies"]:
-            if policyhash == pol["policyhash"]:
+        for policy in wd["policies"]:
+            if policyhash == policy["policyhash"]:
+                pol = deepcopy(policy)
                 pol.pop("name")
                 pol.pop("policyhash")
+
                 temp_in_memory_out = StringIO()
                 sys.stdout = temp_in_memory_out
-                helpers.yaml.dump(pol, sys.stdout)
+                yaml = YAML()
+                yaml.indent(mapping=2, sequence=4, offset=2)
+                yaml.dump(pol, sys.stdout)
                 response = temp_in_memory_out.getvalue()
-                sys.stdout = sys.__stdout__
                 break
     except Exception:
         response = helpers.view_exception(Exception)
