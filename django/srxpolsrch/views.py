@@ -48,14 +48,15 @@ def search(request):
         objects_dest = find_objects(inp_dest) if inp_dest else None
 
         def object_in_policy(pol, direction):
-            objects = objects_src if direction == "source" else objects_dest
-            for obj in objects:
+            objlist = objects_src if direction == "source" else objects_dest
+            zonedir = "fromzone" if direction == "source" else "tozone"
+            for obj in objlist:
                 if isinstance(pol[direction], str):
-                    if obj["name"] == pol[direction]:
+                    if obj["name"] == pol[direction] and obj["zone"] == pol[zonedir]:
                         return True
                 else:
                     for obj_single in pol[direction]:
-                        if obj["name"] == obj_single:
+                        if obj["name"] == obj_single and obj["zone"] == pol[zonedir]:
                             return True
             return False
 
