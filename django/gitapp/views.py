@@ -134,10 +134,17 @@ def get_git_auth_address(request):
     """
     try:
         token = helpers.get_token(request)
-        prfx = "https://" if REMOTE_REPO_URL.startswith("https") else "http://"
-        repo = REMOTE_REPO_URL.replace(prfx, "")
-        # Put colon behind token to prevent gogs from opening a stdin
-        # prompt asking for a password in case of invalid token.
-        return prfx + token + ":" + "@" + repo
+        git_type = os.environ.get("GITSERVER_TYPE")
+
+        if git_type == "gogs":
+            prfx = "https://" if REMOTE_REPO_URL.startswith("https") else "http://"
+            repo = REMOTE_REPO_URL.replace(prfx, "")
+            # Put colon behind token to prevent gogs from opening a stdin
+            # prompt asking for a password in case of invalid token.
+            return prfx + token + ":" + "@" + repo
+        elif git_type == "github":
+            # Support for the Github API has not been implemented yet.
+            return REMOTE_REPO_URL
+
     except Exception:
         helpers.view_exception(Exception)
